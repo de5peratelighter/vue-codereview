@@ -1,148 +1,132 @@
 <template>
   <div id="app">
-    <v-app id="example-2">
-    <v-navigation-drawer persistent light :mini-variant.sync="mini" v-model="drawer">
-      <v-list class="pa-0">
-        <v-list-item>
-          <v-list-tile avatar tag="div">
-            <v-list-tile-avatar>
-              <img :src="activeUserGetter.photoURL" />
-            </v-list-tile-avatar>
-            <v-list-tile-content>
-              <v-list-tile-title>{{activeUserGetter.displayName}}</v-list-tile-title>
-            </v-list-tile-content>
-            <v-list-tile-action>
-              <v-btn icon @click.native.stop="mini = !mini">
-                <v-icon>chevron_left</v-icon>
-              </v-btn>
-            </v-list-tile-action>
-          </v-list-tile>
-        </v-list-item>
-      </v-list>
-      <v-list class="pt-0" dense>
-        <v-divider></v-divider>
-        
-          <v-list-item v-for="item in items" :key="item">
-            <router-link :to="{name : item.name}" class="router__link">
-              <v-list-tile>
-                <v-list-tile-action>
-                  <v-icon>{{ item.icon }}</v-icon>
-                </v-list-tile-action>
-                <v-list-tile-content>
-                  <v-list-tile-title>{{ item.title }}</v-list-tile-title>
-                </v-list-tile-content>
-              </v-list-tile>
-            </router-link>
-          </v-list-item>
-          
-          <!-- LogIn -->
-          <v-list-item @click="logIn">
-              <v-list-tile>
-                <v-list-tile-action>
-                  <v-icon>person</v-icon>
-                </v-list-tile-action>
-                <v-list-tile-content>
-                  <v-list-tile-title v-if="activeUserGetter.isAnonymous">Log In</v-list-tile-title>
-                  <v-list-tile-title v-else>Log Out</v-list-tile-title>
-                </v-list-tile-content>
-              </v-list-tile>
-          </v-list-item>
-        
-        
-      </v-list>
-    </v-navigation-drawer>
-    <v-toolbar fixed class="indigo darken-4" light>
-      <v-toolbar-side-icon light @click.native.stop="drawer = !drawer"></v-toolbar-side-icon>
-      <v-toolbar-title>Toolbar</v-toolbar-title>
-    </v-toolbar>
-    <main>
-      <v-container fluid>
-        <keep-alive>
-          <router-view></router-view>
-        </keep-alive>
-      </v-container>
-    </main>
-  </v-app>
-  
-    <!--<img src="./assets/logo.png">-->
-    
-    <!--<div>-->
       
-    <!--  <router-link :to="{name : 'ReviewersList'}">Reviewers</router-link>-->
-    <!--</div>-->
-    
+      <md-toolbar>
+        <div class="md-toolbar-container">
+          <md-button class="md-icon-button" @click="$refs.sidenav.toggle()">
+            <md-icon >menu</md-icon>
+          </md-button>
+      
+          <span style="flex: 1;"></span>
+      
+          <md-layout md-align="end">
+            
+            <md-layout md-flex="55">
+              <md-input-container md-inline>
+                <label>Number of instances</label>
+                <md-input v-model="search"></md-input>
+              </md-input-container>
+            </md-layout>
+            
+            <md-layout md-flex="10">
+              <md-button class="md-icon-button">
+                <md-icon>search</md-icon>
+              </md-button>
+            </md-layout>
+            
+            <md-layout md-flex="25" :class="{ hidden: hiddenInputs.displayNum }">
+              <md-input-container md-inline>
+                <label>Number of instances</label>
+                <md-input v-model="displayNum"></md-input>
+                <md-button class="md-icon-button" @click="updateItemsNum(displayNum)">
+                  <md-icon>update</md-icon>
+                </md-button>
+              </md-input-container>
+            </md-layout>
+            
+            <md-layout md-flex="10">
+              <md-button class="md-icon-button" @click="showElement('displayNum')">
+                <md-icon>filter_list</md-icon>
+              </md-button>
+            </md-layout>
+            
+          </md-layout>
+
+        </div>
+      </md-toolbar>
+      
+      
+      <md-sidenav class="md-left" ref="sidenav">
+        
+        <main-nav>
+          
+          <md-list-item v-for="item in routes" :key="item">
+            <router-link :to="{name : item.name}" class="router__link">
+              <md-icon>{{ item.icon }}</md-icon>  <span>{{ item.title }}</span>
+            </router-link>
+          </md-list-item>
+          
+        </main-nav>
+        
+      </md-sidenav>
+      
+      <keep-alive>
+        <router-view class="c-full-height"></router-view>
+      </keep-alive>
       
   </div>
 </template>
 
 <script>
 
-// import Tabs from './Tabs'
-// import TabsItem from './TabsItem'
-// import TabsContent from './TabsContent'
-import firebase from 'firebase'
 import 'animate.css/animate.min.css'
-import {LOGIN_ME} from './data/mutation-types'
-import {mapActions, mapGetters} from 'vuex'
 
-var provider = new firebase.auth.GoogleAuthProvider()
+import {UPDATE_NUM} from './data/mutation-types'
+import {mapActions, mapGetters} from 'vuex'
+import MainNav from './components/MainNav.vue'
 
 export default {
   name: 'app',
   data () {
-      return {
-        drawer: true,
-        items: [
-          { title: 'Home', icon: 'dashboard', name: 'CodeReview'},
-          { title: 'Reviewers', icon: 'question_answer', name: 'ReviewersList' }
-        ],
-        mini: false,
-        right: null,
-        DEFAULT_USER : this.$store.state.activeUser
+    return {
+      routes: [
+        { title: 'Home', icon: 'home', name: 'CodeReview'},
+        { title: 'Reviewers', icon: 'people', name: 'ReviewersList' }
+      ],
+      hiddenInputs : {
+        search : true,
+        displayNum : true
+      },
+      displayNum : this.$store.state.displayNum,
+      search: this.$store.state.searchTerm
     }
   },
   computed : {
-    ...mapGetters(['activeUserGetter'])
+    ...mapGetters(['activeUserGetter', 'displayNumGetter'])
   },
-  methods : {
-    ...mapActions([LOGIN_ME]),
-    // ...mapMutations([LOG_ME_IN]),
-    logIn () {
-      
-      if (this.activeUserGetter.isAnonymous) {
-        firebase.auth().signInWithPopup(provider).then((result) => {
-          // This gives you a Google Access Token. You can use it to access the Google API.
-          var token = result.credential.accessToken;
-          // The signed-in user info.
-          var user = result.user
-          this.logMe({displayName: user.displayName, photoURL : user.photoURL, isAnonymous : user.isAnonymous})
-          
-        }).catch(function(error) {
-          // Handle Errors here.
-          var errorCode = error.code;
-          var errorMessage = error.message;
-          // The email of the user's account used.
-          var email = error.email;
-          // The firebase.auth.AuthCredential type that was used.
-          var credential = error.credential;
-          // ...
-        });
-      } else {
-        firebase.auth().signOut().then(() => {
-          this.logMe(this.DEFAULT_USER)
-        }).catch(function(error) {
-          // An error happened.
-        });
-      }
-      
+  methods: {
+    ...mapActions([UPDATE_NUM]),
+    showElement (el) {
+        this.hiddenInputs[el] = !this.hiddenInputs[el]
+    },
+    updateItemsNum (el) {
+      this.updateNum(this.displayNum)
     }
   },
   mounted () {
+  },
+  components : {
+    MainNav
   }
 }
 </script>
 
 <style>
+.hidden {
+  width: 0;
+  min-width: inherit;
+  flex: 0;
+  display: none;
+}
+.review-welcome > * {
+  width: 100%;
+  margin: 5px 8px;
+  text-align: center;
+}
+.asider {
+  background-color: #3f51b5;
+  color: rgba(255, 255, 255, .87);
+}
 .slide-fade-enter-active {
   transition: all .1s ease;
 }
@@ -155,5 +139,11 @@ export default {
 }
 .router__link {
   text-decoration: none;
+}
+.c-full-width {
+  width: 100%;
+}
+.c-full-height {
+  min-height: 100vh;
 }
 </style>

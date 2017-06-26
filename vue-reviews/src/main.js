@@ -7,32 +7,25 @@ import router from './router'
 
 // Firebase
 import VueFire from 'vuefire'
-// Vuetify
-import Vuetify from 'vuetify'
-import 'vuetify/dist/vuetify.min.css'
 
-Vue.use(Vuetify)
+import VueMaterial from 'vue-material'
+import 'vue-material/dist/vue-material.css'
+
 Vue.use(Vuex)
 Vue.use(VueFire)
+Vue.use(VueMaterial)
+
+Vue.material.registerTheme('default', {
+  primary: 'blue',
+  accent: 'red',
+  warn: 'red',
+  background: 'white'
+})
 
 import store from './data/store'
 
 Vue.config.productionTip = false
 
-// import VueResource from 'vue-resource'
-// Vue.use(VueResource);
-// Vue.http.options.root = `https://${store.state.fireConfig.core.databaseURL}/wow/`
-
-// Vue.http.interceptors.push((request,next) => {
-//   console.log(request);
-//   next(response => {
-//     console.log(response.json());
-//   });
-// })
-
-
-
-/* eslint-disable no-new */
 const vm = new Vue({
   el: '#app',
   router,

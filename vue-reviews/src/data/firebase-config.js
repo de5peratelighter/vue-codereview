@@ -8,7 +8,6 @@ var firebaseConfig = {
     senderId : "463670284887"
 };
 
-var FbApp = firebase.initializeApp(firebaseConfig);
-console.log('FBAPP',FbApp )
+var FBApp = firebase.initializeApp(firebaseConfig)
 
-export default FbApp.database();
+export default FBApp.database()
