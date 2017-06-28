@@ -1,56 +1,58 @@
 <template>
-  <md-layout md-gutter>
-    <ul class="c-instances-list">
-      <h4 v-if="activeUserGetter.isAnonymous">{{ initialMessage }}</h4>
-      <h4 v-else>{{onlineMessage}}</h4>
-      
-      <li  v-for="(item, key) in items" :key="key">
+  <div>
+    <md-layout md-gutter>
+      <ul class="c-instance-list">
+        <h4 v-if="activeUserGetter.isAnonymous">{{ initialMessage }}</h4>
+        <h4 v-else>{{onlineMessage}}</h4>
         
-        <md-card :class="[item.status, 'instance']">
-          <md-layout md-align="center" md-vertical-align="center" md-gutter md-row>
-            
-            <md-layout>
-              <md-card-content>{{ truncContent(item.submissiontime, 'time') }} <br> {{item.username }}</md-card-content>
+        <li  v-for="(item, key) in items" :key="key">
+          
+          <md-card :class="[item.status, 'instance']">
+            <md-layout md-align="center" md-vertical-align="center" md-gutter md-row>
+              
+              <md-layout>
+                <md-card-content>{{ truncContent(item.submissiontime, 'time') }} <br> {{item.username }}</md-card-content>
+              </md-layout>
+              
+              <md-layout>
+                <md-avatar class="md-large">
+                  <img :src="item.submitimage" :alt="item.username">
+                </md-avatar>
+              </md-layout>
+              
+              <md-layout>
+                <md-button :href="item.content" target="_blank">
+                  {{ truncContent(item.content, 'changeset') }}
+                </md-button>
+              </md-layout>
+              
+              <md-layout>
+                <md-button :href="item.ticket" target="_blank">
+                  {{ truncContent(item.ticket, 'ticket') }}
+                </md-button>
+              </md-layout>
+              
+              <md-layout>
+                <md-card-content>{{ item.comment }}</md-card-content>
+              </md-layout>
+              
+              <md-layout>
+                <md-input-container>
+                <label for="status">{{ item.reviewer }}</label>
+                  <md-select name="status" v-model="item.status">
+                    <md-option v-for="option in selectOptions" :key="option.id" :value="option.name" @selected="onSelectChange(item)">{{option.name}}</md-option>
+                  </md-select>
+                </md-input-container>
+              </md-layout>
+              
             </md-layout>
-            
-            <md-layout>
-              <md-avatar class="md-large">
-                <img :src="item.submitimage" :alt="item.username">
-              </md-avatar>
-            </md-layout>
-            
-            <md-layout>
-              <md-button :href="item.content" target="_blank">
-                {{ truncContent(item.content, 'changeset') }}
-              </md-button>
-            </md-layout>
-            
-            <md-layout>
-              <md-button :href="item.ticket" target="_blank">
-                {{ truncContent(item.ticket, 'ticket') }}
-              </md-button>
-            </md-layout>
-            
-            <md-layout>
-              <md-card-content>{{ item.comment }}</md-card-content>
-            </md-layout>
-            
-            <md-layout>
-              <md-input-container>
-              <label for="status">{{ item.reviewer }}</label>
-                <md-select name="status" v-model="item.status">
-                  <md-option v-for="option in selectOptions" :key="option.id" :value="option.name" @selected="onSelectChange(item)">{{option.name}}</md-option>
-                </md-select>
-              </md-input-container>
-            </md-layout>
-            
-          </md-layout>
-        </md-card>
-        
-      </li>
-    </ul>
-    
-  </md-layout>
+          </md-card>
+          
+        </li>
+      </ul>
+    </md-layout>
+    <new-instance></new-instance>
+  </div>
 </template>
 
 <script>
@@ -62,6 +64,7 @@ var provider = new firebase.auth.GoogleAuthProvider();
 
 import {GET_FBASE} from './../data/mutation-types'
 import {mapActions, mapGetters } from 'vuex'
+import NewInstance from './NewInstance.vue'
 
 export default {
   name: 'CodeReview',
@@ -116,6 +119,9 @@ export default {
   },
   mounted () {
     // this.$bindAsArray('anArray', FBApp.ref("wow/nice").limitToLast(5), null, () => {this[GET_FBASE](this.anArray) })
+  },
+  components : {
+    NewInstance
   }
 }
 </script>
@@ -125,7 +131,7 @@ export default {
     padding: 0;
     list-style: none;
   }
-  .c-instances-list {
+  .c-instance-list {
     margin: 0 auto;
     width: 95%;
   }
