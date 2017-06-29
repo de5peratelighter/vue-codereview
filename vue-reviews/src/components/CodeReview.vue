@@ -1,7 +1,7 @@
 <template>
   <div>
     <md-layout md-gutter>
-      <ul class="c-instance-list">
+      <ul class="c-main-section">
         <h4 v-if="activeUserGetter.isAnonymous">{{ initialMessage }}</h4>
         <h4 v-else>{{onlineMessage}}</h4>
         
@@ -85,23 +85,24 @@ export default {
     items () {
       return this.$store.state.items
     },
-    ...mapGetters(['activeUserGetter', 'displayNumGetter'])
+    ...mapGetters(['activeUserGetter', 'displayNumGetter', 'firebasePathGetter'])
   },
   methods : {
     ...mapActions([GET_FBASE]),
     getData () {
-      this.$bindAsArray('anArray', FBApp.ref("wow/nice").limitToLast(Number(this.displayNumGetter)), null, () => {this[GET_FBASE](this.anArray) })
+      this.$bindAsArray('anArray', FBApp.ref(this.firebasePathGetter.main).limitToLast(Number(this.displayNumGetter)), null, () => {this[GET_FBASE](this.anArray) })
     },
     truncContent (el, typer) {
+      // TIME - for compatibility with old dates $moment is provided with additional parameter (from old Polymer project w/o $moment in place)
       return (
         typer === "ticket" ? el.substr(el.indexOf("SUP")) :
         typer === "changeset" ? el.slice(-8) :
-        typer === "time" ? el : ""
+        typer === "time" ?  this.$moment(el, 'DD-MM-YYYY, hh:mm:ss').format('DD-MMM, h:mm A') : ""
       )
     },
     onSelectChange (el) {
       if (event && el['.key'] && !this.activeUserGetter.isAnonymous) {
-        FBApp.ref("wow/nice/" + el['.key']).update({status: el.status, reviewer : this.activeUserGetter.displayName})
+        FBApp.ref(this.firebasePathGetter.main +"/" + el['.key']).update({status: el.status, reviewer : this.activeUserGetter.displayName})
       }
     }
   },
@@ -130,10 +131,6 @@ export default {
   ul, li {
     padding: 0;
     list-style: none;
-  }
-  .c-instance-list {
-    margin: 0 auto;
-    width: 95%;
   }
   a, a:visited, a:hover, a:active {
     color: inherit;

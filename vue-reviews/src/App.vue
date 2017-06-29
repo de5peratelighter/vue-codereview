@@ -146,4 +146,8 @@ export default {
 .c-full-height {
   min-height: 100vh;
 }
+.c-main-section {
+  margin: 0 auto;
+  width: 95%;
+}
 </style>

@@ -46,9 +46,7 @@ export default new Vuex.Store({
         displayNum : 5,
         searchTerm : 'SUP',
         firePath : {
-            refs : {
-                items : 'wow/nice'
-            }
+          main : 'wow/nice'
         }
     },
     getters : {
@@ -64,8 +62,8 @@ export default new Vuex.Store({
         //         return ((getters.cartTotal * percentage) / 100)
         //     }
         // },
-        firebaseMainPathGetter : (state) => {
-          return state.firePath.refs.items
+        firebasePathGetter : (state) => {
+          return state.firePath
         },
         activeUserGetter : (state) => {
           return state.activeUser

@@ -5,9 +5,15 @@ import Vuex from 'vuex'
 import App from './App'
 import router from './router'
 
+// Moment
+import moment from 'moment-timezone'
+moment.tz.guess()
+Object.defineProperty(Vue.prototype, '$moment', { get () {return this.$root.moment}})
+
 // Firebase
 import VueFire from 'vuefire'
 
+// Vue Material
 import VueMaterial from 'vue-material'
 import 'vue-material/dist/vue-material.css'
 
@@ -28,6 +34,9 @@ Vue.config.productionTip = false
 
 const vm = new Vue({
   el: '#app',
+  data : {
+    moment
+  },
   router,
   template: '<App/>',
   components: { App },
