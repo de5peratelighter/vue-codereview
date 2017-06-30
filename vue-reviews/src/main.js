@@ -24,7 +24,7 @@ Vue.use(VueMaterial)
 Vue.material.registerTheme('default', {
   primary: 'blue',
   accent: 'red',
-  warn: 'red',
+  warn: 'orange',
   background: 'white'
 })
 

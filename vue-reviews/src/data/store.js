@@ -9,7 +9,6 @@ export default new Vuex.Store({
     state : {
         items : {
           "-KZvonwRi7MBVk7YEiCe" : {
-            "comment" : "css fix",
             "content" : "https://dev.bazaarvoice.com/trac/bvc/changeset/1655761",
             "reviewer" : "Bohdan Kokotko",
             "status" : "Good",
@@ -21,7 +20,7 @@ export default new Vuex.Store({
             "comment" : "WOWO",
             "content" : "https://dev.bazaarvoice.com/trac/bvc/changeset?new=customers%2Fbranches%2Fuser%2Fobodrov-21038-myer%401656411&old=customers%2Fbranches%2Fuser%2Fobodrov-21038-myer%401656400",
             "reviewer" : "Bohdan Kokotko",
-            "status" : "Good",
+            "status" : "NotOK",
             "submissiontime" : "14/06/2017, 14:31:55",
             "submitimage" : "https://lh3.googleusercontent.com/-XdUIqdMkCWA/AAAAAAAAAAI/AAAAAAAAAAA/4252rscbv5M/photo.jpg",
             "ticket" : "https://bits.bazaarvoice.com/jira/browse/SUP-21038",
@@ -34,7 +33,8 @@ export default new Vuex.Store({
             "submissiontime" : "15/06/2017, 12:39:11",
             "submitimage" : "https://lh3.googleusercontent.com/-HKWAKmqd3OQ/AAAAAAAAAAI/AAAAAAAAAGs/fIbbkaPOun0/photo.jpg",
             "ticket" : "https://bits.bazaarvoice.com/jira/browse/SUP-21035",
-            "username" : "Станіслав Чепа"
+            "username" : "Станіслав Чепа",
+            "reviewerComment" : "nice stuff man"
           },
         },
         activeUser : {

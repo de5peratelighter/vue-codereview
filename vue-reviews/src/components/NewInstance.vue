@@ -60,8 +60,7 @@
                     this.inputsInvalid = stater ? false : true
                 },
                 deep: true
-            },
-            
+            }
           },
         methods : {
             submitData (el) {
@@ -74,16 +73,14 @@
                         submitimage:  this.activeUserGetter.photoURL,
                         content: this.inputs[0].val,
                         ticket: this.inputs[1].val,
-                        comment : this.inputs[2].val,
                         status: 'New',
                         reviewer: '',
                         submissiontime : this.$moment().format('DD-MM-YYYY, hh:mm:ss')
-                    }
+                    } 
+                    if (this.inputs[2].val) { newData.comment = this.inputs[2].val }
                     console.log(newData)
                     FBApp.ref(this.firebasePathGetter.main).push(newData)
                 }
-               
-                
                 
                 this.clearData()
             },

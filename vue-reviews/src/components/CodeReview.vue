@@ -33,13 +33,39 @@
               </md-layout>
               
               <md-layout>
-                <md-card-content>{{ item.comment }}</md-card-content>
+                <md-card-content>
+                  
+                <md-button :id="'dialog'+key" @click="openDialog(key)"> <md-icon v-if="item.comment||item.reviewerComment">chat_bubble</md-icon> <md-icon v-else>chat_bubble_outline</md-icon> </md-button>
+                
+                  <md-dialog :md-open-from="'#dialog'+key" :md-close-to="'#dialog'+key" :ref="String(key)"> <!-- String(key) removes dialog undefined bug with the zero-index key -->
+                  
+                    <div v-if="item.comment">
+                      <md-dialog-title>From author</md-dialog-title>
+                      <md-dialog-content>{{ item.comment }}</md-dialog-content>
+                    </div>
+                    <div v-if="item.reviewerComment">
+                      <md-dialog-title>From reviewer</md-dialog-title>
+                      <md-dialog-content>{{ item.reviewerComment }}</md-dialog-content>
+                    </div>
+                    <md-dialog-content>
+                      <md-input-container>
+                          <label :for="'label'+key">New comment</label>
+                          <md-textarea :id="'#label'+key" v-model="newInput"></md-textarea>
+                          <md-button class="md-primary" @click="updateComment(item)">Add</md-button>
+                      </md-input-container>
+                    </md-dialog-content>
+                    <md-dialog-actions>
+                      <md-button class="md-primary" @click="closeDialog(key)">Ok</md-button>
+                    </md-dialog-actions>
+                  </md-dialog>
+                
+                </md-card-content>
               </md-layout>
               
               <md-layout>
                 <md-input-container>
-                <label for="status">{{ item.reviewer }}</label>
-                  <md-select name="status" v-model="item.status">
+                <label for="status" style="color:inherit">{{ item.reviewer ? item.reviewer : 'Codereviewer will set the status' }}</label>
+                  <md-select name="status" v-model="item.status" :disabled="activeUserGetter.displayName === item.username">
                     <md-option v-for="option in selectOptions" :key="option.id" :value="option.name" @selected="onSelectChange(item)">{{option.name}}</md-option>
                   </md-select>
                 </md-input-container>
@@ -72,6 +98,7 @@ export default {
     return {
       initialMessage: 'This is dummy data, please LOG IN to get the real one',
       onlineMessage : 'This is data from firebase',
+      newInput : '',
       DEFAULT_DATA : this.$store.state.items,
       selectOptions :  [
         { id: 1, name: 'New' },
@@ -103,7 +130,36 @@ export default {
     onSelectChange (el) {
       if (event && el['.key'] && !this.activeUserGetter.isAnonymous) {
         FBApp.ref(this.firebasePathGetter.main +"/" + el['.key']).update({status: el.status, reviewer : this.activeUserGetter.displayName})
+      } else {
+        this.dummyDataMessage()
       }
+    },
+    openDialog(ref) {
+      this.newInput = ''
+      this.$refs[ref][0].open();
+    },
+    closeDialog(ref) {
+      this.newInput = ''
+      this.$refs[ref][0].close();
+    },
+    updateComment(el) {
+      if (el['.key'] && !this.activeUserGetter.isAnonymous) {
+        
+        let newData = {} // check whether we should update reviewer's comment or user's Comment
+        if (this.activeUserGetter.displayName === el.reviewer) {
+          newData = {reviewerComment: this.newInput} 
+        } else if (this.activeUserGetter.displayName === el.username) {
+          newData = {comment: this.newInput}
+        }
+        
+        FBApp.ref(this.firebasePathGetter.main +"/" + el['.key']).update(newData)
+      } else {
+        this.dummyDataMessage()
+      }
+    },
+    dummyDataMessage () {
+      
+      console.log('This is not real data')
     }
   },
   watch: {
@@ -157,5 +213,5 @@ export default {
   }      
   .NotOK {
     background: #f44336 !important;
-  } 
+  }
 </style>

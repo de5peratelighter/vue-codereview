@@ -11,7 +11,7 @@
       
           <md-layout md-align="end">
             
-            <md-layout md-flex="55">
+            <md-layout md-flex="55" :class="{ hidden: hiddenInputs.search }">
               <md-input-container md-inline>
                 <label>Number of instances</label>
                 <md-input v-model="search"></md-input>
@@ -19,7 +19,7 @@
             </md-layout>
             
             <md-layout md-flex="10">
-              <md-button class="md-icon-button">
+              <md-button class="md-icon-button"  @click="showElement('search')">
                 <md-icon>search</md-icon>
               </md-button>
             </md-layout>
