@@ -3,12 +3,16 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 Vue.use(Vuex)
 
+import moment from 'moment-timezone'
+moment.tz.guess()
+
 import {GET_FBASE, LOGIN_ME, UPDATE_NUM} from './mutation-types'
 
 export default new Vuex.Store({
     state : {
         items : {
           "-KZvonwRi7MBVk7YEiCe" : {
+            "comment" : "css fix",
             "content" : "https://dev.bazaarvoice.com/trac/bvc/changeset/1655761",
             "reviewer" : "Bohdan Kokotko",
             "status" : "Good",
@@ -33,8 +37,7 @@ export default new Vuex.Store({
             "submissiontime" : "15/06/2017, 12:39:11",
             "submitimage" : "https://lh3.googleusercontent.com/-HKWAKmqd3OQ/AAAAAAAAAAI/AAAAAAAAAGs/fIbbkaPOun0/photo.jpg",
             "ticket" : "https://bits.bazaarvoice.com/jira/browse/SUP-21035",
-            "username" : "Станіслав Чепа",
-            "reviewerComment" : "nice stuff man"
+            "username" : "Станіслав Чепа"
           },
         },
         activeUser : {
@@ -46,8 +49,16 @@ export default new Vuex.Store({
         displayNum : 5,
         searchTerm : 'SUP',
         firePath : {
-          main : 'wow/nice'
-        }
+          main : 'wow/nice',
+          reviewers : 'wow/reviewers'
+        },
+        eventFormDate : moment(),
+        currentYear : Number(moment().format('YYYY')),
+        currentMonth : Number(moment().format('M')),
+        eventFormPosX : 0,
+        eventFormPosY : 0,
+        eventFormActive : false,
+        events : []
     },
     getters : {
         // cartTotal : (state) => {
@@ -82,6 +93,31 @@ export default new Vuex.Store({
       },
       [UPDATE_NUM] (state, payload) {
         state.displayNum = Number(payload)
+      },
+      // date
+      setCurrentMonth(state,payload) {
+            state.currentMonth = payload
+        },
+      setCurrentYear(state,payload) {
+          state.currentYear = payload
+      },
+      eventFormPos(state, payload) {
+          state.eventFormPosX = payload.x;
+          state.eventFormPosY = payload.y
+      },
+      eventFormActive(state, payload) {
+          state.eventFormActive = payload
+      },
+      addEvent(state, payload) {
+          // let obj = {  
+          //     description : payload,
+          //     date: state.eventFormDate
+          // }
+          state.events.push(payload)
+          
+      },
+      eventFormUpdateDate(state, payload) {
+          state.eventFormDate = payload
       }
     },
     actions : {
@@ -94,6 +130,23 @@ export default new Vuex.Store({
       [UPDATE_NUM] (store, payload) {
         // check if number is positive
         if ((payload) > 0) store.commit(UPDATE_NUM, payload)
-      }
+      },
+      // date 
+      addEvent(context, payload) {
+            return new Promise((resolve, reject) => {
+                let obj = {  
+                    description : payload,
+                    date: context.state.eventFormDate
+                };
+                // Axios.post('/add_event', obj).then(response => {
+                //     if (response.status === 200) {
+                //         context.commit('addEvent', obj);
+                //         resolve('wow');
+                //     } else {
+                //         reject();
+                //     }
+                // })
+            });
+        }
     }
 })

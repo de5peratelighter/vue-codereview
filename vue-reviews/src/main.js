@@ -28,6 +28,8 @@ Vue.material.registerTheme('default', {
   background: 'white'
 })
 
+import './style.scss'
+
 import store from './data/store'
 
 Vue.config.productionTip = false
