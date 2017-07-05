@@ -1,6 +1,6 @@
 <template>
     <div>
-        <div>{{formattedDate}}</div>
+        <span>{{formattedDate}}</span>
         <button @click="dec">-</button>
         <button @click="inc">+</button>
     </div>

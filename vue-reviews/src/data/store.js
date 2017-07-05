@@ -50,13 +50,12 @@ export default new Vuex.Store({
         searchTerm : 'SUP',
         firePath : {
           main : 'wow/nice',
-          reviewers : 'wow/reviewers'
+          reviewers : 'wow/reviewers/all',
+          schedule : 'wow/schedule'
         },
         eventFormDate : moment(),
         currentYear : Number(moment().format('YYYY')),
         currentMonth : Number(moment().format('M')),
-        eventFormPosX : 0,
-        eventFormPosY : 0,
         eventFormActive : false,
         events : []
     },
@@ -100,10 +99,6 @@ export default new Vuex.Store({
         },
       setCurrentYear(state,payload) {
           state.currentYear = payload
-      },
-      eventFormPos(state, payload) {
-          state.eventFormPosX = payload.x;
-          state.eventFormPosY = payload.y
       },
       eventFormActive(state, payload) {
           state.eventFormActive = payload

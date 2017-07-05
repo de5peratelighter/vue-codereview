@@ -1,42 +1,67 @@
 <template>
     <div class="c-main-section">
-        <reviewers-list></reviewers-list>
-        <div id="header">
-            <div>
-                <h1>Vue JS Calendar</h1>
-            </div>
-            <div>
-                <current-month></current-month>
-            </div>
-        </div>
-        <div id="day-bar">
-            <div>MON</div>
-            <div>TUE</div>
-            <div>WED</div>
-            <div>THU</div>
-            <div>FRI</div>
-            <div>SAT</div>
-            <div>SUN</div>
-        </div>
-        <div id="calendar">
-            <div v-for="week in weeks" class="calendar-week">
-                <calendar-day v-for="(day, index) in week" :day="day" :key="index"></calendar-day>
-            </div>
-        </div>
-        <event-form>
-            
-        </event-form>
+        <md-layout>
+            <md-layout md-flex="10">
+                <div>
+                    <span class="md-headline">Reviewers</span>
+                    <reviewers-list></reviewers-list>
+                </div>
+            </md-layout>
+            <md-layout md-flex="90">
+                <div style="width: 100%">
+                    <md-layout md-align="end" md-vertical-align="center">
+                        <span class="md-headline">Vue JS Calendar</span>
+                        <current-month></current-month>
+                    </md-layout>
+                    <div id="day-bar">
+                        <div>MON</div>
+                        <div>TUE</div>
+                        <div>WED</div>
+                        <div>THU</div>
+                        <div>FRI</div>
+                        <div>SAT</div>
+                        <div>SUN</div>
+                    </div>
+                    <div id="calendar">
+                        <div v-for="week in weeks" class="calendar-week">
+                            <calendar-day v-for="(day, index) in week" :day="day" :key="index" :scheduler="schedule[day.format('YYYY-MM-DD')]">
+                            </calendar-day>
+                        </div>
+                    </div>
+                </div>
+            </md-layout>
+        </md-layout>
     </div>
 </template>
 
 <script>
+import firebase from 'firebase'
+import FBApp from './../data/firebase-config'
+
+var provider = new firebase.auth.GoogleAuthProvider();
+
+import {GET_FBASE} from './../data/mutation-types'
+import {mapActions, mapGetters } from 'vuex'
+    
 import CalendarDay from './CalendarDay.vue'
 import CurrentMonth from './CurrentMonth.vue'
-import EventForm from './EventForm.vue'
 import ReviewersList from './ReviewersList.vue'
 export default {
     name: 'Reviewers',
+    firebase: {},
+    methods : {
+        lister (el) {
+            if (el) {
+                return el
+            }
+        }
+        
+    },
     computed : {
+        ...mapGetters(['activeUserGetter','firebasePathGetter']),
+        nowDate () {
+            return  this.$store.state.eventFormDate
+        },
         month () {
             return this.$store.state.currentMonth
         },
@@ -94,8 +119,28 @@ export default {
     components : {
         CalendarDay,
         CurrentMonth,
-        EventForm,
         ReviewersList
+    },
+    created () {
+        
+        this.$bindAsArray('lastIndex', FBApp.ref(this.firebasePathGetter.schedule).limitToLast(1), null, () => { 
+            
+            
+            if (this.$moment(this.lastIndex['.key']).isSameOrBefore(this.nowDate,'day')) {
+                
+            }
+ 
+            
+            // console.log('last index found', this.$moment(Object.keys(this.lastIndex)[0]).isSameOrBefore(this.nowDate,'day'), Object.values(this.lastIndex)[0]  )      
+            
+             console.log('last index found', this.lastIndex, this.$moment(this.lastIndex['.key']).isSameOrBefore(this.nowDate,'day')  )    
+            
+            // (this.$moment(this.lastIndex)).isSame(this.nowDate,'day')
+            
+        })
+
+        
+        this.$bindAsObject('schedule', FBApp.ref(this.firebasePathGetter.schedule), null, () => { console.log('Ready fired!', this.schedule) })
     }
 }
 </script>

@@ -1,12 +1,20 @@
 <template>
     <md-layout>
-        
-        <md-layout v-for="(item, index) in anArray" :key="index">
-            <md-input-container>
-                <label :for="item['.key']">{{item['.key']}}</label>
-                <md-input :id="item['.key']" v-model="item['.value']"></md-input>
-            </md-input-container>
-        </md-layout>
+        <md-list>
+            <md-list-item v-for="(reviewer,index) in lister" :key="index">
+                <span>{{index}}. {{reviewer}}</span> 
+                <md-button @click="removeReviewer(index)" class="md-icon-button md-list-action"> 
+                   <md-icon>delete</md-icon>
+                </md-button>
+            </md-list-item>
+        </md-list>
+
+        <!--<md-layout v-for="(reviewer, index) in reviewers" :key="index">-->
+        <!--    <md-input-container>-->
+        <!--        <label :for="reviewer['.key']">{{reviewer}}</label>-->
+        <!--        <md-input :id="reviewer['.key']" v-model="reviewer['.value']"></md-input>-->
+        <!--    </md-input-container>-->
+        <!--</md-layout>-->
         
     </md-layout>
 </template>
@@ -23,14 +31,31 @@
     export default {
        name: 'ReviewersList', 
        computed : {
-           ...mapGetters(['activeUserGetter','firebasePathGetter'])
+            ...mapGetters(['activeUserGetter','firebasePathGetter']),
+            lister () {
+                return this.reviewers ? this.splitReviewers(this.reviewers) : []
+            }
+       },
+       methods : {
+            splitReviewers (ar) {
+                let obj = {}
+                // console.log('what',ar,this.reviewers['.value'] )
+                if (ar['.value']) {                
+                    ar['.value'].split(',').forEach((el, i)=> {
+                        obj[i] = el
+                    }) 
+                    return obj
+                }
+            },
+            removeReviewer (el) {
+                let lister = this.reviewers['.value'].split(',')
+                lister.splice(el,1)
+                FBApp.ref(this.firebasePathGetter.reviewers).set(lister.join(','))
+            }
        },
        firebase: {},
        created () {
-           
-        this.$bindAsArray('anArray', FBApp.ref(this.firebasePathGetter.reviewers))
-        console.log(this.anArray)
-
+            this.$bindAsObject('reviewers', FBApp.ref(this.firebasePathGetter.reviewers) )
        }
     }
 </script>
