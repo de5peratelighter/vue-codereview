@@ -139,6 +139,11 @@ body {
       }
     }
 
+    .c-stretch {
+      flex-flow: column nowrap;
+      align-items: stretch;
+    }
+    
     $event-form-width: 300px;
 
     #event-form {

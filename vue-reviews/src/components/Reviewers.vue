@@ -1,7 +1,7 @@
 <template>
     <div class="c-main-section">
         <md-layout>
-            <md-layout md-flex="10">
+            <md-layout md-flex="10" class="c-stretch">
                 <div>
                     <span class="md-headline">Reviewers</span>
                     <reviewers-list></reviewers-list>
@@ -57,8 +57,16 @@ export default {
         }
         
     },
+    data () {
+        return {
+            dayLimit : 3
+        }
+    },
     computed : {
         ...mapGetters(['activeUserGetter','firebasePathGetter']),
+        reviews () {
+            return this.reviewers ? this.reviewers['.value'] : ''
+        },
         nowDate () {
             return  this.$store.state.eventFormDate
         },
@@ -121,26 +129,59 @@ export default {
         CurrentMonth,
         ReviewersList
     },
+    watch : {
+        reviews (newVal,oldVal) {
+            console.log(newVal,oldVal)
+        }
+    },
     created () {
         
+        this.$bindAsObject('reviewers', FBApp.ref(this.firebasePathGetter.reviewers))
+        
+        this.$bindAsObject('schedule', FBApp.ref(this.firebasePathGetter.schedule))
+    
+
         this.$bindAsArray('lastIndex', FBApp.ref(this.firebasePathGetter.schedule).limitToLast(1), null, () => { 
             
-            
-            if (this.$moment(this.lastIndex['.key']).isSameOrBefore(this.nowDate,'day')) {
+            if (this.$moment(this.lastIndex[0]['.key']).isSameOrBefore(this.nowDate,'day')) {
+                
+                // console.log('VALUES:', this.lastIndex[0]['.value'].split(',').pop())
+                
+                let laster = Number(this.lastIndex[0]['.value'].split(',').pop())
+                let reviewers = this.reviewers['.value'].split(',')
+                let nicer = {}
+                
+                // this.nowDate is wrapped into Moment once again for proper comperison with itself 
+                if (this.$moment(this.nowDate).startOf('week').isSame(this.$moment(this.nowDate),'day'))  { // isoWeek
+                
+                    for (let i=1;i<=14;i++) {
+                        
+                        let datee = this.$moment(this.nowDate).add(i,'days')
+                        let dater = datee.format('YYYY-MM-DD')
+                        
+                        let newStr = ""
+                        for (let j=1; j<=this.dayLimit;j++) {
+                            
+                            laster = laster >= reviewers.length-1 ? 0 : laster+1
+                            
+                            newStr += reviewers[laster]+','
+                            if (j===this.dayLimit) newStr += String(laster)
+                        }
+                        nicer[dater] = newStr
+                        
+                    }
+                    if (nicer) {
+                        console.log(nicer, reviewers[laster])
+                        FBApp.ref(this.firebasePathGetter.schedule).update(nicer)
+                        // this.$bindAsArray('schedule', FBApp.ref(this.firebasePathGetter.schedule).update(nicer) )
+                    }
+                
+                }
                 
             }
- 
-            
-            // console.log('last index found', this.$moment(Object.keys(this.lastIndex)[0]).isSameOrBefore(this.nowDate,'day'), Object.values(this.lastIndex)[0]  )      
-            
-             console.log('last index found', this.lastIndex, this.$moment(this.lastIndex['.key']).isSameOrBefore(this.nowDate,'day')  )    
-            
-            // (this.$moment(this.lastIndex)).isSame(this.nowDate,'day')
             
         })
 
-        
-        this.$bindAsObject('schedule', FBApp.ref(this.firebasePathGetter.schedule), null, () => { console.log('Ready fired!', this.schedule) })
     }
 }
 </script>

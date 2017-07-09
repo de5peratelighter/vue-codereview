@@ -50,8 +50,9 @@ export default new Vuex.Store({
         searchTerm : 'SUP',
         firePath : {
           main : 'wow/nice',
-          reviewers : 'wow/reviewers/all',
-          schedule : 'wow/schedule'
+          resources: 'wow/resources',
+          reviewers : 'wow/resources/reviewers/all',
+          schedule : 'wow/resources/schedule'
         },
         eventFormDate : moment(),
         currentYear : Number(moment().format('YYYY')),
