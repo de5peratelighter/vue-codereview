@@ -18,6 +18,13 @@
     </div>
 </template>
 <script>
+    import firebase from 'firebase'
+    import FBApp from './../data/firebase-config'
+    
+    var provider = new firebase.auth.GoogleAuthProvider();
+    
+    import {mapActions, mapGetters } from 'vuex'
+    
     export default {
         props : ['day','scheduler'],
         data () {
@@ -48,6 +55,7 @@
                 } else {return []}
             }
         },
+        firebase: {},
         methods : {
             openDialog(day) {
                 this.$refs.hello.open();

@@ -1,27 +1,24 @@
 <template>
-        <md-list>
-            <md-list-item v-for="(reviewer,index) in lister" :key="index">
-                <span>{{index}}. {{reviewer}}</span> 
-                <md-button @click="updateReviewerList(index, 'remove')" class="md-icon-button md-list-action"> 
-                   <md-icon>delete</md-icon>
-                </md-button>
-            </md-list-item>
-            <md-input-container>
-                <label for="reviewers__list__addnew">{{newReviewerMessage}}</label>
-                <md-input id="reviewers__list__addnew" v-model="newReviewerInput"></md-input>
-                <md-button @click="updateReviewerList(newReviewerInput, 'add')" class="md-icon-button"> 
-                   Add
-                </md-button>
-            </md-input-container>
-        </md-list>
-
-        <!--<md-layout v-for="(reviewer, index) in reviewers" :key="index">-->
-            <!--<md-input-container>-->
-            <!--    <label :for="reviewer['.key']">{{reviewer}}</label>-->
-            <!--    <md-input :id="reviewer['.key']" v-model="reviewer['.value']"></md-input>-->
-            <!--</md-input-container>-->
-        <!--</md-layout>-->
-        
+    <md-layout md-flex="10" class="c-stretch" v-if="!activeUserGetter.isAnonymous">
+        <div>
+            <span class="md-headline">Reviewers</span>
+            <md-list>
+                <md-list-item v-for="(reviewer,index) in revs" :key="index">
+                    <span>{{index}}. {{reviewer}}</span> 
+                    <md-button @click="updateReviewerList(index, 'remove')" class="md-icon-button md-list-action"> 
+                       <md-icon>delete</md-icon>
+                    </md-button>
+                </md-list-item>
+                <md-input-container>
+                    <label for="reviewers__list__addnew">{{newReviewerMessage}}</label>
+                    <md-input id="reviewers__list__addnew" v-model="newReviewerInput"></md-input>
+                    <md-button @click="updateReviewerList(newReviewerInput, 'add')" class="md-icon-button"> 
+                       Add
+                    </md-button>
+                </md-input-container>
+            </md-list>
+        </div>
+    </md-layout>
 </template>
 
 <script>
@@ -30,50 +27,52 @@
     
     var provider = new firebase.auth.GoogleAuthProvider();
     
-    import {GET_FBASE} from './../data/mutation-types'
+    import {GET_REVIEWERS} from './../data/mutation-types'
     import {mapActions, mapGetters } from 'vuex'
     
     export default {
        name: 'ReviewersList', 
        data () {
            return {
-               newReviewerMessage : "Add reviewer",
+               newReviewerMessage : 'Add reviewer',
                newReviewerInput : ''
            }
        },
        computed : {
             ...mapGetters(['activeUserGetter','firebasePathGetter']),
-            lister () {
-                return this.reviewers ? this.splitReviewers(this.reviewers) : []
-            }
-       },
-       methods : {
-            splitReviewers (ar) {
+            revs () {
+                let ar = this.reviewers ? this.reviewers['.value'] : ''
                 let obj = {}
-                // console.log('what',ar,this.reviewers['.value'] )
-                if (ar['.value']) {                
-                    ar['.value'].split(',').forEach((el, i)=> {
-                        obj[i] = el
-                    }) 
+                if (ar) {  
+                    ar.split(',').forEach((el, i)=> {obj[i] = el}) 
                     return obj
-                }
-            },
-            updateReviewerList (el,action) {
-                let lister = this.reviewers['.value'];
-                
-                if (action === "remove") {
-                    lister = lister.split(',')  
-                    lister.splice(el,1)
-                    FBApp.ref(this.firebasePathGetter.reviewers).set(lister.join(','))
-                } else if (action === "add") {
-                     FBApp.ref(this.firebasePathGetter.reviewers).set(lister + ',' + el)
-                    this.newReviewerInput = ''
                 }
             }
        },
        firebase: {},
-       created () {
-            this.$bindAsObject('reviewers', FBApp.ref(this.firebasePathGetter.reviewers) )
-       }
+       methods : {
+           ...mapActions([GET_REVIEWERS]),
+            updateReviewerList (el,action) {
+                let lister = this.reviewers['.value']
+                if (action === "remove") {
+                    lister = lister.split(',')  
+                    lister.splice(el,1)
+                    FBApp.ref(this.firebasePathGetter.reviewers).set(lister.join(',')).then(()=> {this[GET_REVIEWERS](lister.join(',')) })
+                } else if (action === "add") {
+                    lister = lister + "," + el
+                    FBApp.ref(this.firebasePathGetter.reviewers).set(lister).then(()=> {this[GET_REVIEWERS](lister)})
+                    this.newReviewerInput = ''
+                }
+            }
+       },
+        watch : {
+            activeUserGetter (newCount, oldCount) {
+              if (!newCount.isAnonymous) {
+                  this.$bindAsObject('reviewers', FBApp.ref(this.firebasePathGetter.reviewers),null, () => {
+                      this[GET_REVIEWERS](this.reviewers['.value'])
+                  })
+              }
+            }
+        }
     }
 </script>

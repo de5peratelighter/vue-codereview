@@ -1,12 +1,7 @@
 <template>
     <div class="c-main-section">
         <md-layout>
-            <md-layout md-flex="10" class="c-stretch">
-                <div>
-                    <span class="md-headline">Reviewers</span>
-                    <reviewers-list></reviewers-list>
-                </div>
-            </md-layout>
+            <reviewers-list></reviewers-list>
             <md-layout md-flex="90">
                 <div style="width: 100%">
                     <md-layout md-align="end" md-vertical-align="center">
@@ -24,7 +19,7 @@
                     </div>
                     <div id="calendar">
                         <div v-for="week in weeks" class="calendar-week">
-                            <calendar-day v-for="(day, index) in week" :day="day" :key="index" :scheduler="schedule[day.format('YYYY-MM-DD')]">
+                            <calendar-day v-for="(day, index) in week" :day="day" :key="index" :scheduler="activeUserGetter.isAnonymous ? '' : schedule[day.format('YYYY-MM-DD')]">
                             </calendar-day>
                         </div>
                     </div>
@@ -40,7 +35,7 @@ import FBApp from './../data/firebase-config'
 
 var provider = new firebase.auth.GoogleAuthProvider();
 
-import {GET_FBASE} from './../data/mutation-types'
+import {GET_FBASE, GET_REVIEWERS} from './../data/mutation-types'
 import {mapActions, mapGetters } from 'vuex'
     
 import CalendarDay from './CalendarDay.vue'
@@ -54,21 +49,20 @@ export default {
             if (el) {
                 return el
             }
-        }
-        
+        },
+        ...mapActions([GET_REVIEWERS])
     },
     data () {
         return {
-            dayLimit : 3
+            daysLimit : 10,
+            reviewersLimit : 3,
+            holidays : ["2017-07-14"]
         }
     },
     computed : {
-        ...mapGetters(['activeUserGetter','firebasePathGetter']),
-        reviews () {
-            return this.reviewers ? this.reviewers['.value'] : ''
-        },
+        ...mapGetters(['activeUserGetter','firebasePathGetter','reviewersGetter']),
         nowDate () {
-            return  this.$store.state.eventFormDate
+            return this.$store.state.eventFormDate
         },
         month () {
             return this.$store.state.currentMonth
@@ -130,58 +124,56 @@ export default {
         ReviewersList
     },
     watch : {
-        reviews (newVal,oldVal) {
-            console.log(newVal,oldVal)
-        }
-    },
-    created () {
-        
-        this.$bindAsObject('reviewers', FBApp.ref(this.firebasePathGetter.reviewers))
-        
-        this.$bindAsObject('schedule', FBApp.ref(this.firebasePathGetter.schedule))
-    
-
-        this.$bindAsArray('lastIndex', FBApp.ref(this.firebasePathGetter.schedule).limitToLast(1), null, () => { 
-            
-            if (this.$moment(this.lastIndex[0]['.key']).isSameOrBefore(this.nowDate,'day')) {
+        activeUserGetter (newCount, oldCount) {
+          if (!newCount.isAnonymous) {
+              this.$bindAsObject('schedule', FBApp.ref(this.firebasePathGetter.schedule))
+          }
+        },
+        reviewersGetter (newCount, oldCount) {
+          if (newCount) {
+            // Generating new instances on first person login on Mondays(or on last found DB instance as of Today)
+            this.$bindAsArray('lastIndex', FBApp.ref(this.firebasePathGetter.schedule).limitToLast(1), null, () => { 
                 
-                // console.log('VALUES:', this.lastIndex[0]['.value'].split(',').pop())
-                
-                let laster = Number(this.lastIndex[0]['.value'].split(',').pop())
-                let reviewers = this.reviewers['.value'].split(',')
-                let nicer = {}
-                
-                // this.nowDate is wrapped into Moment once again for proper comperison with itself 
-                if (this.$moment(this.nowDate).startOf('week').isSame(this.$moment(this.nowDate),'day'))  { // isoWeek
-                
-                    for (let i=1;i<=14;i++) {
+                // if (this.$moment(this.lastIndex[0]['.key']).isSameOrBefore(this.nowDate,'day') || this.$moment(this.nowDate).day() === 1) {
+                    
+                    let laster = Number(this.lastIndex[0]['.value'].split(',').pop())
+                    let reviewers = newCount.split(',')
+                    let nicer = {}
+                    
+                    for (let i=1;i<=this.daysLimit;i++) {
                         
                         let datee = this.$moment(this.nowDate).add(i,'days')
-                        let dater = datee.format('YYYY-MM-DD')
+                        let holiday = this.holidays.find(el => el===datee.format('YYYY-MM-DD') )
                         
-                        let newStr = ""
-                        for (let j=1; j<=this.dayLimit;j++) {
+                        if (datee.day() > 0 && datee.day()<6 && !holiday) { // check for weekend and holidays, holidays will be another FB instance soon
+                        
+                            var dater = datee.format('YYYY-MM-DD')
                             
-                            laster = laster >= reviewers.length-1 ? 0 : laster+1
-                            
-                            newStr += reviewers[laster]+','
-                            if (j===this.dayLimit) newStr += String(laster)
+                            let newStr = ""
+                            for (let j=1; j<=this.reviewersLimit;j++) {
+                                
+                                laster = laster >= reviewers.length-1 ? 0 : laster+1
+                                
+                                newStr += reviewers[laster]+','
+                                if (j===this.reviewersLimit) newStr += String(laster)
+                            }
+                            nicer[dater] = newStr
+                        
                         }
-                        nicer[dater] = newStr
                         
                     }
-                    if (nicer) {
-                        console.log(nicer, reviewers[laster])
-                        FBApp.ref(this.firebasePathGetter.schedule).update(nicer)
-                        // this.$bindAsArray('schedule', FBApp.ref(this.firebasePathGetter.schedule).update(nicer) )
+                    if (nicer ) { //&& this.$moment(this.lastIndex[0]['.key']).add(1,'days').isSame(this.$moment(dater))
+                        console.log(nicer)
+                        // FBApp.ref(this.firebasePathGetter.schedule).update(nicer)
                     }
+                    
+                // }
                 
-                }
-                
-            }
-            
-        })
+            })
 
+          }
+          
+        },
     }
 }
 </script>

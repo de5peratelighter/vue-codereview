@@ -6,7 +6,7 @@ Vue.use(Vuex)
 import moment from 'moment-timezone'
 moment.tz.guess()
 
-import {GET_FBASE, LOGIN_ME, UPDATE_NUM} from './mutation-types'
+import {GET_FBASE, LOGIN_ME, UPDATE_NUM, GET_REVIEWERS} from './mutation-types'
 
 export default new Vuex.Store({
     state : {
@@ -40,6 +40,7 @@ export default new Vuex.Store({
             "username" : "Станіслав Чепа"
           },
         },
+        revs : "",
         activeUser : {
           displayName: 'Guest',
           photoURL : 'https://ssl.gstatic.com/images/icons/material/product/1x/avatar_circle_blue_120dp.png',
@@ -50,9 +51,10 @@ export default new Vuex.Store({
         searchTerm : 'SUP',
         firePath : {
           main : 'wow/nice',
-          resources: 'wow/resources',
+          resources : 'wow/resources',
           reviewers : 'wow/resources/reviewers/all',
-          schedule : 'wow/resources/schedule'
+          schedule : 'wow/resources/schedule',
+          holidays : 'wow/resources/holidays'
         },
         eventFormDate : moment(),
         currentYear : Number(moment().format('YYYY')),
@@ -81,11 +83,15 @@ export default new Vuex.Store({
         },
         displayNumGetter : (state) => {
           return state.displayNum
+        },
+        reviewersGetter : (state) => {
+          return state.revs
         }
         
     },
     mutations : {
       [GET_FBASE] (state, payload) {
+        console.log(payload)
         state.items = payload
       },
       [LOGIN_ME] (state, payload) {
@@ -93,6 +99,9 @@ export default new Vuex.Store({
       },
       [UPDATE_NUM] (state, payload) {
         state.displayNum = Number(payload)
+      },
+      [GET_REVIEWERS] (state, payload) {
+        state.revs = payload
       },
       // date
       setCurrentMonth(state,payload) {
@@ -114,11 +123,14 @@ export default new Vuex.Store({
       },
       eventFormUpdateDate(state, payload) {
           state.eventFormDate = payload
-      }
+      },
     },
     actions : {
       [GET_FBASE] (store, payload) {
         store.commit(GET_FBASE, payload)
+      },
+      [GET_REVIEWERS] (store, payload) {
+        store.commit(GET_REVIEWERS, payload)
       },
       [LOGIN_ME] (store, payload) {
         store.commit(LOGIN_ME, payload)
