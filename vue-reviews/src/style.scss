@@ -23,6 +23,13 @@ $calendar-border: 1px solid $alto;
 }
 
 body {
+  
+  .hidden {
+    width: 0;
+    min-width: inherit;
+    flex: 0;
+    display: none;
+  }
 
   #app {
 

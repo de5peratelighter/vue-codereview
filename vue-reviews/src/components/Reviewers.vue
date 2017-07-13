@@ -1,11 +1,12 @@
 <template>
     <div class="c-main-section">
         <md-layout>
+            
             <reviewers-list></reviewers-list>
-            <md-layout md-flex="90">
+            <md-layout md-flex="85">
                 <div style="width: 100%">
                     <md-layout md-align="end" md-vertical-align="center">
-                        <span class="md-headline">Vue JS Calendar</span>
+                        <span class="md-headline">Review schedule</span>
                         <current-month></current-month>
                     </md-layout>
                     <div id="day-bar">
@@ -31,11 +32,11 @@
 
 <script>
 import firebase from 'firebase'
-import FBApp from './../data/firebase-config'
+import FBApp from '@/data/firebase-config'
 
 var provider = new firebase.auth.GoogleAuthProvider();
 
-import {GET_FBASE, GET_REVIEWERS} from './../data/mutation-types'
+import {GET_FBASE, GET_REVIEWERS} from '@/data/mutation-types'
 import {mapActions, mapGetters } from 'vuex'
     
 import CalendarDay from './CalendarDay.vue'
@@ -55,14 +56,20 @@ export default {
     data () {
         return {
             daysLimit : 10,
-            reviewersLimit : 3,
             holidays : ["2017-07-14"]
         }
     },
     computed : {
-        ...mapGetters(['activeUserGetter','firebasePathGetter','reviewersGetter']),
+        ...mapGetters(['activeUserGetter','firebasePathGetter','reviewersGetter','holidaysGetter', 'revPerDayGetter']),
+        // holidays () {
+        //     if (this.$store.state.holidays) {
+        //         return
+        //     } else {
+        //         return []
+        //     }
+        // },
         nowDate () {
-            return this.$store.state.eventFormDate
+            return this.$store.state.eventAppDate
         },
         month () {
             return this.$store.state.currentMonth
@@ -129,8 +136,10 @@ export default {
               this.$bindAsObject('schedule', FBApp.ref(this.firebasePathGetter.schedule))
           }
         },
-        reviewersGetter (newCount, oldCount) {
+        reviewersGetter (newCount, oldCount)  {
+            
           if (newCount) {
+              
             // Generating new instances on first person login on Mondays(or on last found DB instance as of Today)
             this.$bindAsArray('lastIndex', FBApp.ref(this.firebasePathGetter.schedule).limitToLast(1), null, () => { 
                 
@@ -140,7 +149,7 @@ export default {
                     let reviewers = newCount.split(',')
                     let nicer = {}
                     
-                    for (let i=1;i<=this.daysLimit;i++) {
+                    for (let i=0;i<=this.daysLimit;i++) {
                         
                         let datee = this.$moment(this.nowDate).add(i,'days')
                         let holiday = this.holidays.find(el => el===datee.format('YYYY-MM-DD') )
@@ -150,7 +159,7 @@ export default {
                             var dater = datee.format('YYYY-MM-DD')
                             
                             let newStr = ""
-                            for (let j=1; j<=this.reviewersLimit;j++) {
+                            for (let j=1; j<=this.revPerDayGetter;j++) {
                                 
                                 laster = laster >= reviewers.length-1 ? 0 : laster+1
                                 
@@ -162,9 +171,10 @@ export default {
                         }
                         
                     }
-                    if (nicer ) { //&& this.$moment(this.lastIndex[0]['.key']).add(1,'days').isSame(this.$moment(dater))
+                    // final verification - DONT push instances if new latest instance is the same as last in the database || if reviewer is added or removed - rebuild the schedule
+                    if (nicer && !this.$moment(this.lastIndex[0]['.key']).isSameOrAfter(this.$moment(dater)) || (newCount && oldCount && (newCount != oldCount))) {
                         console.log(nicer)
-                        // FBApp.ref(this.firebasePathGetter.schedule).update(nicer)
+                        FBApp.ref(this.firebasePathGetter.schedule).update(nicer)
                     }
                     
                 // }

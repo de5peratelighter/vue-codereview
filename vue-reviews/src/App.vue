@@ -100,7 +100,7 @@ export default {
         this.hiddenInputs[el] = !this.hiddenInputs[el]
     },
     updateItemsNum (el) {
-      this.updateNum(this.displayNum)
+      this[UPDATE_NUM](this.displayNum)
     }
   },
   mounted () {
@@ -112,12 +112,7 @@ export default {
 </script>
 
 <style>
-.hidden {
-  width: 0;
-  min-width: inherit;
-  flex: 0;
-  display: none;
-}
+
 .review-welcome > * {
   width: 100%;
   margin: 5px 8px;
