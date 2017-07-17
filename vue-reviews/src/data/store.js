@@ -6,7 +6,7 @@ Vue.use(Vuex)
 import moment from 'moment-timezone'
 moment.tz.guess()
 
-import {GET_FBASE, LOGIN_ME, UPDATE_NUM, GET_REVIEWERS} from './mutation-types'
+import {GET_FBASE, LOGIN_ME, UPDATE_NUM, GET_REVIEWERS, GET_HOLIDAYS} from './mutation-types'
 
 export default new Vuex.Store({
     state : {
@@ -40,7 +40,9 @@ export default new Vuex.Store({
             "username" : "Станіслав Чепа"
           },
         },
-        revs : "",
+        revs : "", // List of reviewers, filled upon login
+        holidays : "", // List of holidays, filled upon login
+        reviewersPerDay : 3, // Number of reviewers per day
         activeUser : {
           displayName: 'Guest',
           photoURL : 'https://ssl.gstatic.com/images/icons/material/product/1x/avatar_circle_blue_120dp.png',
@@ -52,24 +54,17 @@ export default new Vuex.Store({
         firePath : {
           main : 'wow/nice',
           resources : 'wow/resources',
-          reviewers : 'wow/resources/reviewers/all',
-          schedule : 'wow/resources/schedule',
-          holidays : 'wow/resources/holidays'
+          reviewers : 'wow/resources/reviewers',
+          // holidays : 'wow/resources/holidays/all',
+          schedule : 'wow/resources/schedule'
         },
+        eventAppDate : moment(),
         eventFormDate : moment(),
         currentYear : Number(moment().format('YYYY')),
         currentMonth : Number(moment().format('M')),
-        eventFormActive : false,
-        events : []
+        eventFormActive : false
     },
     getters : {
-        // cartTotal : (state) => {
-        //     let total = 0
-        //     state.cart.items.forEach((item) => {
-        //         total += item.product.price * item.quantity
-        //     })
-        //     return total
-        // },
         // taxAmount : (state, getters) => {
         //     return (percentage) => {
         //         return ((getters.cartTotal * percentage) / 100)
@@ -86,6 +81,12 @@ export default new Vuex.Store({
         },
         reviewersGetter : (state) => {
           return state.revs
+        },
+        holidaysGetter : (state) => {
+          return state.holidays
+        },
+        revPerDayGetter : (state) => {
+          return state.reviewersPerDay
         }
         
     },
@@ -103,23 +104,18 @@ export default new Vuex.Store({
       [GET_REVIEWERS] (state, payload) {
         state.revs = payload
       },
+      [GET_HOLIDAYS] (state, payload) {
+        state.holidays = payload
+      },
       // date
       setCurrentMonth(state,payload) {
             state.currentMonth = payload
-        },
+      },
       setCurrentYear(state,payload) {
           state.currentYear = payload
       },
       eventFormActive(state, payload) {
           state.eventFormActive = payload
-      },
-      addEvent(state, payload) {
-          // let obj = {  
-          //     description : payload,
-          //     date: state.eventFormDate
-          // }
-          state.events.push(payload)
-          
       },
       eventFormUpdateDate(state, payload) {
           state.eventFormDate = payload
@@ -139,22 +135,8 @@ export default new Vuex.Store({
         // check if number is positive
         if ((payload) > 0) store.commit(UPDATE_NUM, payload)
       },
-      // date 
-      addEvent(context, payload) {
-            return new Promise((resolve, reject) => {
-                let obj = {  
-                    description : payload,
-                    date: context.state.eventFormDate
-                };
-                // Axios.post('/add_event', obj).then(response => {
-                //     if (response.status === 200) {
-                //         context.commit('addEvent', obj);
-                //         resolve('wow');
-                //     } else {
-                //         reject();
-                //     }
-                // })
-            });
-        }
+      [GET_HOLIDAYS] (store,payload) {
+        store.commit(GET_HOLIDAYS, payload)
+      }
     }
 })
