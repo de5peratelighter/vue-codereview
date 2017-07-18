@@ -6,7 +6,7 @@ Vue.use(Vuex)
 import moment from 'moment-timezone'
 moment.tz.guess()
 
-import {GET_FBASE, LOGIN_ME, UPDATE_NUM, GET_REVIEWERS} from './mutation-types'
+import {GET_FBASE, LOGIN_ME, UPDATE_NUM, GET_REVIEWERS, GET_CAPACITY} from './mutation-types'
 
 export default new Vuex.Store({
     state : {
@@ -54,11 +54,13 @@ export default new Vuex.Store({
           resources : 'wow/resources',
           reviewers : 'wow/resources/reviewers/all',
           schedule : 'wow/resources/schedule',
-          holidays : 'wow/resources/holidays'
+          holidays : 'wow/resources/holidays',
+          capacity: 'wow/resources/capacityByWeek'
         },
         eventFormDate : moment(),
         currentYear : Number(moment().format('YYYY')),
         currentMonth : Number(moment().format('M')),
+        currentWeek : Number(moment().week()),
         eventFormActive : false,
         events : []
     },
@@ -90,6 +92,9 @@ export default new Vuex.Store({
         
     },
     mutations : {
+      [GET_CAPACITY] (state, payload) {
+        state.capacityWeek = payload
+      },
       [GET_FBASE] (state, payload) {
         console.log(payload)
         state.items = payload
@@ -126,6 +131,9 @@ export default new Vuex.Store({
       },
     },
     actions : {
+      [GET_CAPACITY] (store, payload) {
+        store.commit(GET_CAPACITY, payload)
+      },
       [GET_FBASE] (store, payload) {
         store.commit(GET_FBASE, payload)
       },
