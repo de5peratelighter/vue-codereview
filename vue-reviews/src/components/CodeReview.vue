@@ -84,11 +84,11 @@
 <script>
 
 import firebase from 'firebase'
-import FBApp from './../data/firebase-config'
+import FBApp from '@/data/firebase-config'
 
 var provider = new firebase.auth.GoogleAuthProvider();
 
-import {GET_FBASE} from './../data/mutation-types'
+import {GET_FBASE} from '@/data/mutation-types'
 import {mapActions, mapGetters } from 'vuex'
 import NewInstance from './NewInstance.vue'
 
@@ -174,9 +174,14 @@ export default {
       if (!this.activeUserGetter.isAnonymous) {this.getData () }
     }
   },
-  mounted () {
-    // this.$bindAsArray('anArray', FBApp.ref("wow/nice").limitToLast(5), null, () => {this[GET_FBASE](this.anArray) })
+  activated () {
+      if (!this.activeUserGetter.isAnonymous) {
+        this.getData()
+      } else {
+        this[GET_FBASE](this.DEFAULT_DATA)
+      }
   },
+    // this.$bindAsArray('anArray', FBApp.ref("wow/nice").limitToLast(5), null, () => {this[GET_FBASE](this.anArray) })
   components : {
     NewInstance
   }
