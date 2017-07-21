@@ -10,7 +10,9 @@
             </ul>
         </div>
         <md-dialog ref="hello">
-            <md-dialog-title v-if="!classObject.past">Reviewers schedule</md-dialog-title>
+            <md-dialog-title v-if="activeUserGetter.isAnonymous">For authenticated users</md-dialog-title>
+            <md-dialog-title v-else-if="!scheduler">This date is in far in the future OR this is a weekend|holiday.</md-dialog-title>
+            <md-dialog-title v-else-if="!classObject.past">Reviewers schedule</md-dialog-title>
             <md-dialog-title v-else>Date is in the past, you can't update this.</md-dialog-title>
 
             <md-dialog-content v-if="!classObject.past">
@@ -47,7 +49,7 @@
             }
         },
         computed: {
-            ...mapGetters(['firebasePathGetter','reviewersGetter','revPerDayGetter']),
+            ...mapGetters(['firebasePathGetter','reviewersGetter','revPerDayGetter','activeUserGetter']),
             classObject () {
                 let eventFormDate = this.$store.state.eventFormDate
                 let eventFormActive = this.$store.state.eventFormActive

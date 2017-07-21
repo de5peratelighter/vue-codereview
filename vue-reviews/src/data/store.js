@@ -43,6 +43,7 @@ export default new Vuex.Store({
         revs : "", // List of reviewers, filled upon login
         holidays : "", // List of holidays, filled upon login
         reviewersPerDay : 3, // Number of reviewers per day
+        reviewersScheduleAhead : 14, // Number of days to reschedule
         activeUser : {
           displayName: 'Guest',
           photoURL : 'https://ssl.gstatic.com/images/icons/material/product/1x/avatar_circle_blue_120dp.png',
@@ -87,6 +88,9 @@ export default new Vuex.Store({
         },
         revPerDayGetter : (state) => {
           return state.reviewersPerDay
+        },
+        revScheduleDaysGetter : (state) => {
+          return state.reviewersScheduleAhead
         }
         
     },

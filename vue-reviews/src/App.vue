@@ -63,7 +63,6 @@
       <keep-alive>
         <router-view class="c-full-height"></router-view>
       </keep-alive>
-      
   </div>
 </template>
 

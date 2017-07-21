@@ -1,7 +1,6 @@
 <template>
     <md-layout md-flex="15" class="c-stretch" v-if="!activeUserGetter.isAnonymous">
-        
-        <div>
+        <div class="md-title">
             
             <div class="md-headline">
                 <md-button @click="showElement('reviewersInput')">
@@ -102,8 +101,10 @@
                     }) 
                     return obj
                 }
-            }
-
+            },
+            year () {
+                return this.$store.state.currentYear
+            },
        },
        firebase: {},
        methods : {
@@ -121,16 +122,20 @@
                 }
             },
             updateHolidayList (el, action) {
+                let dater = this.$moment(el, 'MMMM D')
                 let lister = this.reviewers['holidays']
                 if (action === "remove") {
-                    lister = lister.split(',')  
+                    lister = lister.split(',')
                     lister.splice(el,1)
                     FBApp.ref(this.firebasePathGetter.reviewers+'/holidays').set(lister.join(',')).then(()=> {this[GET_HOLIDAYS](lister.join(',')) })
-                } else if (action === "add") {
+                } else if (action === "add" && this.validateDate(dater) ) {
                     lister = lister + "," + el
                     FBApp.ref(this.firebasePathGetter.reviewers+'/holidays').set(lister).then(()=> {this[GET_HOLIDAYS](lister)})
-                    this.newHolidayInput = ''
                 }
+                this.newHolidayInput = ''
+            },
+            validateDate (el ) {
+                return el.isValid() && (Number(el.format('YYYY')) === this.year)
             },
             showElement (el) {
                 this.hiddenInputs[el] = !this.hiddenInputs[el]

@@ -28,6 +28,8 @@ Vue.material.registerTheme('default', {
   background: 'white'
 })
 
+Vue.material.setCurrentTheme('default')
+
 import './style.scss'
 
 import store from './data/store'

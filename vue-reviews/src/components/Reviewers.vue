@@ -53,21 +53,13 @@ export default {
         },
         ...mapActions([GET_REVIEWERS])
     },
-    data () {
-        return {
-            daysLimit : 10,
-            holidays : ["2017-07-14"]
-        }
-    },
     computed : {
-        ...mapGetters(['activeUserGetter','firebasePathGetter','reviewersGetter','holidaysGetter', 'revPerDayGetter']),
-        // holidays () {
-        //     if (this.$store.state.holidays) {
-        //         return
-        //     } else {
-        //         return []
-        //     }
-        // },
+        ...mapGetters(['activeUserGetter','firebasePathGetter','reviewersGetter','holidaysGetter', 'revPerDayGetter', 'revScheduleDaysGetter']),
+        holidays () {
+            if (this.$store.state.holidays) {
+                return this.$store.state.holidays.split(',')
+            } else return []
+        },
         nowDate () {
             return this.$store.state.eventAppDate
         },
@@ -144,16 +136,15 @@ export default {
             this.$bindAsArray('lastIndex', FBApp.ref(this.firebasePathGetter.schedule).limitToLast(1), null, () => { 
                 
                 // if (this.$moment(this.lastIndex[0]['.key']).isSameOrBefore(this.nowDate,'day') || this.$moment(this.nowDate).day() === 1) {
-                    
                     let laster = Number(this.lastIndex[0]['.value'].split(',').pop())
                     let reviewers = newCount.split(',')
                     let nicer = {}
                     
-                    for (let i=0;i<=this.daysLimit;i++) {
+                    for (let i=0;i<=this.revScheduleDaysGetter;i++) {
                         
                         let datee = this.$moment(this.nowDate).add(i,'days')
-                        let holiday = this.holidays.find(el => el===datee.format('YYYY-MM-DD') )
-                        
+                        let holiday = this.holidays.find(el => this.$moment(el, 'MMMM D').isSame(datee, 'day'))
+ 
                         if (datee.day() > 0 && datee.day()<6 && !holiday) { // check for weekend and holidays, holidays will be another FB instance soon
                         
                             var dater = datee.format('YYYY-MM-DD')
