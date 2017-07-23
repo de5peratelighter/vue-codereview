@@ -69,13 +69,13 @@
                     el.target.setAttribute('disabled', this.inputsInvalid)
                 } else if (!this.activeUserGetter.isAnonymous) {
                     let newData = {
-                        username: this.activeUserGetter.displayName,
-                        submitimage:  this.activeUserGetter.photoURL,
+                        username: this.activeUserGetter.alias,
+                        si:  this.activeUserGetter.photoURL,
                         content: this.inputs[0].val,
                         ticket: this.inputs[1].val,
                         status: 'New',
                         reviewer: '',
-                        submissiontime : this.$moment().format('DD-MM-YYYY, hh:mm:ss')
+                        st : this.$moment().format('DD-MM-YYYY, hh:mm:ss')
                     } 
                     if (this.inputs[2].val) { newData.comment = this.inputs[2].val }
                     console.log(newData)

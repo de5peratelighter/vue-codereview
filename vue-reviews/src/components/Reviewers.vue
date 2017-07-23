@@ -34,14 +34,12 @@
 import firebase from 'firebase'
 import FBApp from '@/data/firebase-config'
 
-var provider = new firebase.auth.GoogleAuthProvider();
-
-import {GET_FBASE, GET_REVIEWERS} from '@/data/mutation-types'
+import {GET_REVIEWERS} from '@/data/mutation-types'
 import {mapActions, mapGetters } from 'vuex'
     
 import CalendarDay from './CalendarDay.vue'
 import CurrentMonth from './CurrentMonth.vue'
-import ReviewersList from './ReviewersList.vue'
+const ReviewersList = () => import('@/components/ReviewersList.vue')
 export default {
     name: 'Reviewers',
     firebase: {},

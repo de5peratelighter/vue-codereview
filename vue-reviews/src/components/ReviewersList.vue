@@ -145,7 +145,7 @@
             activeUserGetter (newCount, oldCount) {
               if (!newCount.isAnonymous) {
                   this.$bindAsObject('reviewers', FBApp.ref(this.firebasePathGetter.reviewers),null, () => {
-                      console.log(this.reviewers['all'], this.reviewers['holidays'])
+                    //   console.log(this.reviewers['all'], this.reviewers['holidays'])
                       this[GET_REVIEWERS](this.reviewers['all'])
                       this[GET_HOLIDAYS](this.reviewers['holidays'])
                   })

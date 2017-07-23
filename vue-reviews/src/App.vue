@@ -80,7 +80,8 @@ export default {
     return {
       routes: [
         { title: 'Home', icon: 'home', name: 'CodeReview'},
-        { title: 'Reviewers', icon: 'people', name: 'ReviewersList' }
+        { title: 'Reviewers', icon: 'people', name: 'ReviewersList' },
+        { title: 'Config', icon: 'settings', name: 'MainConfig' }
       ],
       hiddenInputs : {
         search : true,

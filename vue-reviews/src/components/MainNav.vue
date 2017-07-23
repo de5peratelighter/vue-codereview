@@ -27,6 +27,7 @@
 
 <script>
 import firebase from 'firebase'
+import FBApp from '@/data/firebase-config'
 import {LOGIN_ME} from './../data/mutation-types'
 import {mapActions, mapGetters} from 'vuex'
 
@@ -40,7 +41,7 @@ export default {
     }
   },
   computed : {
-    ...mapGetters(['activeUserGetter'])
+    ...mapGetters(['activeUserGetter', 'firebasePathGetter'])
   },
   methods : {
     ...mapActions([LOGIN_ME]),
@@ -48,7 +49,12 @@ export default {
       if (this.activeUserGetter.isAnonymous) {
         firebase.auth().signInWithPopup(provider).then((result) => {
           let user = result.user
-          this[LOGIN_ME]({displayName: user.displayName, photoURL : user.photoURL, isAnonymous : user.isAnonymous, sessionLength: this.session})
+          this.$bindAsObject('rules', FBApp.ref(this.firebasePathGetter.users + '/' + user.uid), null, () => {
+              let rulez = this.rules
+              this[LOGIN_ME]({displayName: user.displayName, photoURL : user.photoURL, 
+              isAnonymous : user.isAnonymous, role : rulez.role, alias : rulez.alias, team : rulez.team, token : user.uid})
+          })
+          
         }).catch(function(error) {
           console.warn(error)
         });

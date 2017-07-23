@@ -2,6 +2,7 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import CodeReview from '@/components/CodeReview'
 import ReviewersList from '@/components/Reviewers'
+import MainConfig from '@/components/MainConfig'
 
 Vue.use(Router)
 
@@ -16,6 +17,12 @@ export default new Router({
       path: '/reviewers',
       name: 'ReviewersList',
       component: ReviewersList
+      
+    },
+    {
+      path: '/config',
+      name: 'MainConfig',
+      component: MainConfig
       
     }
   ]
