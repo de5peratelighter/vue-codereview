@@ -6,10 +6,14 @@ Vue.use(Vuex)
 import moment from 'moment-timezone'
 moment.tz.guess()
 
-import {GET_FBASE, LOGIN_ME, UPDATE_NUM, GET_REVIEWERS, GET_HOLIDAYS} from './mutation-types'
+import {GET_FBASE, LOGIN_ME, UPDATE_NUM, GET_REVIEWERS, GET_HOLIDAYS, GET_CAPACITY} from './mutation-types'
 
 export default new Vuex.Store({
     state : {
+        capacity: {
+          "Fake Blade": "4,4,4,4,4|0,1.5,3,2,0|1,2,1,1,0||NA||Fake Blade",
+          "Fake Batman": "1,1,1,1,1|0,1.5,3,2,0|1,2,1,1,0||NA||Fake Blade",
+        },
         items : {
           "-KZvonwRi7MBVk7YEiCe" : {
             "comment" : "css fix",
@@ -54,14 +58,17 @@ export default new Vuex.Store({
         firePath : {
           main : 'wow/nice',
           resources : 'wow/resources',
-          reviewers : 'wow/resources/reviewers',
+
+          reviewers : 'wow/resources/reviewers/all',
+          schedule : 'wow/resources/schedule',
           // holidays : 'wow/resources/holidays/all',
-          schedule : 'wow/resources/schedule'
+          capacity: 'wow/resources/capacityByWeek'
         },
         eventAppDate : moment(),
         eventFormDate : moment(),
         currentYear : Number(moment().format('YYYY')),
         currentMonth : Number(moment().format('M')),
+        currentWeek : Number(moment().week()),
         eventFormActive : false
     },
     getters : {
@@ -87,10 +94,39 @@ export default new Vuex.Store({
         },
         revPerDayGetter : (state) => {
           return state.reviewersPerDay
+        },
+        teamsGetter: (state) => {
+          let capacity = state.capacity;
+          let teams = [];
+          let team = '';
+          let user;
+          for (user in capacity) {
+            team = capacity[user].split('||')[1];
+            if(teams.indexOf(team) === -1) {
+              teams.push(team);
+            }
+          }
+          return (teams);
+        },
+        leadsGetter: (state) => {
+          let capacity = state.capacity;
+          let leads = [];
+          let lead = '';
+          let user;
+          for (user in capacity) {
+            debugger;
+            lead = capacity[user].split('||')[2];
+            if(leads.indexOf(lead) === -1) {
+              leads.push(lead);
+            }
+          }
+          return (leads);
         }
-        
     },
     mutations : {
+      [GET_CAPACITY] (state, payload) {
+        state.capacity = payload
+      },
       [GET_FBASE] (state, payload) {
         console.log(payload)
         state.items = payload
@@ -122,6 +158,9 @@ export default new Vuex.Store({
       },
     },
     actions : {
+      [GET_CAPACITY] (store, payload) {
+        store.commit(GET_CAPACITY, payload)
+      },
       [GET_FBASE] (store, payload) {
         store.commit(GET_FBASE, payload)
       },
