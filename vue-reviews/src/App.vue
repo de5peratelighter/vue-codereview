@@ -81,7 +81,8 @@ export default {
       routes: [
         { title: 'Home', icon: 'home', name: 'CodeReview'},
         { title: 'Reviewers', icon: 'people', name: 'ReviewersList' },
-        { title: 'Config', icon: 'settings', name: 'MainConfig' }
+        { title: 'Config', icon: 'settings', name: 'MainConfig' },
+        { title: 'CapacityDoc', icon: 'alarm_add', name: 'CapacityDoc' }
       ],
       hiddenInputs : {
         search : true,
