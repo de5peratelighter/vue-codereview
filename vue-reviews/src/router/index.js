@@ -2,7 +2,7 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import CodeReview from '@/components/CodeReview'
 import ReviewersList from '@/components/Reviewers'
-import CapacityList from '@/components/CapacityList'
+import CapacityDoc from '@/components/CapacityDoc'
 
 Vue.use(Router)
 
@@ -21,8 +21,8 @@ export default new Router({
     },
     {
       path: '/capacity',
-      name: 'CapacityList',
-      component: CapacityList
+      name: 'CapacityDoc',
+      component: CapacityDoc
       
     }
   ]

@@ -82,7 +82,7 @@ export default {
       routes: [
         { title: 'Home', icon: 'home', name: 'CodeReview'},
         { title: 'Reviewers', icon: 'people', name: 'ReviewersList' },
-        { title: 'Capacity', icon: 'alarm_add', name: 'CapacityList' }
+        { title: 'CapacityDoc', icon: 'alarm_add', name: 'CapacityDoc' }
       ],
       hiddenInputs : {
         search : true,
