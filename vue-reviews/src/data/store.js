@@ -75,11 +75,6 @@ export default new Vuex.Store({
         eventFormActive : false
     },
     getters : {
-        // taxAmount : (state, getters) => {
-        //     return (percentage) => {
-        //         return ((getters.cartTotal * percentage) / 100)
-        //     }
-        // },
         firebasePathGetter : (state) => {
           return state.firePath
         },
@@ -89,11 +84,15 @@ export default new Vuex.Store({
         displayNumGetter : (state) => {
           return state.displayNum
         },
-        reviewersGetter : (state) => {
-          return state.revs
+        revsGetter : (state) => {
+          let obj = {}
+          state.revs ? state.revs.split(',').forEach((el, i)=> { obj[i] = el}) : obj = state.revs
+          return obj
         },
         holidaysGetter : (state) => {
-          return state.holidays
+          let obj = {} // an object, if data is received from Firebase - restructure it into object (kept in Firebase as a single String)
+          state.holidays ? state.holidays.split(',').forEach((el, i)=> { obj[i] = el}) : obj = state.holidays
+          return obj
         },
         revPerDayGetter : (state) => {
           return state.reviewersPerDay

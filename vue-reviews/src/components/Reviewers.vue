@@ -1,8 +1,7 @@
 <template>
     <div class="c-main-section">
         <md-layout>
-            
-            <reviewers-list></reviewers-list>
+            <reviewers-list v-if="levelDEVORPM(activeUserGetter.role)"></reviewers-list>
             <md-layout md-flex="85">
                 <div style="width: 100%">
                     <md-layout md-align="end" md-vertical-align="center">
@@ -20,7 +19,7 @@
                     </div>
                     <div id="calendar">
                         <div v-for="week in weeks" class="calendar-week">
-                            <calendar-day v-for="(day, index) in week" :day="day" :key="index" :scheduler="activeUserGetter.isAnonymous ? '' : schedule[day.format('YYYY-MM-DD')]">
+                            <calendar-day v-for="(day, index) in week" :day="day" :key="index" :scheduler="scheduleReady ? schedule[day.format('YYYY-MM-DD')] : ''">
                             </calendar-day>
                         </div>
                     </div>
@@ -33,7 +32,7 @@
 <script>
 import firebase from 'firebase'
 import FBApp from '@/data/firebase-config'
-
+import { levelMixin } from '@/mixins/restrictions'
 import {GET_REVIEWERS} from '@/data/mutation-types'
 import {mapActions, mapGetters } from 'vuex'
     
@@ -42,17 +41,18 @@ import CurrentMonth from './CurrentMonth.vue'
 const ReviewersList = () => import('@/components/ReviewersList.vue')
 export default {
     name: 'Reviewers',
+    data () {
+        return {
+            scheduleReady : false
+        }
+    },
     firebase: {},
+    mixins: [levelMixin],
     methods : {
-        lister (el) {
-            if (el) {
-                return el
-            }
-        },
         ...mapActions([GET_REVIEWERS])
     },
     computed : {
-        ...mapGetters(['activeUserGetter','firebasePathGetter','reviewersGetter','holidaysGetter', 'revPerDayGetter', 'revScheduleDaysGetter']),
+        ...mapGetters(['activeUserGetter','firebasePathGetter','revsGetter','holidaysGetter', 'revPerDayGetter', 'revScheduleDaysGetter']),
         holidays () {
             if (this.$store.state.holidays) {
                 return this.$store.state.holidays.split(',')
@@ -123,10 +123,10 @@ export default {
     watch : {
         activeUserGetter (newCount, oldCount) {
           if (!newCount.isAnonymous) {
-              this.$bindAsObject('schedule', FBApp.ref(this.firebasePathGetter.schedule))
-          }
+              this.$bindAsObject('schedule', FBApp.ref(this.firebasePathGetter.schedule), null, () => {  this.scheduleReady = true })
+          } else { this.scheduleReady = false }
         },
-        reviewersGetter (newCount, oldCount)  {
+        revsGetter (newCount, oldCount)  {
             
           if (newCount) {
               
@@ -135,7 +135,7 @@ export default {
                 
                 // if (this.$moment(this.lastIndex[0]['.key']).isSameOrBefore(this.nowDate,'day') || this.$moment(this.nowDate).day() === 1) {
                     let laster = Number(this.lastIndex[0]['.value'].split(',').pop())
-                    let reviewers = newCount.split(',')
+                    let reviewers = newCount
                     let nicer = {}
                     
                     for (let i=0;i<=this.revScheduleDaysGetter;i++) {
@@ -149,9 +149,7 @@ export default {
                             
                             let newStr = ""
                             for (let j=1; j<=this.revPerDayGetter;j++) {
-                                
-                                laster = laster >= reviewers.length-1 ? 0 : laster+1
-                                
+                                laster = laster >= Object.keys(reviewers).length-1 ? 0 : laster+1
                                 newStr += reviewers[laster]+','
                                 if (j===this.reviewersLimit) newStr += String(laster)
                             }
@@ -162,7 +160,7 @@ export default {
                     }
                     // final verification - DONT push instances if new latest instance is the same as last in the database || if reviewer is added or removed - rebuild the schedule
                     if (nicer && !this.$moment(this.lastIndex[0]['.key']).isSameOrAfter(this.$moment(dater)) || (newCount && oldCount && (newCount != oldCount))) {
-                        console.log(nicer)
+                        console.warn('New schedule',nicer)
                         FBApp.ref(this.firebasePathGetter.schedule).update(nicer)
                     }
                     
@@ -173,6 +171,11 @@ export default {
           }
           
         },
-    }
+      },
+      activated () {
+          if (!this.activeUserGetter.isAnonymous) {
+             this.$bindAsObject('schedule', FBApp.ref(this.firebasePathGetter.schedule), null, () => { this.scheduleReady = true})
+          }
+      }
 }
 </script>

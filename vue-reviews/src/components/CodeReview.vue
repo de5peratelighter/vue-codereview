@@ -65,7 +65,7 @@
               <md-layout>
                 <md-input-container>
                 <label for="status" style="color:inherit">{{ item.reviewer ? item.reviewer : 'Codereviewer will set the status' }}</label>
-                  <md-select :disabled="!isReviewer(activeUserGetter.role)" name="status" v-model="item.status">
+                  <md-select :disabled="!levelReviewer(activeUserGetter.role)" name="status" v-model="item.status">
                     <md-option v-for="option in selectOptions" :key="option.id" :value="option.name" @selected="onSelectChange(item)">{{option.name}}</md-option>
                   </md-select>
                 </md-input-container>
@@ -78,7 +78,7 @@
       </ul>
     </md-layout>
     <div v-if="!activeUserGetter.isAnonymous">
-      <new-instance></new-instance>
+      <new-instance :inputs="codeReviewInputs" :requiredword="newInstanceRequiredWord" :path="firebasePathGetter.main" relcomponent="codereview"> </new-instance>
     </div>
     
   </div>
@@ -90,6 +90,8 @@ import firebase from 'firebase'
 import FBApp from '@/data/firebase-config'
 import {GET_FBASE} from '@/data/mutation-types'
 import {mapActions, mapGetters } from 'vuex'
+import { levelMixin } from '@/mixins/restrictions'
+import { newInstanceMixin } from '@/mixins/inputs'
 const NewInstance = () => import('@/components/NewInstance.vue')
 
 export default {
@@ -99,15 +101,17 @@ export default {
       initialMessage: 'This is dummy data, please LOG IN to get the real one',
       onlineMessage : 'This is data from firebase',
       newInput : '',
+      newInstanceRequiredWord: 'bazaarvoice',
       DEFAULT_DATA : this.$store.state.items,
       selectOptions :  [
         { id: 1, name: 'New' },
         { id: 2, name: 'Looking' },
         { id: 3, name: 'Good' },
-        { id: 4, name: 'NotOK' }],
+        { id: 4, name: 'NotOK' }]
     }
   },
   firebase: {},
+  mixins: [levelMixin, newInstanceMixin],
   computed: {
     items () {
       return this.$store.state.items
@@ -128,14 +132,11 @@ export default {
       )
     },
     onSelectChange (el) {
-      if (event && el['.key'] && !this.activeUserGetter.isAnonymous && this.isReviewer(this.activeUserGetter.role)) {
+      if (event && el['.key'] && !this.activeUserGetter.isAnonymous && this.levelReviewer(this.activeUserGetter.role)) {
         FBApp.ref(this.firebasePathGetter.main +"/" + el['.key']).update({status: el.status, reviewer : this.activeUserGetter.alias})
       } else {
         this.dummyDataMessage()
       }
-    },
-    isReviewer(role) {
-      return role === 'Reviewer' || role === 'PM_DEV'
     },
     openDialog(ref) {
       this.newInput = ''

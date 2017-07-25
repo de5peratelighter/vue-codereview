@@ -17,9 +17,9 @@
 
             <md-dialog-content v-if="!classObject.past">
                 
-                <md-input-container v-if="reviewersGetter" v-for="(item, key) in schedule" :key="key">
-                    <label for="reviewers" style="color:inherit">{{ reviewersGetter ? 'Update reviewer' : 'Something went wrong' }}</label>
-                    <md-select name="reviewers" v-model="stuff[key]" :disabled="!reviewersGetter">
+                <md-input-container v-if="revsGetter" v-for="(item, key) in schedule" :key="key">
+                    <label for="reviewers" style="color:inherit">{{ revsGetter ? 'Update reviewer' : 'Something went wrong' }}</label>
+                    <md-select name="reviewers" v-model="stuff[key]" :disabled="!revsGetter">
                         <md-option v-for="(option, index) in selectOptions" :key="index" :value="option" @selected="onSelectChange(stuff[key], key)">{{option}}</md-option>
                     </md-select>
                 </md-input-container>
@@ -49,7 +49,7 @@
             }
         },
         computed: {
-            ...mapGetters(['firebasePathGetter','reviewersGetter','revPerDayGetter','activeUserGetter']),
+            ...mapGetters(['firebasePathGetter','revPerDayGetter','activeUserGetter', 'revsGetter']),
             classObject () {
                 let eventFormDate = this.$store.state.eventFormDate
                 let eventFormActive = this.$store.state.eventFormActive
@@ -69,12 +69,7 @@
                 } else {return []}
             },
             selectOptions () {
-                let ar = this.reviewersGetter ? this.reviewersGetter : ''
-                let obj = {}
-                if (ar) {  
-                    ar.split(',').forEach((el, i)=> {obj[i] = el}) 
-                    return obj
-                }
+                return this.revsGetter
             },
             stuff () {
                 if (this.scheduler) {
@@ -124,5 +119,6 @@
     .day__schedule {
         margin: 0;
         list-style: none;
+        padding: 0 35px;
     }
 </style>
