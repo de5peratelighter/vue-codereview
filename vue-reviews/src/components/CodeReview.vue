@@ -11,12 +11,12 @@
             <md-layout md-align="center" md-vertical-align="center" md-gutter md-row>
               
               <md-layout>
-                <md-card-content>{{ truncContent(item.submissiontime, 'time') }} <br> {{item.username }}</md-card-content>
+                <md-card-content>{{ truncContent(item.st, 'time') }} <br> {{item.username }}</md-card-content>
               </md-layout>
               
               <md-layout>
                 <md-avatar class="md-large">
-                  <img :src="item.submitimage" :alt="item.username">
+                  <img :src="item.si" :alt="item.username">
                 </md-avatar>
               </md-layout>
               
@@ -65,7 +65,7 @@
               <md-layout>
                 <md-input-container>
                 <label for="status" style="color:inherit">{{ item.reviewer ? item.reviewer : 'Codereviewer will set the status' }}</label>
-                  <md-select name="status" v-model="item.status" :disabled="activeUserGetter.displayName === item.username">
+                  <md-select :disabled="!levelReviewer(activeUserGetter.role)" name="status" v-model="item.status">
                     <md-option v-for="option in selectOptions" :key="option.id" :value="option.name" @selected="onSelectChange(item)">{{option.name}}</md-option>
                   </md-select>
                 </md-input-container>
@@ -77,7 +77,10 @@
         </li>
       </ul>
     </md-layout>
-    <new-instance></new-instance>
+    <div v-if="!activeUserGetter.isAnonymous">
+      <new-instance :inputs="codeReviewInputs" :requiredword="newInstanceRequiredWord" :path="firebasePathGetter.main" relcomponent="codereview"> </new-instance>
+    </div>
+    
   </div>
 </template>
 
@@ -85,12 +88,11 @@
 
 import firebase from 'firebase'
 import FBApp from '@/data/firebase-config'
-
-var provider = new firebase.auth.GoogleAuthProvider();
-
 import {GET_FBASE} from '@/data/mutation-types'
 import {mapActions, mapGetters } from 'vuex'
-import NewInstance from './NewInstance.vue'
+import { levelMixin } from '@/mixins/restrictions'
+import { newInstanceMixin } from '@/mixins/inputs'
+const NewInstance = () => import('@/components/NewInstance.vue')
 
 export default {
   name: 'CodeReview',
@@ -99,15 +101,17 @@ export default {
       initialMessage: 'This is dummy data, please LOG IN to get the real one',
       onlineMessage : 'This is data from firebase',
       newInput : '',
+      newInstanceRequiredWord: 'bazaarvoice',
       DEFAULT_DATA : this.$store.state.items,
       selectOptions :  [
         { id: 1, name: 'New' },
         { id: 2, name: 'Looking' },
         { id: 3, name: 'Good' },
-        { id: 4, name: 'NotOK' }],
+        { id: 4, name: 'NotOK' }]
     }
   },
   firebase: {},
+  mixins: [levelMixin, newInstanceMixin],
   computed: {
     items () {
       return this.$store.state.items
@@ -117,7 +121,7 @@ export default {
   methods : {
     ...mapActions([GET_FBASE]),
     getData () {
-      this.$bindAsArray('anArray', FBApp.ref(this.firebasePathGetter.main).limitToLast(Number(this.displayNumGetter)), null, () => {this[GET_FBASE](this.anArray) })
+      this.$bindAsArray('itemsArray', FBApp.ref(this.firebasePathGetter.main).limitToLast(Number(this.displayNumGetter)), null, () => {this[GET_FBASE](this.itemsArray) })
     },
     truncContent (el, typer) {
       // TIME - for compatibility with old dates $moment is provided with additional parameter (from old Polymer project w/o $moment in place)
@@ -128,8 +132,8 @@ export default {
       )
     },
     onSelectChange (el) {
-      if (event && el['.key'] && !this.activeUserGetter.isAnonymous) {
-        FBApp.ref(this.firebasePathGetter.main +"/" + el['.key']).update({status: el.status, reviewer : this.activeUserGetter.displayName})
+      if (event && el['.key'] && !this.activeUserGetter.isAnonymous && this.levelReviewer(this.activeUserGetter.role)) {
+        FBApp.ref(this.firebasePathGetter.main +"/" + el['.key']).update({status: el.status, reviewer : this.activeUserGetter.alias})
       } else {
         this.dummyDataMessage()
       }
@@ -146,9 +150,9 @@ export default {
       if (el['.key'] && !this.activeUserGetter.isAnonymous) {
         
         let newData = {} // check whether we should update reviewer's comment or user's Comment
-        if (this.activeUserGetter.displayName === el.reviewer) {
+        if (this.activeUserGetter.alias === el.reviewer) {
           newData = {reviewerComment: this.newInput} 
-        } else if (this.activeUserGetter.displayName === el.username) {
+        } else if (this.activeUserGetter.alias === el.username) {
           newData = {comment: this.newInput}
         }
         
@@ -189,10 +193,6 @@ export default {
 </script>
 
 <style scoped>
-  ul, li {
-    padding: 0;
-    list-style: none;
-  }
   a, a:visited, a:hover, a:active {
     color: inherit;
   }

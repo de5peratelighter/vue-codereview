@@ -2,6 +2,7 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import CodeReview from '@/components/CodeReview'
 import ReviewersList from '@/components/Reviewers'
+import MainConfig from '@/components/MainConfig'
 import CapacityDoc from '@/components/CapacityDoc'
 
 Vue.use(Router)
@@ -24,6 +25,11 @@ export default new Router({
       name: 'CapacityDoc',
       component: CapacityDoc
       
+    },
+    {
+      path: '/config',
+      name: 'MainConfig',
+      component: MainConfig
     }
   ]
 })

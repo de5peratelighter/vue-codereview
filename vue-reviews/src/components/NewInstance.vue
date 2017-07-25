@@ -7,7 +7,7 @@
             </md-input-container>
         </md-layout>
         <md-layout md-flex="15">
-            <md-button class="md-raised md-accent" :disabled="disableSubmit" @click="submitData">Submit</md-button>
+            <md-button class="md-raised md-accent" :disabled="disableSubmit" @click="submitData(activeUserGetter, $event)">Submit</md-button>
             <md-button class="md-raised" @click="clearData">Clear</md-button>
         </md-layout>
     </md-layout>
@@ -17,38 +17,19 @@
     import firebase from 'firebase'
     import FBApp from './../data/firebase-config'
     var provider = new firebase.auth.GoogleAuthProvider();
+    import { levelMixin } from '@/mixins/restrictions'
     import {mapActions, mapGetters } from 'vuex'
     export default {
+        mixins: [levelMixin],
+        props : ['inputs','requiredword', 'path', 'relcomponent'],
         data () {
             return {
                 pre : 'newInstance',
-                inputsInvalid : true,
-                requiredWord : 'bazaarvoice',
-                inputs : [
-                    {
-                        id : this.pre + 'Changeset',
-                        label : 'New Changeset',
-                        val: '',
-                        required: true,
-                        maxLength : 70
-                    }, {
-                        id : this.pre + 'Ticket',
-                        label: 'New Ticket',
-                        val: '',
-                        required: true,
-                        maxLength: 50
-                    }, {
-                        id : this.pre + 'Comment',
-                        label: 'New Comment(optional)',
-                        val: '',
-                        required : false,
-                        maxLength : 100
-                    }
-                ]
+                inputsInvalid : true
             }
         },
         computed : {
-            ...mapGetters(['activeUserGetter', 'firebasePathGetter']),
+            ...mapGetters(['activeUserGetter']),
             disableSubmit () {
                 return this.inputsInvalid
             }
@@ -56,30 +37,42 @@
         watch: {
             inputs : {
                 handler(after, before) {
-                    let stater = after.every((el) => (el.required && !el.val.includes(this.requiredWord)) ? false : true)
+                    let stater = after.every((el) => (el.required && !el.val.includes(this.requiredword)) ? false : true)
                     this.inputsInvalid = stater ? false : true
                 },
                 deep: true
             }
           },
         methods : {
-            submitData (el) {
-                // if user updated the disabled attribute manually in the markup - impress him by putting it back;)
+            submitData (user, el) {
                 if (this.inputsInvalid) {
                     el.target.setAttribute('disabled', this.inputsInvalid)
-                } else if (!this.activeUserGetter.isAnonymous) {
-                    let newData = {
-                        username: this.activeUserGetter.displayName,
-                        submitimage:  this.activeUserGetter.photoURL,
-                        content: this.inputs[0].val,
-                        ticket: this.inputs[1].val,
-                        status: 'New',
-                        reviewer: '',
-                        submissiontime : this.$moment().format('DD-MM-YYYY, hh:mm:ss')
-                    } 
-                    if (this.inputs[2].val) { newData.comment = this.inputs[2].val }
-                    console.log(newData)
-                    FBApp.ref(this.firebasePathGetter.main).push(newData)
+                    
+                } else if (!user.isAnonymous && this.levelDEVORPM(user.role) && this.path) {
+                    
+                    // relcomponent indicates the component that is relevant for our concrete newInstance component
+                    if (this.relcomponent === 'codereview') {
+                        
+                        let newData = {
+                            username: user.alias,
+                            si:  user.photoURL,
+                            content: this.inputs[0].val,
+                            ticket: this.inputs[1].val,
+                            status: 'New',
+                            reviewer: '',
+                            st : this.$moment().format('DD-MM-YYYY, hh:mm:ss')
+                        } 
+                        if (this.inputs[2].val) { newData.comment = this.inputs[2].val }
+                        FBApp.ref(this.path).push(newData)
+                        
+                    } else if (this.relcomponent === 'mainconfig' && this.defaultRoleOption && this.defaultTeamOption) {
+                        
+                        let token = this.inputs[0].val ? this.inputs[0].val : 'WrongToken'
+                        let alias = this.inputs[1].val ? this.inputs[1].val : 'WrongAlias'
+                        FBApp.ref(this.path +"/" + token).set({alias: alias, role : this.defaultRoleOption, team : this.defaultTeamOption})
+                        
+                    }
+                    
                 }
                 
                 this.clearData()

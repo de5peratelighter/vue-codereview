@@ -18,50 +18,53 @@ export default new Vuex.Store({
           "-KZvonwRi7MBVk7YEiCe" : {
             "comment" : "css fix",
             "content" : "https://dev.bazaarvoice.com/trac/bvc/changeset/1655761",
-            "reviewer" : "Bohdan Kokotko",
+            "reviewer" : "user2",
             "status" : "Good",
-            "submissiontime" : "12/06/2017, 16:27:22",
-            "submitimage" : "https://lh5.googleusercontent.com/-3Hk73cIZ3no/AAAAAAAAAAI/AAAAAAAAADA/HEzBAYy-kC0/photo.jpg",
+            "st" : "12/06/2017, 16:27:22",
+            "si" : "https://lh5.googleusercontent.com/-3Hk73cIZ3no/AAAAAAAAAAI/AAAAAAAAADA/HEzBAYy-kC0/photo.jpg",
             "ticket" : "https://bits.bazaarvoice.com/jira/browse/SUP-21014",
-          "username" : "Daryna Hunko"
+          "username" : "user1"
           }, "-KZwWEmvglByJWO72guy" : {
             "comment" : "WOWO",
             "content" : "https://dev.bazaarvoice.com/trac/bvc/changeset?new=customers%2Fbranches%2Fuser%2Fobodrov-21038-myer%401656411&old=customers%2Fbranches%2Fuser%2Fobodrov-21038-myer%401656400",
-            "reviewer" : "Bohdan Kokotko",
+            "reviewer" : "user1",
             "status" : "NotOK",
-            "submissiontime" : "14/06/2017, 14:31:55",
-            "submitimage" : "https://lh3.googleusercontent.com/-XdUIqdMkCWA/AAAAAAAAAAI/AAAAAAAAAAA/4252rscbv5M/photo.jpg",
+            "st" : "14/06/2017, 14:31:55",
+            "si" : "https://lh3.googleusercontent.com/-XdUIqdMkCWA/AAAAAAAAAAI/AAAAAAAAAAA/4252rscbv5M/photo.jpg",
             "ticket" : "https://bits.bazaarvoice.com/jira/browse/SUP-21038",
-            "username" : "Alexandr Bodrov"
+            "username" : "user2"
           }, "-KZwWEmvglByJWO72guS" : {
             "comment" : "kk",
             "content" : "https://dev.bazaarvoice.com/trac/bvc/changeset/1656377",
-            "reviewer" : "Igor Kokotko",
+            "reviewer" : "user1",
             "status" : "Looking",
-            "submissiontime" : "15/06/2017, 12:39:11",
-            "submitimage" : "https://lh3.googleusercontent.com/-HKWAKmqd3OQ/AAAAAAAAAAI/AAAAAAAAAGs/fIbbkaPOun0/photo.jpg",
+            "st" : "15/06/2017, 12:39:11",
+            "si" : "https://lh3.googleusercontent.com/-HKWAKmqd3OQ/AAAAAAAAAAI/AAAAAAAAAGs/fIbbkaPOun0/photo.jpg",
             "ticket" : "https://bits.bazaarvoice.com/jira/browse/SUP-21035",
-            "username" : "Станіслав Чепа"
+            "username" : "user1"
           },
         },
         revs : "", // List of reviewers, filled upon login
         holidays : "", // List of holidays, filled upon login
         reviewersPerDay : 3, // Number of reviewers per day
+        reviewersScheduleAhead : 14, // Number of days to reschedule
         activeUser : {
           displayName: 'Guest',
           photoURL : 'https://ssl.gstatic.com/images/icons/material/product/1x/avatar_circle_blue_120dp.png',
           isAnonymous : true,
-          sessionLength: 0
+          role: undefined, // not best practice but very convenient, won't require additional if-elses on user-login
+          alias: undefined, // if user isn't in read-only firebase boject "users" - login response always returns 'undefined'
+          team: undefined,
+          token: 1111111
         },
         displayNum : 5,
         searchTerm : 'SUP',
         firePath : {
           main : 'wow/nice',
           resources : 'wow/resources',
-
-          reviewers : 'wow/resources/reviewers/all',
+          reviewers : 'wow/resources/reviewers',
           schedule : 'wow/resources/schedule',
-          // holidays : 'wow/resources/holidays/all',
+          users : 'wow/users',
           capacity: 'wow/resources/capacityByWeek'
         },
         eventAppDate : moment(),
@@ -72,11 +75,6 @@ export default new Vuex.Store({
         eventFormActive : false
     },
     getters : {
-        // taxAmount : (state, getters) => {
-        //     return (percentage) => {
-        //         return ((getters.cartTotal * percentage) / 100)
-        //     }
-        // },
         firebasePathGetter : (state) => {
           return state.firePath
         },
@@ -86,14 +84,21 @@ export default new Vuex.Store({
         displayNumGetter : (state) => {
           return state.displayNum
         },
-        reviewersGetter : (state) => {
-          return state.revs
+        revsGetter : (state) => {
+          let obj = {}
+          state.revs ? state.revs.split(',').forEach((el, i)=> { obj[i] = el}) : obj = state.revs
+          return obj
         },
         holidaysGetter : (state) => {
-          return state.holidays
+          let obj = {} // an object, if data is received from Firebase - restructure it into object (kept in Firebase as a single String)
+          state.holidays ? state.holidays.split(',').forEach((el, i)=> { obj[i] = el}) : obj = state.holidays
+          return obj
         },
         revPerDayGetter : (state) => {
           return state.reviewersPerDay
+        },
+        revScheduleDaysGetter : (state) => {
+          return state.reviewersScheduleAhead
         },
         teamsGetter: (state) => {
           let capacity = state.capacity;
@@ -114,7 +119,6 @@ export default new Vuex.Store({
           let lead = '';
           let user;
           for (user in capacity) {
-            debugger;
             lead = capacity[user].split('||')[2];
             if(leads.indexOf(lead) === -1) {
               leads.push(lead);
