@@ -35,7 +35,7 @@
 </template>
 <script>
     import firebase from 'firebase'
-    import FBApp from '@/data/firebase-config'
+    import { FBApp } from '@/data/firebase-config'
     
     var provider = new firebase.auth.GoogleAuthProvider();
     

@@ -23,7 +23,8 @@
     "vue-router": "^2.3.1",
     "vuefire": "^1.4.3",
     "vuetify": "^0.12.7",
-    "vuex": "^2.3.1"
+    "vuex": "^2.3.1",
+    "worker-loader": "^0.8.1"
   },
   "devDependencies": {
     "autoprefixer": "^6.7.2",

@@ -6,11 +6,11 @@
             <md-button v-else id="configButton" @click="goGetUsers" class="md-accent">Get users</md-button>
         </div>
         
-        <ul v-if="levelDEVORPM(activeUserGetter.role)" class="c-main-section">
+        <ul v-if="levelDEVORPM(activeUserGetter.role) && isPM" class="c-main-section">
             
             <span class="md-display-3" v-if="!activeUserGetter.isAnonymous">{{ initialMessage }}</span>
-        
-            <li  v-for="(item, key) in users" :key="key">
+
+            <li v-for="(item, key) in users" :key="key">
               
                 <md-card>
                     <md-layout md-align="center" md-vertical-align="center" md-gutter md-row>
@@ -55,7 +55,7 @@
 <script>
     import firebase from 'firebase'
     import {mapActions, mapGetters} from 'vuex'
-    import FBApp from '@/data/firebase-config'
+    import { FBApp } from '@/data/firebase-config'
     import { levelMixin } from '@/mixins/restrictions'
     import { newInstanceMixin } from '@/mixins/inputs'
     const NewInstance = () => import('@/components/NewInstance.vue')
