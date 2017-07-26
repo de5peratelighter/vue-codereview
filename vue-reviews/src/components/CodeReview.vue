@@ -2,8 +2,17 @@
   <div>
     <md-layout md-gutter>
       <ul class="c-main-section">
-        <h4 v-if="activeUserGetter.isAnonymous">{{ initialMessage }}</h4>
-        <h4 v-else>{{onlineMessage}}</h4>
+        <div v-if="activeUserGetter.isAnonymous"> 
+          <h4>{{ initialMessage }}</h4>
+          
+        </div>
+        <div v-else-if="levelEngineer(activeUserGetter.role)"> 
+          <h4>{{onlineMessage}}{{activeUserGetter.displayName}} 
+            <notification-app></notification-app>
+          </h4>
+        </div>
+        <div v-else>{{noaccessMessage}}</div>
+        
         
         <li  v-for="(item, key) in items" :key="key">
           
@@ -87,11 +96,12 @@
 <script>
 
 import firebase from 'firebase'
-import FBApp from '@/data/firebase-config'
+import { FBApp, messaging } from '@/data/firebase-config'
 import {GET_FBASE} from '@/data/mutation-types'
 import {mapActions, mapGetters } from 'vuex'
 import { levelMixin } from '@/mixins/restrictions'
 import { newInstanceMixin } from '@/mixins/inputs'
+import NotificationApp from '@/components/NotificationApp.vue'
 const NewInstance = () => import('@/components/NewInstance.vue')
 
 export default {
@@ -99,7 +109,8 @@ export default {
   data () {
     return {
       initialMessage: 'This is dummy data, please LOG IN to get the real one',
-      onlineMessage : 'This is data from firebase',
+      onlineMessage : 'Hello, ',
+      noaccessMessage : 'Ask PM to activate your account(via skype, hipchat)',
       newInput : '',
       newInstanceRequiredWord: 'bazaarvoice',
       DEFAULT_DATA : this.$store.state.items,
@@ -187,7 +198,14 @@ export default {
   },
     // this.$bindAsArray('anArray', FBApp.ref("wow/nice").limitToLast(5), null, () => {this[GET_FBASE](this.anArray) })
   components : {
-    NewInstance
+    NewInstance,
+    NotificationApp
+  },
+  created () {
+    // resistering and using SW
+    navigator.serviceWorker.register('./static/firebase-messaging-sw.js').then((registration) => {
+        messaging.useServiceWorker(registration)
+    })
   }
 }
 </script>

@@ -27,7 +27,7 @@
 
 <script>
 import firebase from 'firebase'
-import FBApp from '@/data/firebase-config'
+import { FBApp } from '@/data/firebase-config'
 import {LOGIN_ME} from './../data/mutation-types'
 import {mapActions, mapGetters} from 'vuex'
 

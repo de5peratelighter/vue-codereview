@@ -59,7 +59,7 @@
 
 <script>
     import firebase from 'firebase'
-    import FBApp from '@/data/firebase-config'
+    import { FBApp } from '@/data/firebase-config'
     var provider = new firebase.auth.GoogleAuthProvider()
     
     import {GET_REVIEWERS, GET_HOLIDAYS} from '@/data/mutation-types'
@@ -80,7 +80,12 @@
            }
        },
        computed : {
-            ...mapGetters(['activeUserGetter','firebasePathGetter', 'holidaysGetter', 'revsGetter']),
+            ...mapGetters(['activeUserGetter','firebasePathGetter', 'holidaysGetter', 'revsGetter', 'revPerDayGetter', 'revScheduleDaysGetter']),
+            holidays () {
+                if (this.$store.state.holidays) {
+                    return this.$store.state.holidays.split(',')
+                } else return []
+            },
             revs () {
                 return this.revsGetter
             },
@@ -89,6 +94,9 @@
             },
             year () {
                 return this.$store.state.currentYear
+            },
+            nowDate () {
+                return this.$store.state.eventAppDate
             },
        },
        firebase: {},
@@ -118,34 +126,93 @@
                     this.newReviewerInput = ''
                     this.newHolidayInput = ''
                 }
+                
+                if (allowUpdating) {
+                    this.rescheduleData(this.revsGetter, this.lastIndex)
+                }
+                
+            },
+            rescheduleData (newCount, lastInd) {
+                    
+                let lastIndVal = lastInd[0]['.value']
+                let lastIndKey = lastInd[0]['.key']
+                
+                let reviewerIndex = Number(lastIndVal.split(',').pop())
+                let reviewers = newCount
+                let resultData = { [lastIndKey] : lastIndVal } // initiate new resulting object with the last instance
+                
+                for (let i=1;i<=this.revScheduleDaysGetter;i++) {
+                    
+                    let nextDay = this.$moment(this.nowDate).add(i,'days')
+                    let holiday = this.holidays.find(el => this.$moment(el, 'MMMM D').isSame(nextDay, 'day'))
+
+                    if (nextDay.day() > 0 && nextDay.day()<6 && !holiday) { // check for weekend and holidays, holidays will be another FB instance soon
+                    
+                        var nextDayF = nextDay.format('YYYY-MM-DD')
+                        
+                        let newStr = ""
+                        for (let j=1; j<=this.revPerDayGetter;j++) {
+                            reviewerIndex = reviewerIndex >= Object.keys(reviewers).length-1 ? 0 : reviewerIndex+1
+                            newStr += reviewers[reviewerIndex]+','
+                            if (j===this.revPerDayGetter) newStr += String(reviewerIndex)
+                        }
+                        resultData[nextDayF] = newStr
+                    
+                    }
+                    
+                }
+                if (resultData) {
+                    //  && !this.$moment(this.lastIndex[0]['.key']).isSameOrAfter(this.$moment(dater))
+                    console.warn('New schedule',resultData )
+                    FBApp.ref(this.firebasePathGetter.schedule).update(resultData)
+                }
+                    
             },
             validateDate (el ) {
                 return el.isValid() && (Number(el.format('YYYY')) === this.year)
             },
             showElement (el) {
                 this.hiddenInputs[el] = !this.hiddenInputs[el]
+            },
+            updateUiValues (el) {
+                
+                if (!el.isAnonymous) {
+                
+                    this.$bindAsObject('reviewers', FBApp.ref(this.firebasePathGetter.reviewers),null, () => {
+                        this[GET_REVIEWERS](this.reviewers['all'])
+                        this[GET_HOLIDAYS](this.reviewers['holidays'])
+                        
+                        this.$bindAsArray('lastIndex', FBApp.ref(this.firebasePathGetter.schedule).limitToLast(1), null, () => {
+                            // Generating new instances on first PM login on Mondays(or on last found DB instance as of Today)
+                            if (this.$moment(this.lastIndex[0]['.key']).isSameOrBefore(this.nowDate,'day') || this.$moment(this.nowDate).day() === 1) {
+                                this.rescheduleData(this.revsGetter, this.lastIndex)
+                            }
+                        })
+                        
+                        FBApp.ref(this.firebasePathGetter.reviewers).on('child_changed', (dataSnapshot) => {
+                            if (dataSnapshot.key === 'all') {
+                                this[GET_REVIEWERS](dataSnapshot.val())
+                            } else if (dataSnapshot.key === 'holidays') {
+                                this[GET_HOLIDAYS](dataSnapshot.val())
+                            }
+                        })
+                        
+                    })
+                
+                } else {
+                  this[GET_HOLIDAYS](String())
+                  this[GET_REVIEWERS](String())
+                }
+                
             }
         },
         watch : {
             activeUserGetter (newCount, oldCount) {
-              if (!newCount.isAnonymous) {
-                  this.$bindAsObject('reviewers', FBApp.ref(this.firebasePathGetter.reviewers),null, () => {
-                      this[GET_REVIEWERS](this.reviewers['all'])
-                      this[GET_HOLIDAYS](this.reviewers['holidays'])
-                  })
-              } else {
-                  this[GET_HOLIDAYS](String())
-                  this[GET_REVIEWERS](String())
-              }
+                this.updateUiValues(newCount.isAnonymous)
             }
         },
         mounted () {
-            if (!this.activeUserGetter.isAnonymous) {
-                this.$bindAsObject('reviewers', FBApp.ref(this.firebasePathGetter.reviewers),null, () => {
-                    this[GET_REVIEWERS](this.reviewers['all'])
-                    this[GET_HOLIDAYS](this.reviewers['holidays'])
-                })
-            }
+            this.updateUiValues(this.activeUserGetter.isAnonymous)
         }
     }
 </script>

@@ -8,7 +8,7 @@ import firebase from 'firebase';
 import { mapActions, mapGetters } from 'vuex';
 
 import CapacityTable from './CapacityTable';
-import FBApp from './../data/firebase-config';
+import { FBApp } from './../data/firebase-config';
 import { GET_CAPACITY } from './../data/mutation-types';
 
 export default {

@@ -15,7 +15,7 @@
 
 <script>
     import firebase from 'firebase'
-    import FBApp from './../data/firebase-config'
+    import { FBApp } from './../data/firebase-config'
     var provider = new firebase.auth.GoogleAuthProvider();
     import { levelMixin } from '@/mixins/restrictions'
     import {mapActions, mapGetters } from 'vuex'
@@ -24,7 +24,6 @@
         props : ['inputs','requiredword', 'path', 'relcomponent'],
         data () {
             return {
-                pre : 'newInstance',
                 inputsInvalid : true
             }
         },

@@ -1,6 +1,7 @@
 export const newInstanceMixin = {
   data () {
     return {
+        pre : 'newInstance',
         codeReviewInputs : [
           {
               id : this.pre + 'Changeset',

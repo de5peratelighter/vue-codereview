@@ -21,7 +21,7 @@ export default new Vuex.Store({
             "reviewer" : "user2",
             "status" : "Good",
             "st" : "12/06/2017, 16:27:22",
-            "si" : "https://lh5.googleusercontent.com/-3Hk73cIZ3no/AAAAAAAAAAI/AAAAAAAAADA/HEzBAYy-kC0/photo.jpg",
+            "si" : "https://lh3.googleusercontent.com/-XdUIqdMkCWA/AAAAAAAAAAI/AAAAAAAAAAA/4252rscbv5M/photo.jpg",
             "ticket" : "https://bits.bazaarvoice.com/jira/browse/SUP-21014",
           "username" : "user1"
           }, "-KZwWEmvglByJWO72guy" : {
@@ -39,7 +39,7 @@ export default new Vuex.Store({
             "reviewer" : "user1",
             "status" : "Looking",
             "st" : "15/06/2017, 12:39:11",
-            "si" : "https://lh3.googleusercontent.com/-HKWAKmqd3OQ/AAAAAAAAAAI/AAAAAAAAAGs/fIbbkaPOun0/photo.jpg",
+            "si" : "https://lh3.googleusercontent.com/-XdUIqdMkCWA/AAAAAAAAAAI/AAAAAAAAAAA/4252rscbv5M/photo.jpg",
             "ticket" : "https://bits.bazaarvoice.com/jira/browse/SUP-21035",
             "username" : "user1"
           },
@@ -65,7 +65,8 @@ export default new Vuex.Store({
           reviewers : 'wow/resources/reviewers',
           schedule : 'wow/resources/schedule',
           users : 'wow/users',
-          capacity: 'wow/resources/capacityByWeek'
+          capacity: 'wow/resources/capacityByWeek',
+          notifications : 'wow/notifications'
         },
         eventAppDate : moment(),
         eventFormDate : moment(),

@@ -50,7 +50,7 @@
         
         <main-nav>
           
-          <md-list-item v-for="item in routes" :key="item">
+          <md-list-item v-for="(item, index) in routes" :key="index">
             <router-link :to="{name : item.name}" class="router__link">
               <md-icon>{{ item.icon }}</md-icon>  <span>{{ item.title }}</span>
             </router-link>
@@ -67,7 +67,6 @@
 </template>
 
 <script>
-
 import 'animate.css/animate.min.css'
 
 import {UPDATE_NUM} from './data/mutation-types'
