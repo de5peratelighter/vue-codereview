@@ -52,7 +52,7 @@ export default {
         ...mapActions([GET_REVIEWERS])
     },
     computed : {
-        ...mapGetters(['activeUserGetter','firebasePathGetter','revsGetter','holidaysGetter', 'revPerDayGetter', 'revScheduleDaysGetter']),
+        ...mapGetters(['activeUserGetter','firebasePathGetter']),
         nowDate () {
             return this.$store.state.eventAppDate
         },
@@ -120,51 +120,7 @@ export default {
           if (!newCount.isAnonymous) {
               this.$bindAsObject('schedule', FBApp.ref(this.firebasePathGetter.schedule), null, () => {  this.scheduleReady = true })
           } else { this.scheduleReady = false }
-        },
-        revsGetter (newCount, oldCount)  {
-          if (newCount) {
-              
-            // // Generating new instances on first person login on Mondays(or on last found DB instance as of Today)
-            // this.$bindAsArray('lastIndex', FBApp.ref(this.firebasePathGetter.schedule).limitToLast(1), null, () => { 
-                
-            //     // if (this.$moment(this.lastIndex[0]['.key']).isSameOrBefore(this.nowDate,'day') || this.$moment(this.nowDate).day() === 1) {
-            //         let laster = Number(this.lastIndex[0]['.value'].split(',').pop())
-            //         let reviewers = newCount
-            //         let nicer = {}
-                    
-            //         for (let i=0;i<=this.revScheduleDaysGetter;i++) {
-                        
-            //             let datee = this.$moment(this.nowDate).add(i,'days')
-            //             let holiday = this.holidays.find(el => this.$moment(el, 'MMMM D').isSame(datee, 'day'))
- 
-            //             if (datee.day() > 0 && datee.day()<6 && !holiday) { // check for weekend and holidays, holidays will be another FB instance soon
-                        
-            //                 var dater = datee.format('YYYY-MM-DD')
-                            
-            //                 let newStr = ""
-            //                 for (let j=1; j<=this.revPerDayGetter;j++) {
-            //                     laster = laster >= Object.keys(reviewers).length-1 ? 0 : laster+1
-            //                     newStr += reviewers[laster]+','
-            //                     if (j===this.reviewersLimit) newStr += String(laster)
-            //                 }
-            //                 nicer[dater] = newStr
-                        
-            //             }
-                        
-            //         }
-            //         // final verification - DONT push instances if new latest instance is the same as last in the database || if reviewer is added or removed - rebuild the schedule
-            //         if (nicer && !this.$moment(this.lastIndex[0]['.key']).isSameOrAfter(this.$moment(dater)) || (newCount && oldCount && (newCount != oldCount))) {
-            //             console.warn('New schedule',nicer)
-            //             FBApp.ref(this.firebasePathGetter.schedule).update(nicer)
-            //         }
-                    
-            //     // }
-                
-            // })
-
-          }
-          
-        },
+        }
       },
       activated () {
           if (!this.activeUserGetter.isAnonymous) {
