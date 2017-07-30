@@ -69,6 +69,8 @@
 <script>
 import 'animate.css/animate.min.css'
 
+import firebase from 'firebase'
+import { messaging } from '@/data/firebase-config'
 import {UPDATE_NUM} from './data/mutation-types'
 import {mapActions, mapGetters} from 'vuex'
 import MainNav from './components/MainNav.vue'
@@ -102,6 +104,12 @@ export default {
     updateItemsNum (el) {
       this[UPDATE_NUM](this.displayNum)
     }
+  },
+  created () {
+    // resistering and using SW
+    navigator.serviceWorker.register('./static/firebase-messaging-sw.js').then((registration) => {
+        messaging.useServiceWorker(registration)
+    })
   },
   mounted () {
   },

@@ -1,26 +1,29 @@
 <template>
     <div class="asider">
           
-          <md-toolbar class="md-account-header md-theme-default">
-                <md-avatar class="md-large">
-                  <img :src="activeUserGetter.photoURL" :title="activeUserGetter.displayName">
-                </md-avatar>
-                <md-layout class="review-welcome" md-align="center">
-                  <div class="md-headline">{{activeUserGetter.displayName}}</div>
-                  <md-button class="md-raised md-accent" @click="logIn">
-                    <span v-if="activeUserGetter.isAnonymous">Log In</span>
-                    <span v-else>Log Out</span>
-                  </md-button>
-                </md-layout>
-          </md-toolbar>
-      
-          <md-layout class="md-theme-default">
-            <md-list class="c-full-width">
-              
-              <slot></slot>
-        
-            </md-list>
-          </md-layout>
+      <md-toolbar class="md-account-header md-theme-default">
+            <md-avatar class="md-large">
+              <img :src="activeUserGetter.photoURL" :title="activeUserGetter.displayName">
+            </md-avatar>
+            <md-layout class="review-welcome" md-align="center">
+              <div>
+                <span class="md-headline">{{activeUserGetter.displayName}}</span>
+                <notification-app v-if="!activeUserGetter.isAnonymous"></notification-app>
+              </div>
+              <md-button class="md-raised md-accent" @click="logIn">
+                <span v-if="activeUserGetter.isAnonymous">Log In</span>
+                <span v-else>Log Out</span>
+              </md-button>
+            </md-layout>
+      </md-toolbar>
+  
+      <md-layout class="md-theme-default">
+        <md-list class="c-full-width">
+          
+          <slot></slot>
+    
+        </md-list>
+      </md-layout>
           
    </div>
 </template>
@@ -28,8 +31,9 @@
 <script>
 import firebase from 'firebase'
 import { FBApp } from '@/data/firebase-config'
-import {LOGIN_ME} from './../data/mutation-types'
+import {LOGIN_ME} from '@/data/mutation-types'
 import {mapActions, mapGetters} from 'vuex'
+const NotificationApp = () => import('@/components/NotificationApp.vue')
 
 var provider = new firebase.auth.GoogleAuthProvider()
 
@@ -68,6 +72,9 @@ export default {
       }
       
     }
+  },
+  components : {
+    NotificationApp
   }
 }
 </script>

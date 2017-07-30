@@ -1,29 +1,32 @@
 <template>
     <div>
-        <span>{{formattedDate}}</span>
-        <button @click="dec">-</button>
-        <button @click="inc">+</button>
+        <span class="md-headline">Schedule, {{formattedDate}}</span>
+        <md-button class="md-icon-button md-accent" @click="dec"><md-icon>remove_circle</md-icon></md-button>
+        <md-button class="md-icon-button md-accent" @click="inc"><md-icon>add_circle</md-icon></md-button>
     </div>
 </template>
 
 <script>
+    import {SET_MONTH, SET_YEAR} from '@/data/mutation-types'
+    import {mapActions, mapGetters } from 'vuex'
     export default {
         methods : {
+            ...mapActions([SET_MONTH, SET_YEAR]),
             dec () {
                 if (this.month === 1) {
-                    this.$store.commit('setCurrentMonth', 12)
-                    this.$store.commit('setCurrentYear', this.year - 1)
+                    this[SET_MONTH](12)
+                    this[SET_YEAR](this.year - 1)
                 } else {
-                    this.$store.commit('setCurrentMonth', this.month - 1)
+                    this[SET_MONTH](this.month - 1)
                 }
                 this.$store.commit('eventFormActive', false)
             },
             inc () {
                 if (this.month === 12) {
-                    this.$store.commit('setCurrentMonth', 1)
-                    this.$store.commit('setCurrentYear', this.year + 1)
+                    this[SET_MONTH](1)
+                    this[SET_YEAR](this.year + 1)
                 } else {
-                    this.$store.commit('setCurrentMonth', this.month + 1)
+                    this[SET_MONTH](this.month + 1)
                 }
             }
         },
@@ -40,3 +43,9 @@
         }
     }
 </script>
+<style scoped>
+    div {
+        display: flex;
+        align-items: center;
+    }
+</style>

@@ -51,7 +51,7 @@
         computed: {
             ...mapGetters(['firebasePathGetter','revPerDayGetter','activeUserGetter', 'revsGetter']),
             classObject () {
-                let eventFormDate = this.$store.state.eventFormDate
+                let eventFormDate = this.$store.state.eventAppDate
                 let eventFormActive = this.$store.state.eventFormActive
                 let today = this.day.isSame(this.$moment(),'day')
                 return {
@@ -85,7 +85,6 @@
             openDialog(day) {
                 this.$refs.hello.open();
                 this.$store.commit('eventFormActive', true)
-                this.$store.commit('eventFormUpdateDate', this.day)
             },
             closeDialog(day) {
                  this.$refs.hello.close();

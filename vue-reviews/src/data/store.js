@@ -6,7 +6,7 @@ Vue.use(Vuex)
 import moment from 'moment-timezone'
 moment.tz.guess()
 
-import {GET_FBASE, LOGIN_ME, UPDATE_NUM, GET_REVIEWERS, GET_HOLIDAYS, GET_CAPACITY} from './mutation-types'
+import {GET_FBASE, LOGIN_ME, UPDATE_NUM, GET_REVIEWERS, GET_HOLIDAYS, GET_CAPACITY, SET_MONTH, SET_YEAR} from './mutation-types'
 
 export default new Vuex.Store({
     state : {
@@ -69,7 +69,6 @@ export default new Vuex.Store({
           notifications : 'wow/notifications'
         },
         eventAppDate : moment(),
-        eventFormDate : moment(),
         currentYear : Number(moment().format('YYYY')),
         currentMonth : Number(moment().format('M')),
         currentWeek : Number(moment().week()),
@@ -148,19 +147,15 @@ export default new Vuex.Store({
       [GET_HOLIDAYS] (state, payload) {
         state.holidays = payload
       },
-      // date
-      setCurrentMonth(state,payload) {
-            state.currentMonth = payload
+      [SET_MONTH] (state, payload) {
+        state.currentMonth = payload
       },
-      setCurrentYear(state,payload) {
-          state.currentYear = payload
+      [SET_YEAR] (state, payload) {
+        state.currentYear = payload
       },
       eventFormActive(state, payload) {
           state.eventFormActive = payload
-      },
-      eventFormUpdateDate(state, payload) {
-          state.eventFormDate = payload
-      },
+      }
     },
     actions : {
       [GET_CAPACITY] (store, payload) {
@@ -181,6 +176,12 @@ export default new Vuex.Store({
       },
       [GET_HOLIDAYS] (store,payload) {
         store.commit(GET_HOLIDAYS, payload)
+      },
+      [SET_MONTH] (store,payload) {
+        store.commit(SET_MONTH, payload)
+      },
+      [SET_YEAR] (store,payload) {
+        store.commit(SET_YEAR, payload)
       }
     }
 })

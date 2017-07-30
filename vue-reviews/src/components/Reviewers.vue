@@ -5,7 +5,6 @@
             <md-layout md-flex="85">
                 <div style="width: 100%">
                     <md-layout md-align="end" md-vertical-align="center">
-                        <span class="md-headline">Review schedule</span>
                         <current-month></current-month>
                     </md-layout>
                     <div id="day-bar">

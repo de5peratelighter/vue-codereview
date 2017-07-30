@@ -4,12 +4,16 @@
       <ul class="c-main-section">
         <div v-if="activeUserGetter.isAnonymous"> 
           <h4>{{ initialMessage }}</h4>
-          
         </div>
-        <div v-else-if="levelEngineer(activeUserGetter.role)"> 
-          <h4>{{onlineMessage}}{{activeUserGetter.displayName}} 
-            <notification-app></notification-app>
-          </h4>
+        <div v-else-if="levelEngineer(activeUserGetter.role)">
+          <md-card style="align-items: center">
+            <md-layout>
+              <md-card-content>Today reviewers:</md-card-content>
+              <md-card-content v-for="(item,index) in reviewers" :key="index">
+                {{item}}
+              </md-card-content>
+            </md-layout>
+          </md-card>
         </div>
         <div v-else>{{noaccessMessage}}</div>
         
@@ -96,12 +100,11 @@
 <script>
 
 import firebase from 'firebase'
-import { FBApp, messaging } from '@/data/firebase-config'
+import { FBApp } from '@/data/firebase-config'
 import {GET_FBASE} from '@/data/mutation-types'
 import {mapActions, mapGetters } from 'vuex'
 import { levelMixin } from '@/mixins/restrictions'
 import { newInstanceMixin } from '@/mixins/inputs'
-import NotificationApp from '@/components/NotificationApp.vue'
 const NewInstance = () => import('@/components/NewInstance.vue')
 
 export default {
@@ -109,7 +112,6 @@ export default {
   data () {
     return {
       initialMessage: 'This is dummy data, please LOG IN to get the real one',
-      onlineMessage : 'Hello, ',
       noaccessMessage : 'Ask PM to activate your account(via skype, hipchat)',
       newInput : '',
       newInstanceRequiredWord: 'bazaarvoice',
@@ -118,7 +120,8 @@ export default {
         { id: 1, name: 'New' },
         { id: 2, name: 'Looking' },
         { id: 3, name: 'Good' },
-        { id: 4, name: 'NotOK' }]
+        { id: 4, name: 'NotOK' }],
+      reviewers : []
     }
   },
   firebase: {},
@@ -127,12 +130,21 @@ export default {
     items () {
       return this.$store.state.items
     },
+    today () {
+      return this.$store.state.eventAppDate
+    },
     ...mapGetters(['activeUserGetter', 'displayNumGetter', 'firebasePathGetter'])
   },
   methods : {
     ...mapActions([GET_FBASE]),
     getData () {
-      this.$bindAsArray('itemsArray', FBApp.ref(this.firebasePathGetter.main).limitToLast(Number(this.displayNumGetter)), null, () => {this[GET_FBASE](this.itemsArray) })
+      this.$bindAsArray('itemsArray', FBApp.ref(this.firebasePathGetter.main).limitToLast(Number(this.displayNumGetter)), null, () => {
+        this[GET_FBASE](this.itemsArray)
+        this.$bindAsObject('todayReviewersArray', FBApp.ref(this.firebasePathGetter.schedule).child(this.today.format('YYYY-MM-DD')), null, () => {
+          this.reviewers = this.todayReviewersArray['.value'].split(',').slice(0,-1)
+        })
+        
+      })
     },
     truncContent (el, typer) {
       // TIME - for compatibility with old dates $moment is provided with additional parameter (from old Polymer project w/o $moment in place)
@@ -144,9 +156,42 @@ export default {
     },
     onSelectChange (el) {
       if (event && el['.key'] && !this.activeUserGetter.isAnonymous && this.levelReviewer(this.activeUserGetter.role)) {
-        FBApp.ref(this.firebasePathGetter.main +"/" + el['.key']).update({status: el.status, reviewer : this.activeUserGetter.alias})
+        FBApp.ref(this.firebasePathGetter.main +"/" + el['.key']).update({status: el.status, reviewer : this.activeUserGetter.alias}).then(()=> {
+           this.$bindAsObject('itemOwner', FBApp.ref(this.firebasePathGetter.notifications + '/' + el.username), null, () => {
+             if (this.itemOwner.token) { 
+                console.warn('Token', this.itemOwner)
+                this.submitNotification(this.itemOwner, this.activeUserGetter, el.status, 'statusUpdate')
+             }
+           })
+        })
       } else {
         this.dummyDataMessage()
+      }
+    },
+    submitNotification(owner, requester, status, type) {
+      
+      let notification = {
+          'title': '',
+          'body': '',
+          'icon' : '',
+          'color' : '#0000FF',
+          'click_action' : window ? window.location.href : ''
+      };
+      
+      if (type==='statusUpdate') {
+        
+            notification.title =  'Hello ' + owner['.key'];
+            notification.body = requester.alias + ' updated status of your changeset to ' + status
+            notification.icon = requester.photoURL
+            
+            console.warn('Notification', notification)
+            
+            fetch('https://fcm.googleapis.com/fcm/send', {
+              'method': 'POST',
+              'headers': {'Authorization': 'key=' + 'AAAAa_TnElc:APA91bHPwaZvdrnnFm5eG3-lcgSpJ1pWMGOBs940x4Wp63ZNA__tfSesEHul8gw4UWzISSsjfEiFJQsTN3Zp5ebYRl1hEew9_vKnf2pUuGNsoFq9uZf5t9JjlG-siyX9CAZKrXgyojNE', 'Content-Type': 'application/json'},
+              'body': JSON.stringify({'notification': notification, 'to': owner.token})
+            }).then(()=>{console.debug("Bob: Notification sent to the reviewer.");
+            }).catch((error)=>{console.warn("Bob: Notification wasn't sent:( Oopps.", error) });
       }
     },
     openDialog(ref) {
@@ -196,16 +241,8 @@ export default {
         this[GET_FBASE](this.DEFAULT_DATA)
       }
   },
-    // this.$bindAsArray('anArray', FBApp.ref("wow/nice").limitToLast(5), null, () => {this[GET_FBASE](this.anArray) })
   components : {
-    NewInstance,
-    NotificationApp
-  },
-  created () {
-    // resistering and using SW
-    navigator.serviceWorker.register('./static/firebase-messaging-sw.js').then((registration) => {
-        messaging.useServiceWorker(registration)
-    })
+    NewInstance
   }
 }
 </script>
