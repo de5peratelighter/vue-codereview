@@ -6,7 +6,7 @@ Vue.use(Vuex)
 import moment from 'moment-timezone'
 moment.tz.guess()
 
-import {GET_FBASE, LOGIN_ME, UPDATE_NUM, GET_REVIEWERS, GET_HOLIDAYS, GET_CAPACITY, SET_MONTH, SET_YEAR} from './mutation-types'
+import {GET_FBASE, LOGIN_ME, UPDATE_NUM, GET_REVIEWERS, GET_HOLIDAYS, GET_CAPACITY, SET_MONTH, SET_YEAR, GET_TODAYREVIEWERS} from './mutation-types'
 
 export default new Vuex.Store({
     state : {
@@ -72,7 +72,8 @@ export default new Vuex.Store({
         currentYear : Number(moment().format('YYYY')),
         currentMonth : Number(moment().format('M')),
         currentWeek : Number(moment().week()),
-        eventFormActive : false
+        eventFormActive : false,
+        activeReviewers : []
     },
     getters : {
         firebasePathGetter : (state) => {
@@ -154,7 +155,10 @@ export default new Vuex.Store({
         state.currentYear = payload
       },
       eventFormActive(state, payload) {
-          state.eventFormActive = payload
+        state.eventFormActive = payload
+      },
+      [GET_TODAYREVIEWERS] (state,payload) {
+        state.activeReviewers = payload
       }
     },
     actions : {
@@ -182,6 +186,12 @@ export default new Vuex.Store({
       },
       [SET_YEAR] (store,payload) {
         store.commit(SET_YEAR, payload)
+      },
+      [GET_TODAYREVIEWERS] (store,payload) {
+        if (payload) {
+          console.log(payload)
+          store.commit(GET_TODAYREVIEWERS, payload.split(',').slice(0,-1))
+        }
       }
     }
 })

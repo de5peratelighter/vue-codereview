@@ -6,17 +6,9 @@
           <h4>{{ initialMessage }}</h4>
         </div>
         <div v-else-if="levelEngineer(activeUserGetter.role)">
-          <md-card style="align-items: center">
-            <md-layout>
-              <md-card-content>Today reviewers:</md-card-content>
-              <md-card-content v-for="(item,index) in reviewers" :key="index">
-                {{item}}
-              </md-card-content>
-            </md-layout>
-          </md-card>
+          <h4>{{welcomeMessage}}</h4>
         </div>
-        <div v-else>{{noaccessMessage}}</div>
-        
+        <div v-else-if="levelEngineer(activeUserGetter.role)">{{noaccessMessage}}</div>
         
         <li  v-for="(item, key) in items" :key="key">
           
@@ -90,7 +82,7 @@
         </li>
       </ul>
     </md-layout>
-    <div v-if="!activeUserGetter.isAnonymous">
+    <div v-if="levelEngineer(activeUserGetter.role)">
       <new-instance :inputs="codeReviewInputs" :requiredword="newInstanceRequiredWord" :path="firebasePathGetter.main" relcomponent="codereview"> </new-instance>
     </div>
     
@@ -105,6 +97,8 @@ import {GET_FBASE} from '@/data/mutation-types'
 import {mapActions, mapGetters } from 'vuex'
 import { levelMixin } from '@/mixins/restrictions'
 import { newInstanceMixin } from '@/mixins/inputs'
+import { notificationMixin } from '@/mixins/notifications'
+
 const NewInstance = () => import('@/components/NewInstance.vue')
 
 export default {
@@ -113,6 +107,7 @@ export default {
     return {
       initialMessage: 'This is dummy data, please LOG IN to get the real one',
       noaccessMessage : 'Ask PM to activate your account(via skype, hipchat)',
+      welcomeMessage: 'Welcome!',
       newInput : '',
       newInstanceRequiredWord: 'bazaarvoice',
       DEFAULT_DATA : this.$store.state.items,
@@ -125,13 +120,10 @@ export default {
     }
   },
   firebase: {},
-  mixins: [levelMixin, newInstanceMixin],
+  mixins: [levelMixin, newInstanceMixin, notificationMixin],
   computed: {
     items () {
       return this.$store.state.items
-    },
-    today () {
-      return this.$store.state.eventAppDate
     },
     ...mapGetters(['activeUserGetter', 'displayNumGetter', 'firebasePathGetter'])
   },
@@ -140,9 +132,9 @@ export default {
     getData () {
       this.$bindAsArray('itemsArray', FBApp.ref(this.firebasePathGetter.main).limitToLast(Number(this.displayNumGetter)), null, () => {
         this[GET_FBASE](this.itemsArray)
-        this.$bindAsObject('todayReviewersArray', FBApp.ref(this.firebasePathGetter.schedule).child(this.today.format('YYYY-MM-DD')), null, () => {
-          this.reviewers = this.todayReviewersArray['.value'].split(',').slice(0,-1)
-        })
+        // this.$bindAsObject('todayReviewersArray', FBApp.ref(this.firebasePathGetter.schedule).child(this.today.format('YYYY-MM-DD')), null, () => {
+        //   this.reviewers = this.todayReviewersArray['.value'].split(',').slice(0,-1)
+        // })
         
       })
     },
@@ -159,39 +151,12 @@ export default {
         FBApp.ref(this.firebasePathGetter.main +"/" + el['.key']).update({status: el.status, reviewer : this.activeUserGetter.alias}).then(()=> {
            this.$bindAsObject('itemOwner', FBApp.ref(this.firebasePathGetter.notifications + '/' + el.username), null, () => {
              if (this.itemOwner.token) { 
-                console.warn('Token', this.itemOwner)
-                this.submitNotification(this.itemOwner, this.activeUserGetter, el.status, 'statusUpdate')
+                this.submitNotification(this.itemOwner, this.activeUserGetter, 'informOwner' , el.status) // from 'notificationMixin'
              }
            })
         })
       } else {
         this.dummyDataMessage()
-      }
-    },
-    submitNotification(owner, requester, status, type) {
-      
-      let notification = {
-          'title': '',
-          'body': '',
-          'icon' : '',
-          'color' : '#0000FF',
-          'click_action' : window ? window.location.href : ''
-      };
-      
-      if (type==='statusUpdate') {
-        
-            notification.title =  'Hello ' + owner['.key'];
-            notification.body = requester.alias + ' updated status of your changeset to ' + status
-            notification.icon = requester.photoURL
-            
-            console.warn('Notification', notification)
-            
-            fetch('https://fcm.googleapis.com/fcm/send', {
-              'method': 'POST',
-              'headers': {'Authorization': 'key=' + 'AAAAa_TnElc:APA91bHPwaZvdrnnFm5eG3-lcgSpJ1pWMGOBs940x4Wp63ZNA__tfSesEHul8gw4UWzISSsjfEiFJQsTN3Zp5ebYRl1hEew9_vKnf2pUuGNsoFq9uZf5t9JjlG-siyX9CAZKrXgyojNE', 'Content-Type': 'application/json'},
-              'body': JSON.stringify({'notification': notification, 'to': owner.token})
-            }).then(()=>{console.debug("Bob: Notification sent to the reviewer.");
-            }).catch((error)=>{console.warn("Bob: Notification wasn't sent:( Oopps.", error) });
       }
     },
     openDialog(ref) {
