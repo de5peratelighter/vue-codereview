@@ -14,11 +14,17 @@
             </md-layout>
         </md-layout>
         
-        <md-layout md-align="center">
-            <div style="padding: 20px">Today reviewers:
+        <md-layout v-if="relcomponent === 'codereview'" md-align="center" md-vertical-align="center">
+            <div>Today reviewers:
                 <span class="md-subheading" v-for="(item,index) in reviewers" :key="index">
                 {{item}}
                 </span>
+            </div>
+            <div>
+                <md-button id="guidelinesDialog" @click="openDialog('guidelinesDialog')"> Code review guidelines </md-button>
+                <md-dialog md-open-from="guidelinesDialog" md-close-to="guidelinesDialog" ref="guidelinesDialog"> <!-- String(key) removes dialog undefined bug with the zero-index key -->
+                    <code-guidelines></code-guidelines>
+                </md-dialog>
             </div>
         </md-layout>
     
@@ -33,6 +39,7 @@
     import {GET_TODAYREVIEWERS} from '@/data/mutation-types'
     import {mapActions, mapGetters } from 'vuex'
     import { notificationMixin } from '@/mixins/notifications'
+    const CodeGuidelines = () => import('@/components/CodeGuidelines.vue')
     
     export default {
         mixins: [levelMixin, notificationMixin],
@@ -64,6 +71,9 @@
           },
         methods : {
             ...mapActions([GET_TODAYREVIEWERS]),
+            openDialog (ref) {
+                this.$refs[ref].open()
+            },
             submitData (user, el) {
                 if (this.inputsInvalid) {
                     el.target.setAttribute('disabled', this.inputsInvalid)
@@ -122,7 +132,9 @@
 
                 })
             }
+        },
+        components : {
+            CodeGuidelines
         }
-        
     }
 </script>

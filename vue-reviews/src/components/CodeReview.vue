@@ -8,7 +8,7 @@
         <div v-else-if="levelEngineer(activeUserGetter.role)">
           <h4>{{welcomeMessage}}</h4>
         </div>
-        <div v-else-if="levelEngineer(activeUserGetter.role)">{{noaccessMessage}}</div>
+        <div v-else-if="!levelEngineer(activeUserGetter.role)">{{noaccessMessage}}</div>
         
         <li  v-for="(item, key) in items" :key="key">
           
@@ -40,7 +40,7 @@
               <md-layout>
                 <md-card-content>
                   
-                <md-button :id="'dialog'+key" @click="openDialog(key)"> <md-icon v-if="item.comment||item.reviewerComment">chat_bubble</md-icon> <md-icon v-else>chat_bubble_outline</md-icon> </md-button>
+                <md-button :id="'dialog'+key" @click="updateDialog(key,'open')"> <md-icon v-if="item.comment||item.reviewerComment">chat_bubble</md-icon> <md-icon v-else>chat_bubble_outline</md-icon> </md-button>
                 
                   <md-dialog :md-open-from="'#dialog'+key" :md-close-to="'#dialog'+key" :ref="String(key)"> <!-- String(key) removes dialog undefined bug with the zero-index key -->
                   
@@ -60,7 +60,7 @@
                       </md-input-container>
                     </md-dialog-content>
                     <md-dialog-actions>
-                      <md-button class="md-primary" @click="closeDialog(key)">Ok</md-button>
+                      <md-button class="md-primary" @click="updateDialog(key,'close')">Ok</md-button>
                     </md-dialog-actions>
                   </md-dialog>
                 
@@ -159,13 +159,14 @@ export default {
         this.dummyDataMessage()
       }
     },
-    openDialog(ref) {
+    updateDialog(ref, type) {
+      let el = this.$refs[ref][0]
       this.newInput = ''
-      this.$refs[ref][0].open();
-    },
-    closeDialog(ref) {
-      this.newInput = ''
-      this.$refs[ref][0].close();
+      if (type==='open') {
+        el.open()
+      } else if (type==='close') {
+        el.close()
+      }
     },
     updateComment(el) {
       if (el['.key'] && !this.activeUserGetter.isAnonymous) {

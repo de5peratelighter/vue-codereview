@@ -66,7 +66,8 @@ export default new Vuex.Store({
           schedule : 'wow/resources/schedule',
           users : 'wow/users',
           capacity: 'wow/resources/capacityByWeek',
-          notifications : 'wow/notifications'
+          notifications : 'wow/notifications',
+          guidelines: 'wow/guidelines'
         },
         eventAppDate : moment(),
         currentYear : Number(moment().format('YYYY')),
@@ -156,9 +157,6 @@ export default new Vuex.Store({
       },
       eventFormActive(state, payload) {
         state.eventFormActive = payload
-      },
-      [GET_TODAYREVIEWERS] (state,payload) {
-        state.activeReviewers = payload
       }
     },
     actions : {
@@ -186,12 +184,6 @@ export default new Vuex.Store({
       },
       [SET_YEAR] (store,payload) {
         store.commit(SET_YEAR, payload)
-      },
-      [GET_TODAYREVIEWERS] (store,payload) {
-        if (payload) {
-          console.log(payload)
-          store.commit(GET_TODAYREVIEWERS, payload.split(',').slice(0,-1))
-        }
       }
     }
 })
