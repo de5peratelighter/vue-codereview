@@ -12,8 +12,8 @@
 import firebase from 'firebase';
 import { mapActions, mapGetters } from 'vuex';
 
-import FBApp from './../../data/firebase-config';
-import { SET_FOCUSED_CELL } from './../../data/mutation-types';
+import FBApp from '@/data/firebase-config';
+import { SET_FOCUSED_CELL } from '@/data/mutation-types';
 
 export default {
   name: 'CapacityItem',
@@ -38,24 +38,21 @@ export default {
     },
     getUpdatedString(value) {
       let capacityArray = this.capacityByUserGetter(this.user);
-      let splitCapacity;
+      let index;
       switch (this.type) {
         case 'requested':
-          splitCapacity = capacityArray[0].split(',')
-          splitCapacity[this.day] = value;
-          capacityArray[0] = splitCapacity.join(',');
+          index = 0;
           break;
         case 'received':
-          splitCapacity = capacityArray[1].split(',')
-          splitCapacity[this.day] = value;
-          capacityArray[1] = splitCapacity.join(',');
+          index = 1;
           break;
         case 'tickets':
-          splitCapacity = capacityArray[2].split(',')
-          splitCapacity[this.day] = value;
-          capacityArray[2] = splitCapacity.join(',');
+          index = 2;
           break;
       }
+      let splitCapacity = capacityArray[index].split(',');
+      splitCapacity[this.day] = value;
+      capacityArray[index] = splitCapacity.join(',');
       return capacityArray
     },
     submitUpdate(value) {

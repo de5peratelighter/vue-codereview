@@ -193,6 +193,7 @@ export default new Vuex.Store({
           let capacityLength = capacity.length;
           let splitCapacity;
           let currentUser;
+          let index;
           for(let i = 0; i < capacityLength; i++) {
             currentUser = capacity[i]['.key']
             if(currentUser === user) {
@@ -202,17 +203,19 @@ export default new Vuex.Store({
           }
           switch (type) {
             case 'requested':
-              return splitCapacity[0].split(',');
+              index = 0;
               break;
             case 'received':
-              return splitCapacity[1].split(',');
+              index = 1;
               break;
             case 'tickets':
-              return splitCapacity[2].split(',');
+              index = 2;
               break;
-            default:
+          }
+          if (type !== undefined) {
+            return splitCapacity[index].split(',');
+          } else {
             return splitCapacity;
-              break;
           }
         },
         focusedUserGetter: (state) => {
@@ -238,6 +241,9 @@ export default new Vuex.Store({
       },
       [UPDATE_NUM] (state, payload) {
         state.displayNum = Number(payload)
+      },
+      [GET_REVIEWERS] (state, payload) {
+        state.revs = payload
       },
       [SET_FOCUSED_CELL] (state, payload) {
         state.focusedCell = payload
