@@ -6,14 +6,45 @@ Vue.use(Vuex)
 import moment from 'moment-timezone'
 moment.tz.guess()
 
-import {GET_FBASE, LOGIN_ME, UPDATE_NUM, GET_REVIEWERS, GET_HOLIDAYS, GET_CAPACITY} from './mutation-types'
+import {GET_FBASE, LOGIN_ME, UPDATE_NUM, GET_REVIEWERS, GET_HOLIDAYS, GET_CAPACITY, SET_FOCUSED_CELL} from './mutation-types'
 
 export default new Vuex.Store({
     state : {
-        capacity: {
-          "Fake Blade": "4,4,4,4,4|0,1.5,3,2,0|1,2,1,1,0||NA||Fake Blade",
-          "Fake Batman": "1,1,1,1,1|0,1.5,3,2,0|1,2,1,1,0||NA||Fake Blade",
-        },
+        capacity: [
+          {
+            '.key': 'Fake Blade',
+            '.value': '4,4,4,4,4|0,1.5,3,2,0|1,2,1,1,0||NA||Fake Blade'
+          },
+          {
+            '.key': 'Fake Batman',
+            '.value': '4,4,4,4,4|0,1.5,3,2,0|1,2,1,1,0||NA||Fake Blade'
+          },
+          {
+            '.key': 'Fake Gambit',
+            '.value': '4,4,4,4,4|0,1.5,3,2,0|1,2,1,1,0||NA||Fake Gambit'
+          },
+          {
+            '.key': 'Fake Wolverine',
+            '.value': '4,4,4,4,4|0,1.5,3,2,0|1,2,1,1,0||NA||Fake Gambit'
+          },
+          {
+            '.key': 'Fake Spiderman',
+            '.value': '4,4,4,4,4|0,1.5,3,2,0|1,2,1,1,0||EMEA||Fake Spiderman'
+          },
+          {
+            '.key': 'Fake Green Goblin',
+            '.value': '4,4,4,4,4|0,1.5,3,2,0|1,2,1,1,0||EMEA||Fake Spiderman'
+          },
+          {
+            '.key': 'Fake Tony Stark',
+            '.value': '4,4,4,4,4|0,1.5,3,2,0|1,2,1,1,0||EMEA||Fake Tony Stark'
+          },
+          {
+            '.key': 'Fake Tor',
+            '.value': '4,4,4,4,4|0,1.5,3,2,0|1,2,1,1,0||EMEA||Fake Tony Stark'
+          }
+        ],
+        focusedCell: {},
         items : {
           "-KZvonwRi7MBVk7YEiCe" : {
             "comment" : "css fix",
@@ -102,32 +133,99 @@ export default new Vuex.Store({
         },
         teamsGetter: (state) => {
           let capacity = state.capacity;
+          let capacityLength = capacity.length;
           let teams = [];
           let team = '';
-          let user;
-          for (user in capacity) {
-            team = capacity[user].split('||')[1];
+          for(let i = 0; i < capacityLength; i++) {
+            team = capacity[i]['.value'].split('||')[1];
             if(teams.indexOf(team) === -1) {
               teams.push(team);
             }
           }
-          return (teams);
+          teams.sort();
+          return teams;
         },
-        leadsGetter: (state) => {
+        leadsByTeamGetter: (state) => (team) => {
           let capacity = state.capacity;
-          let leads = [];
-          let lead = '';
-          let user;
-          for (user in capacity) {
-            lead = capacity[user].split('||')[2];
-            if(leads.indexOf(lead) === -1) {
-              leads.push(lead);
+          let capacityLength = capacity.length;
+          let leadsByTeam = [];
+          let lead;
+          let leadsTeam;
+          let splitCapacity;
+          for(let i = 0; i < capacityLength; i++) {
+            splitCapacity = capacity[i]['.value'].split('||');
+            lead = splitCapacity[2];
+            leadsTeam = splitCapacity[1];
+            if (leadsTeam !== team) {
+              continue;
+            }
+            if(leadsByTeam.indexOf(lead) === -1) {
+              leadsByTeam.push(lead);
             }
           }
-          return (leads);
+          leadsByTeam.sort();
+          return leadsByTeam;
+        },
+        usersByLeadGetter: (state) => (lead) => {
+          let capacity = state.capacity;
+          let capacityLength = capacity.length;
+          let usersByLead = [];
+          let user;
+          let usersLead;
+          let splitCapacity;
+          for(let i = 0; i < capacityLength; i++) {
+            splitCapacity = capacity[i]['.value'].split('||');
+            usersLead = splitCapacity[2];
+            user = capacity[i]['.key']
+            if (usersLead !== lead || usersLead === user) {
+              continue;
+            }
+            if(usersByLead.indexOf(user) === -1) {
+              usersByLead.push(user);
+            }
+          }
+          usersByLead.sort();
+          usersByLead.push(lead);
+          return usersByLead;
+        },
+        capacityByUserGetter: (state) => (user, type) => {
+          let capacity = state.capacity;
+          let capacityLength = capacity.length;
+          let splitCapacity;
+          let currentUser;
+          for(let i = 0; i < capacityLength; i++) {
+            currentUser = capacity[i]['.key']
+            if(currentUser === user) {
+              splitCapacity = capacity[i]['.value'].split('|');
+              break;
+            }
+          }
+          switch (type) {
+            case 'requested':
+              return splitCapacity[0].split(',');
+              break;
+            case 'received':
+              return splitCapacity[1].split(',');
+              break;
+            case 'tickets':
+              return splitCapacity[2].split(',');
+              break;
+            default:
+            return splitCapacity;
+              break;
+          }
+        },
+        focusedUserGetter: (state) => {
+          return state.focusedCell.user;
+        },
+        focusedDayGetter: (state) => {
+          return state.focusedCell.day;
         }
     },
     mutations : {
+      [GET_CAPACITY] (state, payload) {
+        state.capacity = payload
+      },
       [GET_CAPACITY] (state, payload) {
         state.capacity = payload
       },
@@ -141,8 +239,8 @@ export default new Vuex.Store({
       [UPDATE_NUM] (state, payload) {
         state.displayNum = Number(payload)
       },
-      [GET_REVIEWERS] (state, payload) {
-        state.revs = payload
+      [SET_FOCUSED_CELL] (state, payload) {
+        state.focusedCell = payload
       },
       [GET_HOLIDAYS] (state, payload) {
         state.holidays = payload
@@ -162,6 +260,9 @@ export default new Vuex.Store({
       },
     },
     actions : {
+      [SET_FOCUSED_CELL] (store, payload) {
+        store.commit(SET_FOCUSED_CELL, payload)
+      },
       [GET_CAPACITY] (store, payload) {
         store.commit(GET_CAPACITY, payload)
       },
