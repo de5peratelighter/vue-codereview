@@ -37,7 +37,7 @@ export default {
       });
     },
     getUpdatedString(value) {
-      let capacityArray = this.capacityByUserGetter(this.user);
+      let capacityArray = this.capacityByUserGetter(this.user).split('|');
       let index;
       switch (this.type) {
         case 'requested':

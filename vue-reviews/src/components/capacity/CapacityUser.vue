@@ -32,17 +32,34 @@ import CapacityItem from './CapacityItem';
 export default {
   name: 'CapacityUser',
   props: ['user'],
+  data() {
+    return {
+      requestedCapacity: [],
+      receivedCapacity: [],
+      ticketsCapacity: [],
+    }
+  },
   computed: {
     ...mapGetters(['capacityByUserGetter', 'focusedUserGetter']),
-    requestedCapacity() {
-      return this.capacityByUserGetter(this.user, 'requested');
-    },
-    receivedCapacity() {
-      return this.capacityByUserGetter(this.user, 'received');
-    },
-    ticketsCapacity() {
-      return this.capacityByUserGetter(this.user, 'tickets');
+    usersCapacity() {
+      return this.capacityByUserGetter(this.user);
     }
+  },
+  methods: {
+    splitCapacity(capacityString) {
+      let splitCapacity = capacityString.split('|');
+      this.requestedCapacity = splitCapacity[0].split(',');
+      this.receivedCapacity = splitCapacity[1].split(',');
+      this.ticketsCapacity = splitCapacity[2].split(',');
+    }
+  },
+  watch: {
+    usersCapacity (newCapacityString) {
+      this.splitCapacity(newCapacityStrings);;
+    }
+  },
+  mounted() {
+    this.splitCapacity(this.usersCapacity);
   },
   components: {
     CapacityItem

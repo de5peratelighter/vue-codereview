@@ -188,8 +188,20 @@ export default new Vuex.Store({
           usersByLead.push(lead);
           return usersByLead;
         },
-        capacityByUserGetter: (state) => (user, type) => {
+        capacityByUserGetter: (state) => (user) => {
           let capacity = state.capacity;
+          let capacityLength = capacity.length;
+          let currentUser;
+          for(let i = 0; i < capacityLength; i++) {
+            currentUser = capacity[i]['.key']
+            if(currentUser === user) {
+              return capacity[i]['.value'];
+            }
+          }
+        },
+        usersByTeam: (state) => (team) => {
+          // => TODO
+/*           let capacity = state.capacity;
           let capacityLength = capacity.length;
           let splitCapacity;
           let currentUser;
@@ -216,7 +228,8 @@ export default new Vuex.Store({
             return splitCapacity[index].split(',');
           } else {
             return splitCapacity;
-          }
+          } */
+
         },
         focusedUserGetter: (state) => {
           return state.focusedCell.user;
