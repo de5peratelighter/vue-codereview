@@ -1,16 +1,6 @@
 <template>
   <md-layout md-row md-flex class="capacity-row" :class="{focused: focusedUserGetter === user}">
-    <md-layout class="capacity-user">
-      <md-layout md-vertical-align="center" class="capacity-cell">
-        <span>{{ user }}</span>
-      </md-layout>
-      <md-layout md-vertical-align="center" class="capacity-cell">
-        <span>Empty</span>
-      </md-layout>
-      <md-layout md-vertical-align="center" class="capacity-cell">
-        <span>Empty</span>
-      </md-layout>
-    </md-layout>
+    <capacity-user-data :user="user"></capacity-user-data>
     <md-layout class="capacity-week">
       <md-layout class="capacity-day" v-for="n in 5" :n="n" :key="n">
         <md-layout md-row class="capacity-data-container">
@@ -28,6 +18,7 @@
 import { mapGetters } from 'vuex';
 
 import CapacityItem from './CapacityItem';
+import CapacityUserData from './CapacityUserData';
 
 export default {
   name: 'CapacityUser',
@@ -62,7 +53,8 @@ export default {
     this.splitCapacity(this.usersCapacity);
   },
   components: {
-    CapacityItem
+    CapacityItem,
+    CapacityUserData
   },
 }
 </script>

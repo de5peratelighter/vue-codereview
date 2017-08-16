@@ -1,36 +1,18 @@
 <template>
   <md-layout md-row md-flex class="capacity-row">
-    <md-layout class="capacity-user">
-      <md-layout md-vertical-align="center" class="capacity-cell">
-        <span>Engineer</span>
-      </md-layout>
-      <md-layout md-vertical-align="center" class="capacity-cell">
-        <span>Assigned to team</span>
-      </md-layout>
-      <md-layout md-vertical-align="center" class="capacity-cell">
-        <span>TSE Testing</span>
-      </md-layout>
-    </md-layout>
+    <capacity-user-data user="Engineer" assignedTeam="Assigned to team" testing="TSE Testing"></capacity-user-data>
     <md-layout class="capacity-week">
       <md-layout class="capacity-day" v-for="day in week" :day="day" :key="day">
         <md-layout md-align="center" class="capacity-day-name capacity-cell">{{ day }}</md-layout>
-        <md-layout md-row class="capacity-data-container">
-          <div md-vertical-align="center" class="capacity-data capacity-cell">
-            <span>Requested</span>
-          </div>
-          <div md-vertical-align="center" class="capacity-data capacity-cell">
-            <span>Received</span>
-          </div>
-          <div md-vertical-align="center" class="capacity-data capacity-cell">
-            <span>Assigned</span>
-          </div>
-        </md-layout>
+        <capacity-stat-data requested="Requested" received="Received" tickets="Assigned"></capacity-stat-data>
       </md-layout>
     </md-layout>
   </md-layout>
 </template>
 
 <script>
+import CapacityStatData from './CapacityStatData';
+import CapacityUserData from './CapacityUserData';
 
 export default {
   name: 'CapacityTableHeader',
@@ -42,6 +24,10 @@ export default {
       week.splice(5,1);
       return week;
     }
+  },
+  components: {
+    CapacityStatData,
+    CapacityUserData
   }
 }
 </script>
@@ -52,7 +38,7 @@ export default {
   }
    div :focus {
     outline: 5px solid blue;
-  } /**/
+  }
     input:focus {
       outline: 5px solid yellow;
     }
@@ -60,10 +46,6 @@ export default {
     flex-wrap: nowrap;
     word-break: break-all;
     flex: 0 0 100%;
-  }
-  .capacity-user {
-    flex: 0 0 20%;
-    flex-wrap: nowrap;
   }
   .capacity-week {
     flex-wrap: nowrap;
@@ -75,20 +57,12 @@ export default {
       flex: 0 0 100%;
       flex-wrap: nowrap;
     }
-    .capacity-data-container {
-      flex-wrap: nowrap;
-    }
-      .capacity-data {
-        display: flex;
-        flex: 0 0 33.333%;
-        align-items: center;
-      }
-          .capacity-cell span {
-            text-align: center;
-            flex: 0 0 100%;
-          }
 .capacity-cell {
   border-right: 2px solid green;
   border-bottom: 2px solid green;
 }
+  .capacity-cell span {
+    text-align: center;
+    flex: 0 0 100%;
+  }
 </style>
