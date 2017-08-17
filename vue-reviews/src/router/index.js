@@ -10,8 +10,11 @@ Vue.use(Router)
 
 export default new Router({
   routes: [
+    { path: '/', 
+      redirect: { name: 'CodeReview' }
+    },
     {
-      path: '/',
+      path: '/main',
       name: 'CodeReview',
       component: CodeReview,
     },

@@ -9,12 +9,15 @@
       
           <span style="flex: 1;"></span>
       
-          <md-layout md-align="end">
+          <md-layout md-align="end" v-if="mainPath && levelEngineer(activeUserGetter.role)">
             
             <md-layout md-flex="55" :class="{ hidden: hiddenInputs.search }">
               <md-input-container md-inline>
                 <label>Number of instances</label>
                 <md-input v-model="search"></md-input>
+                <md-button class="md-icon-button" @click="findChanges(search)">
+                  <md-icon>update</md-icon>
+                </md-button>
               </md-input-container>
             </md-layout>
             
@@ -70,8 +73,9 @@
 import 'animate.css/animate.min.css'
 
 import firebase from 'firebase'
-import { messaging } from '@/data/firebase-config'
-import {UPDATE_NUM} from './data/mutation-types'
+import { FBApp, messaging } from '@/data/firebase-config'
+import {UPDATE_NUM, GET_FBASE} from './data/mutation-types'
+import { levelMixin } from '@/mixins/restrictions'
 import {mapActions, mapGetters} from 'vuex'
 import MainNav from './components/MainNav.vue'
 
@@ -94,16 +98,26 @@ export default {
       search: this.$store.state.searchTerm
     }
   },
+  mixins: [levelMixin],
   computed : {
-    ...mapGetters(['activeUserGetter', 'displayNumGetter'])
+    ...mapGetters(['activeUserGetter', 'firebasePathGetter']),
+    mainPath () {
+    	return this.$route.path.indexOf('/main') == 0
+    }
   },
   methods: {
-    ...mapActions([UPDATE_NUM]),
+    ...mapActions([UPDATE_NUM,GET_FBASE]),
     showElement (el) {
-        this.hiddenInputs[el] = !this.hiddenInputs[el]
+      this.hiddenInputs[el] = !this.hiddenInputs[el]
     },
     updateItemsNum (el) {
       this[UPDATE_NUM](this.displayNum)
+    },
+    findChanges (ticket) {
+      this.$bindAsArray('allItems', FBApp.ref(this.firebasePathGetter.main), null, () => {
+          let changes = Object.values(this.allItems).filter((el)=> el.ticket.toLowerCase().includes(ticket.toLowerCase()))
+          this[GET_FBASE](changes)
+      })
     }
   },
   created () {

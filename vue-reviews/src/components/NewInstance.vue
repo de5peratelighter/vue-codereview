@@ -123,11 +123,14 @@
         created () {
             if (this.relcomponent === 'codereview') {
                 this.$bindAsObject('todayReviewersArray', FBApp.ref(this.firebasePathGetter.schedule).child(this.today.format('YYYY-MM-DD')), null, () => {
-                    this.reviewers = this.todayReviewersArray['.value'].split(',').slice(0,-1)
-                    
+                    if (this.todayReviewersArray['.value']) {
+                        this.reviewers = this.todayReviewersArray['.value'].split(',').slice(0,-1)
+                    }
                     // start listening whether reviewers might have changed for today
                     FBApp.ref(this.firebasePathGetter.schedule).child(this.today.format('YYYY-MM-DD')).on('value', (el) => {
-                        this.reviewers = el.val().split(',').slice(0,-1)
+                        if (this.todayReviewersArray['.value']) { 
+                            this.reviewers = el.val().split(',').slice(0,-1)
+                        }
                     })
 
                 })

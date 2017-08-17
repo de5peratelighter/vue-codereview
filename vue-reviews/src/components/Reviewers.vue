@@ -1,6 +1,6 @@
 <template>
     <div class="c-main-section">
-        <md-layout>
+        <md-layout md-align="center">
             <reviewers-list v-if="levelDEVORPM(activeUserGetter.role)"></reviewers-list>
             <md-layout md-flex="85">
                 <div style="width: 100%">

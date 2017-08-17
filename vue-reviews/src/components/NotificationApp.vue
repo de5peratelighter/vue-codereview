@@ -59,32 +59,22 @@
         },
         created () {
             
-            // Callback fired if Instance ID token is updated.
-            messaging.onTokenRefresh(() => {
-                messaging.getToken().then((refreshedToken) => {
-                    FBApp.ref(this.firebasePathGetter.notifications +"/" + this.activeUserGetter.alias).set({
-                        token : refreshedToken, subscribed : this.$moment().format('DD-MM-YYYY, hh:mm')
-                    })
-                    if (refreshedToken) {
-                        console.warn('Refreshed token: ', refreshedToken)
-                        this.subscribed = true
-                    }
-                }).catch((err) => {
-                    console.warn('Unable to retrieve refreshed token ', err);
-                });
-            });
-            
             // check whether user is subscribed and update UI correspondingly (also checks whether current token is same as in DB on component creation
             // token can be accessed before requestPermission() call 
             this.$bindAsObject('tokenGetter', FBApp.ref(this.firebasePathGetter.notifications +"/" + this.activeUserGetter.alias), null, () => {
 
                 messaging.getToken().then((currentToken) => {
                     if (this.tokenGetter && currentToken) {
-                        console.warn('TGettertoken:',this.tokenGetter.token)
-                        console.warn('currentToken:', currentToken)
-                        this.subscribed = this.tokenGetter.token === currentToken
+                        if (this.tokenGetter.token != currentToken) {
+                            FBApp.ref(this.firebasePathGetter.notifications +"/" + this.activeUserGetter.alias).set({
+                                token : currentToken, subscribed : this.$moment().format('DD-MM-YYYY, hh:mm')
+                            })
+                        }
+                        return currentToken
                     }
-                });
+                }).then((currentToken) => { 
+                    if (currentToken) {this.subscribed = this.tokenGetter.token === currentToken}
+                })
                 
             })
             
