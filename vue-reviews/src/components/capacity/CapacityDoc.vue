@@ -1,5 +1,7 @@
 <template>
-  <capacity-table></capacity-table>
+  <div class="capacity-view" v-if="levelDEVORPM(activeUserGetter.role)">
+    <capacity-table></capacity-table>
+  </div>
 </template>
 
 <script>
@@ -8,8 +10,9 @@ import firebase from 'firebase';
 import { mapActions, mapGetters } from 'vuex';
 
 import CapacityTable from './CapacityTable';
-import { FBApp } from './../data/firebase-config';
-import { GET_CAPACITY } from './../data/mutation-types';
+import FBApp from '@/data/firebase-config';
+import { GET_CAPACITY } from '@/data/mutation-types';
+import { levelMixin } from '@/mixins/restrictions';
 
 export default {
   name: 'CapacityDoc',
@@ -18,6 +21,7 @@ export default {
       DEFAULT_DATA : this.$store.state.capacity
     };
   },
+  mixins: [levelMixin],
   computed: {
     ...mapGetters(['firebasePathGetter', 'activeUserGetter']),
     capacity () {
@@ -27,22 +31,11 @@ export default {
   firebase: {},
   methods: {
     ...mapActions([GET_CAPACITY]),
-    prettifyCapacity() {
-      let capacity = {};
-      let uglyCapacity = this.capacityData;
-      let users = uglyCapacity.length;
-      for (let i = 0; i < users; i++) {
-        let user = uglyCapacity[i]['.key'];
-        let capacityByDay = uglyCapacity[i]['.value'];
-        capacity[user] = capacityByDay;
-      }
-      return capacity;
-    },
     getCapacityData() {
-      this.$bindAsArray('capacityData', FBApp.ref(this.firebasePathGetter.capacity + '/' + this.$store.state.currentWeek),null, () => {
-        this[GET_CAPACITY](this.prettifyCapacity());
+      this.$bindAsArray('capacityData', FBApp.ref(this.firebasePathGetter.capacity + '/' + this.$store.state.currentWeek), null, () => {
+         this[GET_CAPACITY](this.capacityData); 
       })
-    },
+    }
   },
   watch: {
     activeUserGetter (newCount, oldCount) {
