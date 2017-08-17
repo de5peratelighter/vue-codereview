@@ -3,7 +3,7 @@ import Router from 'vue-router'
 import CodeReview from '@/components/CodeReview'
 import ReviewersList from '@/components/Reviewers'
 import MainConfig from '@/components/MainConfig'
-import CapacityDoc from '@/components/CapacityDoc'
+import CapacityDoc from '@/components/capacity/CapacityDoc'
 import StatsTable from '@/components/StatsTable'
 
 Vue.use(Router)
