@@ -1,5 +1,5 @@
 <template>
-  <div class="capacity-view">
+  <div class="capacity-view" v-if="levelDEVORPM(activeUserGetter.role)">
     <capacity-table></capacity-table>
   </div>
 </template>
@@ -12,6 +12,7 @@ import { mapActions, mapGetters } from 'vuex';
 import CapacityTable from './CapacityTable';
 import FBApp from '@/data/firebase-config';
 import { GET_CAPACITY } from '@/data/mutation-types';
+import { levelMixin } from '@/mixins/restrictions';
 
 export default {
   name: 'CapacityDoc',
@@ -20,6 +21,7 @@ export default {
       DEFAULT_DATA : this.$store.state.capacity
     };
   },
+  mixins: [levelMixin],
   computed: {
     ...mapGetters(['firebasePathGetter', 'activeUserGetter']),
     capacity () {

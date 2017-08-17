@@ -38,15 +38,15 @@ export default {
   },
   methods: {
     splitCapacity(capacityString) {
-      let splitCapacity = capacityString.split('|');
-      this.requestedCapacity = splitCapacity[0].split(',');
-      this.receivedCapacity = splitCapacity[1].split(',');
-      this.ticketsCapacity = splitCapacity[2].split(',');
+      let capacityArray = capacityString.split('|');
+      this.requestedCapacity = capacityArray[0].split(',');
+      this.receivedCapacity = capacityArray[1].split(',');
+      this.ticketsCapacity = capacityArray[2].split(',');
     }
   },
   watch: {
     usersCapacity (newCapacityString) {
-      this.splitCapacity(newCapacityStrings);;
+      this.splitCapacity(newCapacityString);;
     }
   },
   mounted() {
