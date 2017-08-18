@@ -17,9 +17,12 @@ import VueFire from 'vuefire'
 import VueMaterial from 'vue-material'
 import 'vue-material/dist/vue-material.css'
 
+import VueClipboard from 'vue-clipboard2'
+
 Vue.use(Vuex)
 Vue.use(VueFire)
 Vue.use(VueMaterial)
+Vue.use(VueClipboard)
 
 Vue.material.registerTheme('default', {
   primary: 'blue',

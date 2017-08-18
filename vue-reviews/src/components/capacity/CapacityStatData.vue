@@ -19,10 +19,10 @@ export default {
 }
 </script>
 
-<style>
-.capacity-data-container {
-  flex-wrap: nowrap;
-}
+<style scoped>
+  .capacity-data-container {
+    flex-wrap: nowrap;
+  }
   .capacity-data {
     display: flex;
     flex: 0 0 33.333%;

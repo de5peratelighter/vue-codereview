@@ -6,7 +6,7 @@ Vue.use(Vuex)
 import moment from 'moment-timezone'
 moment.tz.guess()
 
-import {GET_FBASE, LOGIN_ME, UPDATE_NUM, GET_REVIEWERS, GET_HOLIDAYS, GET_CAPACITY, SET_FOCUSED_CELL} from './mutation-types'
+import {GET_FBASE, LOGIN_ME, UPDATE_NUM, GET_REVIEWERS, GET_HOLIDAYS, GET_CAPACITY, SET_MONTH, SET_YEAR, GET_TODAYREVIEWERS, SET_FOCUSED_CELL} from './mutation-types'
 
 export default new Vuex.Store({
     state : {
@@ -52,17 +52,17 @@ export default new Vuex.Store({
             "reviewer" : "user2",
             "status" : "Good",
             "st" : "12/06/2017, 16:27:22",
-            "si" : "https://lh3.googleusercontent.com/-XdUIqdMkCWA/AAAAAAAAAAI/AAAAAAAAAAA/4252rscbv5M/photo.jpg",
             "ticket" : "https://bits.bazaarvoice.com/jira/browse/SUP-21014",
-          "username" : "user1"
+            "rc": "Ok this is good",
+            "username" : "user1"
           }, "-KZwWEmvglByJWO72guy" : {
             "comment" : "WOWO",
             "content" : "https://dev.bazaarvoice.com/trac/bvc/changeset?new=customers%2Fbranches%2Fuser%2Fobodrov-21038-myer%401656411&old=customers%2Fbranches%2Fuser%2Fobodrov-21038-myer%401656400",
             "reviewer" : "user1",
             "status" : "NotOK",
             "st" : "14/06/2017, 14:31:55",
-            "si" : "https://lh3.googleusercontent.com/-XdUIqdMkCWA/AAAAAAAAAAI/AAAAAAAAAAA/4252rscbv5M/photo.jpg",
             "ticket" : "https://bits.bazaarvoice.com/jira/browse/SUP-21038",
+            "rc": "You're playing with fire kid",
             "username" : "user2"
           }, "-KZwWEmvglByJWO72guS" : {
             "comment" : "kk",
@@ -70,8 +70,8 @@ export default new Vuex.Store({
             "reviewer" : "user1",
             "status" : "Looking",
             "st" : "15/06/2017, 12:39:11",
-            "si" : "https://lh3.googleusercontent.com/-XdUIqdMkCWA/AAAAAAAAAAI/AAAAAAAAAAA/4252rscbv5M/photo.jpg",
             "ticket" : "https://bits.bazaarvoice.com/jira/browse/SUP-21035",
+            "rc": "I'll take a look soon",
             "username" : "user1"
           },
         },
@@ -81,7 +81,6 @@ export default new Vuex.Store({
         reviewersScheduleAhead : 14, // Number of days to reschedule
         activeUser : {
           displayName: 'Guest',
-          photoURL : 'https://ssl.gstatic.com/images/icons/material/product/1x/avatar_circle_blue_120dp.png',
           isAnonymous : true,
           role: undefined, // not best practice but very convenient, won't require additional if-elses on user-login
           alias: undefined, // if user isn't in read-only firebase boject "users" - login response always returns 'undefined'
@@ -97,14 +96,15 @@ export default new Vuex.Store({
           schedule : 'wow/resources/schedule',
           users : 'wow/users',
           capacity: 'wow/resources/capacityByWeek',
-          notifications : 'wow/notifications'
+          notifications : 'wow/notifications',
+          guidelines: 'wow/guidelines'
         },
         eventAppDate : moment(),
-        eventFormDate : moment(),
         currentYear : Number(moment().format('YYYY')),
         currentMonth : Number(moment().format('M')),
         currentWeek : Number(moment().week()),
-        eventFormActive : false
+        eventFormActive : false,
+        activeReviewers : []
     },
     getters : {
         firebasePathGetter : (state) => {
@@ -247,7 +247,6 @@ export default new Vuex.Store({
         state.capacity = payload
       },
       [GET_FBASE] (state, payload) {
-        console.log(payload)
         state.items = payload
       },
       [LOGIN_ME] (state, payload) {
@@ -265,19 +264,15 @@ export default new Vuex.Store({
       [GET_HOLIDAYS] (state, payload) {
         state.holidays = payload
       },
-      // date
-      setCurrentMonth(state,payload) {
-            state.currentMonth = payload
+      [SET_MONTH] (state, payload) {
+        state.currentMonth = payload
       },
-      setCurrentYear(state,payload) {
-          state.currentYear = payload
+      [SET_YEAR] (state, payload) {
+        state.currentYear = payload
       },
       eventFormActive(state, payload) {
-          state.eventFormActive = payload
-      },
-      eventFormUpdateDate(state, payload) {
-          state.eventFormDate = payload
-      },
+        state.eventFormActive = payload
+      }
     },
     actions : {
       [SET_FOCUSED_CELL] (store, payload) {
@@ -301,6 +296,12 @@ export default new Vuex.Store({
       },
       [GET_HOLIDAYS] (store,payload) {
         store.commit(GET_HOLIDAYS, payload)
+      },
+      [SET_MONTH] (store,payload) {
+        store.commit(SET_MONTH, payload)
+      },
+      [SET_YEAR] (store,payload) {
+        store.commit(SET_YEAR, payload)
       }
     }
 })

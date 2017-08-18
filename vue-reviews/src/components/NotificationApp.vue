@@ -1,6 +1,10 @@
 <template>
     <span>
         <md-checkbox v-model="subscribed" @change="changeSubscription">Subscribe to notifications</md-checkbox>
+        <md-snackbar md-position="bottom center" ref="popUpNotification" md-duration="5000">
+            <strong>{{popUpNotificationBody}}</strong>
+            <md-button class="md-accent" @click="$refs.popUpNotification.close()">Close</md-button>
+        </md-snackbar>
     </span>
 </template>
 
@@ -12,7 +16,8 @@
         name: 'NotificationApp',
         data () {
             return {
-                subscribed : false
+                subscribed : false,
+                popUpNotificationBody : ''
             }
         },
         firebase : {},
@@ -40,7 +45,8 @@
                             console.warn('An error occurred while retrieving token. ', err);
                           })    
                     }).catch((err) => {
-                      console.warn(`Permission wasn't granted, please make sure you aren't in Incognito mode or with HTTP (feature works only for HTTPS pages).`, err);
+                        this.subscribed = false;
+                        console.warn(`Permission wasn't granted, please make sure you aren't in Incognito mode or with HTTP (feature works only for HTTPS pages).`, err);
                     })
                     
                 } else {
@@ -52,18 +58,32 @@
             }
         },
         created () {
-            // check whether user is subscribed and update UI correspondingly
+            
+            // check whether user is subscribed and update UI correspondingly (also checks whether current token is same as in DB on component creation
+            // token can be accessed before requestPermission() call 
             this.$bindAsObject('tokenGetter', FBApp.ref(this.firebasePathGetter.notifications +"/" + this.activeUserGetter.alias), null, () => {
-                this.subscribed = Boolean(this.tokenGetter.token)
+
+                messaging.getToken().then((currentToken) => {
+                    if (this.tokenGetter && currentToken) {
+                        if (this.tokenGetter.token != currentToken) {
+                            FBApp.ref(this.firebasePathGetter.notifications +"/" + this.activeUserGetter.alias).set({
+                                token : currentToken, subscribed : this.$moment().format('DD-MM-YYYY, hh:mm')
+                            })
+                        }
+                        return currentToken
+                    }
+                }).then((currentToken) => { 
+                    if (currentToken) {this.subscribed = this.tokenGetter.token === currentToken}
+                })
+                
             })
             
-            // Callback fired if Instance ID token is updated.
-            messaging.onTokenRefresh(() => {
-                messaging.getToken().then(function(refreshedToken) {
-                    console.warn(`Subscription Token has refreshed. Replacing it's latest instance in FB`);
-                }).catch(function(err) {
-                    console.warn('Unable to retrieve refreshed token ', err);
-                });
+            // if app is an active TAB - display notificaiton as a snackbar
+            messaging.onMessage((payload) => {
+                if (payload.notification) {
+                      this.popUpNotificationBody = payload.notification.body;
+                      this.$refs.popUpNotification.open();
+                }
             });
  
         }

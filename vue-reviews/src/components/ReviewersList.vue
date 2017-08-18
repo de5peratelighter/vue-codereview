@@ -1,6 +1,6 @@
 <template>
-    <md-layout md-flex="15" class="c-stretch" v-if="!activeUserGetter.isAnonymous">
-        <div class="md-title">
+    <md-layout md-flex="15" class="c-stretch padding40p">
+        <div>
             
             <div class="md-headline">
                 <md-button @click="showElement('reviewersInput')">
@@ -104,10 +104,9 @@
            ...mapActions([GET_REVIEWERS,GET_HOLIDAYS]),
             updateListInDB (el, action, path) {
                 let dater = this.$moment(el, 'MMMM D')
-                let lister = this.reviewers[path]
+                let lister = path === 'all' ? Object.values(this.revs) : path === 'holidays' ? Object.values(this.holies) : []
                 let allowUpdating =  false
-                if (action === "remove") {
-                    lister = lister.split(',')
+                if (action === "remove" && lister) {
                     lister.splice(el,1)
                     allowUpdating = path === 'holidays' || path === 'all'
                     if (allowUpdating) {
@@ -115,7 +114,7 @@
                             if (path === 'holidays') { this[GET_HOLIDAYS](lister.join(',')) } else if (path = 'all') { this[GET_REVIEWERS](lister.join(',')) }
                         })
                     }
-                } else if (action === "add") {
+                } else if (action === "add" && lister) {
                     lister = lister + "," + el
                     allowUpdating = path === 'holidays' ? (this.validateDate(dater) && this.holidaysGetter && el) : path === 'all' ? el  : false
                     if (allowUpdating) {
@@ -177,31 +176,14 @@
             updateUiValues (el) {
                 
                 if (!el.isAnonymous) {
-                
-                    this.$bindAsObject('reviewers', FBApp.ref(this.firebasePathGetter.reviewers),null, () => {
-                        this[GET_REVIEWERS](this.reviewers['all'])
-                        this[GET_HOLIDAYS](this.reviewers['holidays'])
-                        
-                        this.$bindAsArray('lastIndex', FBApp.ref(this.firebasePathGetter.schedule).limitToLast(1), null, () => {
-                            // Generating new instances on first PM login on Mondays(or on last found DB instance as of Today)
-                            if (this.$moment(this.lastIndex[0]['.key']).isSameOrBefore(this.nowDate,'day') || this.$moment(this.nowDate).day() === 1) {
-                                this.rescheduleData(this.revsGetter, this.lastIndex)
-                            }
-                        })
-                        
-                        FBApp.ref(this.firebasePathGetter.reviewers).on('child_changed', (dataSnapshot) => {
-                            if (dataSnapshot.key === 'all') {
-                                this[GET_REVIEWERS](dataSnapshot.val())
-                            } else if (dataSnapshot.key === 'holidays') {
-                                this[GET_HOLIDAYS](dataSnapshot.val())
-                            }
-                        })
-                        
+                    
+                    this.$bindAsArray('lastIndex', FBApp.ref(this.firebasePathGetter.schedule).limitToLast(1), null, () => {
+                        // Generating new instances on first PM login on Mondays(or on last found DB instance as of Today)
+                        if (this.$moment(this.lastIndex[0]['.key']).isSameOrBefore(this.nowDate,'day') || this.$moment(this.nowDate).day() === 1) {
+                            this.rescheduleData(this.revsGetter, this.lastIndex)
+                        }
                     })
                 
-                } else {
-                  this[GET_HOLIDAYS](String())
-                  this[GET_REVIEWERS](String())
                 }
                 
             }
@@ -216,3 +198,8 @@
         }
     }
 </script>
+<style scoped>
+    .padding40p {
+        padding: 40px;
+    }
+</style>

@@ -4,15 +4,11 @@
       <ul class="c-main-section">
         <div v-if="activeUserGetter.isAnonymous"> 
           <h4>{{ initialMessage }}</h4>
-          
         </div>
-        <div v-else-if="levelEngineer(activeUserGetter.role)"> 
-          <h4>{{onlineMessage}}{{activeUserGetter.displayName}} 
-            <notification-app></notification-app>
-          </h4>
+        <div v-else-if="levelEngineer(activeUserGetter.role)">
+          <h4>{{welcomeMessage}}</h4>
         </div>
-        <div v-else>{{noaccessMessage}}</div>
-        
+        <div v-else-if="!levelEngineer(activeUserGetter.role)">{{noaccessMessage}}</div>
         
         <li  v-for="(item, key) in items" :key="key">
           
@@ -25,7 +21,12 @@
               
               <md-layout>
                 <md-avatar class="md-large">
-                  <img :src="item.si" :alt="item.username">
+                  <template v-if="item.si">
+                    <img :src="item.si" :alt="item.username">
+                  </template>
+                  <template v-else>
+                    <md-icon>face</md-icon>
+                  </template>
                 </md-avatar>
               </md-layout>
               
@@ -44,7 +45,7 @@
               <md-layout>
                 <md-card-content>
                   
-                <md-button :id="'dialog'+key" @click="openDialog(key)"> <md-icon v-if="item.comment||item.reviewerComment">chat_bubble</md-icon> <md-icon v-else>chat_bubble_outline</md-icon> </md-button>
+                <md-button :id="'dialog'+key" @click="updateDialog(key,'open')"> <md-icon v-if="item.comment||item.reviewerComment">chat_bubble</md-icon> <md-icon v-else>chat_bubble_outline</md-icon> </md-button>
                 
                   <md-dialog :md-open-from="'#dialog'+key" :md-close-to="'#dialog'+key" :ref="String(key)"> <!-- String(key) removes dialog undefined bug with the zero-index key -->
                   
@@ -52,9 +53,9 @@
                       <md-dialog-title>From author</md-dialog-title>
                       <md-dialog-content>{{ item.comment }}</md-dialog-content>
                     </div>
-                    <div v-if="item.reviewerComment">
+                    <div v-if="item.rc">
                       <md-dialog-title>From reviewer</md-dialog-title>
-                      <md-dialog-content>{{ item.reviewerComment }}</md-dialog-content>
+                      <md-dialog-content>{{ item.rc }}</md-dialog-content>
                     </div>
                     <md-dialog-content>
                       <md-input-container>
@@ -64,7 +65,7 @@
                       </md-input-container>
                     </md-dialog-content>
                     <md-dialog-actions>
-                      <md-button class="md-primary" @click="closeDialog(key)">Ok</md-button>
+                      <md-button class="md-primary" @click="updateDialog(key,'close')">Ok</md-button>
                     </md-dialog-actions>
                   </md-dialog>
                 
@@ -72,8 +73,8 @@
               </md-layout>
               
               <md-layout>
-                <md-input-container>
-                <label for="status" style="color:inherit">{{ item.reviewer ? item.reviewer : 'Codereviewer will set the status' }}</label>
+                <md-input-container class="width75">
+                  <label for="status" style="color:inherit">{{ item.reviewer ? item.reviewer : 'Codereviewer will set the status' }}</label>
                   <md-select :disabled="!levelReviewer(activeUserGetter.role)" name="status" v-model="item.status">
                     <md-option v-for="option in selectOptions" :key="option.id" :value="option.name" @selected="onSelectChange(item)">{{option.name}}</md-option>
                   </md-select>
@@ -86,7 +87,7 @@
         </li>
       </ul>
     </md-layout>
-    <div v-if="!activeUserGetter.isAnonymous">
+    <div v-if="levelEngineer(activeUserGetter.role)">
       <new-instance :inputs="codeReviewInputs" :requiredword="newInstanceRequiredWord" :path="firebasePathGetter.main" relcomponent="codereview"> </new-instance>
     </div>
     
@@ -96,12 +97,13 @@
 <script>
 
 import firebase from 'firebase'
-import { FBApp, messaging } from '@/data/firebase-config'
+import { FBApp } from '@/data/firebase-config'
 import {GET_FBASE} from '@/data/mutation-types'
 import {mapActions, mapGetters } from 'vuex'
 import { levelMixin } from '@/mixins/restrictions'
 import { newInstanceMixin } from '@/mixins/inputs'
-import NotificationApp from '@/components/NotificationApp.vue'
+import { notificationMixin } from '@/mixins/notifications'
+
 const NewInstance = () => import('@/components/NewInstance.vue')
 
 export default {
@@ -109,8 +111,8 @@ export default {
   data () {
     return {
       initialMessage: 'This is dummy data, please LOG IN to get the real one',
-      onlineMessage : 'Hello, ',
       noaccessMessage : 'Ask PM to activate your account(via skype, hipchat)',
+      welcomeMessage: 'Welcome!',
       newInput : '',
       newInstanceRequiredWord: 'bazaarvoice',
       DEFAULT_DATA : this.$store.state.items,
@@ -118,11 +120,12 @@ export default {
         { id: 1, name: 'New' },
         { id: 2, name: 'Looking' },
         { id: 3, name: 'Good' },
-        { id: 4, name: 'NotOK' }]
+        { id: 4, name: 'NotOK' }],
+      reviewers : []
     }
   },
   firebase: {},
-  mixins: [levelMixin, newInstanceMixin],
+  mixins: [levelMixin, newInstanceMixin, notificationMixin],
   computed: {
     items () {
       return this.$store.state.items
@@ -132,7 +135,12 @@ export default {
   methods : {
     ...mapActions([GET_FBASE]),
     getData () {
-      this.$bindAsArray('itemsArray', FBApp.ref(this.firebasePathGetter.main).limitToLast(Number(this.displayNumGetter)), null, () => {this[GET_FBASE](this.itemsArray) })
+      this.$bindAsArray('itemsArray', FBApp.ref(this.firebasePathGetter.main).limitToLast(Number(this.displayNumGetter)), null, () => {
+        this[GET_FBASE](this.itemsArray)
+        // this.$bindAsObject('todayReviewersArray', FBApp.ref(this.firebasePathGetter.schedule).child(this.today.format('YYYY-MM-DD')), null, () => {
+        //   this.reviewers = this.todayReviewersArray['.value'].split(',').slice(0,-1)
+        // })
+      })
     },
     truncContent (el, typer) {
       // TIME - for compatibility with old dates $moment is provided with additional parameter (from old Polymer project w/o $moment in place)
@@ -144,25 +152,32 @@ export default {
     },
     onSelectChange (el) {
       if (event && el['.key'] && !this.activeUserGetter.isAnonymous && this.levelReviewer(this.activeUserGetter.role)) {
-        FBApp.ref(this.firebasePathGetter.main +"/" + el['.key']).update({status: el.status, reviewer : this.activeUserGetter.alias})
+        FBApp.ref(this.firebasePathGetter.main +"/" + el['.key']).update({status: el.status, reviewer : this.activeUserGetter.alias}).then(()=> {
+           this.$bindAsObject('itemOwner', FBApp.ref(this.firebasePathGetter.notifications + '/' + el.username), null, () => {
+             if (this.itemOwner.token) { 
+                this.submitNotification(this.itemOwner, this.activeUserGetter, 'informOwner' , el.status) // from 'notificationMixin'
+             }
+           })
+        })
       } else {
         this.dummyDataMessage()
       }
     },
-    openDialog(ref) {
+    updateDialog(ref, type) {
+      let el = this.$refs[ref][0]
       this.newInput = ''
-      this.$refs[ref][0].open();
-    },
-    closeDialog(ref) {
-      this.newInput = ''
-      this.$refs[ref][0].close();
+      if (type==='open') {
+        el.open()
+      } else if (type==='close') {
+        el.close()
+      }
     },
     updateComment(el) {
       if (el['.key'] && !this.activeUserGetter.isAnonymous) {
         
         let newData = {} // check whether we should update reviewer's comment or user's Comment
         if (this.activeUserGetter.alias === el.reviewer) {
-          newData = {reviewerComment: this.newInput} 
+          newData = {rc: this.newInput} 
         } else if (this.activeUserGetter.alias === el.username) {
           newData = {comment: this.newInput}
         }
@@ -173,7 +188,6 @@ export default {
       }
     },
     dummyDataMessage () {
-      
       console.log('This is not real data')
     }
   },
@@ -196,16 +210,8 @@ export default {
         this[GET_FBASE](this.DEFAULT_DATA)
       }
   },
-    // this.$bindAsArray('anArray', FBApp.ref("wow/nice").limitToLast(5), null, () => {this[GET_FBASE](this.anArray) })
   components : {
-    NewInstance,
-    NotificationApp
-  },
-  created () {
-    // resistering and using SW
-    navigator.serviceWorker.register('./static/firebase-messaging-sw.js').then((registration) => {
-        messaging.useServiceWorker(registration)
-    })
+    NewInstance
   }
 }
 </script>
@@ -213,6 +219,9 @@ export default {
 <style scoped>
   a, a:visited, a:hover, a:active {
     color: inherit;
+  }
+  .width75 {
+    width: 75%;
   }
   .instance {
     height: 81px !important;

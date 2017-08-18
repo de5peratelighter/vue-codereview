@@ -21,7 +21,7 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
 .capacity-subteam {
   flex: 0 0 100%;
   border-bottom: 2px solid purple;

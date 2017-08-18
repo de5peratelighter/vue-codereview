@@ -1,11 +1,10 @@
 <template>
     <div class="c-main-section">
-        <md-layout>
+        <md-layout md-align="center">
             <reviewers-list v-if="levelDEVORPM(activeUserGetter.role)"></reviewers-list>
             <md-layout md-flex="85">
                 <div style="width: 100%">
                     <md-layout md-align="end" md-vertical-align="center">
-                        <span class="md-headline">Review schedule</span>
                         <current-month></current-month>
                     </md-layout>
                     <div id="day-bar">
@@ -33,7 +32,7 @@
 import firebase from 'firebase'
 import { FBApp } from '@/data/firebase-config'
 import { levelMixin } from '@/mixins/restrictions'
-import {GET_REVIEWERS} from '@/data/mutation-types'
+import {GET_REVIEWERS, GET_HOLIDAYS} from '@/data/mutation-types'
 import {mapActions, mapGetters } from 'vuex'
     
 import CalendarDay from './CalendarDay.vue'
@@ -49,7 +48,29 @@ export default {
     firebase: {},
     mixins: [levelMixin],
     methods : {
-        ...mapActions([GET_REVIEWERS])
+        ...mapActions([GET_REVIEWERS, GET_HOLIDAYS]),
+        receiveScheduleData (user) {
+            if (!user.isAnonymous) {
+                this.$bindAsObject('reviewers', FBApp.ref(this.firebasePathGetter.reviewers),null, () => {
+                    this[GET_REVIEWERS](this.reviewers['all'])
+                    this[GET_HOLIDAYS](this.reviewers['holidays'])
+                    
+                    FBApp.ref(this.firebasePathGetter.reviewers).on('child_changed', (dataSnapshot) => {
+                        if (dataSnapshot.key === 'all') {
+                            this[GET_REVIEWERS](dataSnapshot.val())
+                        } else if (dataSnapshot.key === 'holidays') {
+                            this[GET_HOLIDAYS](dataSnapshot.val())
+                        }
+                    })
+                    
+                })
+                this.$bindAsObject('schedule', FBApp.ref(this.firebasePathGetter.schedule), null, () => {  this.scheduleReady = true })
+            } else { 
+                this.scheduleReady = false;
+                this[GET_HOLIDAYS](String())
+                this[GET_REVIEWERS](String())
+            }
+        }
     },
     computed : {
         ...mapGetters(['activeUserGetter','firebasePathGetter']),
@@ -117,15 +138,11 @@ export default {
     },
     watch : {
         activeUserGetter (newCount, oldCount) {
-          if (!newCount.isAnonymous) {
-              this.$bindAsObject('schedule', FBApp.ref(this.firebasePathGetter.schedule), null, () => {  this.scheduleReady = true })
-          } else { this.scheduleReady = false }
+            this.receiveScheduleData(this.activeUserGetter)
         }
-      },
-      activated () {
-          if (!this.activeUserGetter.isAnonymous) {
-             this.$bindAsObject('schedule', FBApp.ref(this.firebasePathGetter.schedule), null, () => { this.scheduleReady = true})
-          }
-      }
+    },
+    activated () {
+        this.receiveScheduleData(this.activeUserGetter)
+    }
 }
 </script>

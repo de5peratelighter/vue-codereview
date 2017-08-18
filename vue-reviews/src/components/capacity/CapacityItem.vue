@@ -12,7 +12,7 @@
 import firebase from 'firebase';
 import { mapActions, mapGetters } from 'vuex';
 
-import FBApp from '@/data/firebase-config';
+import { FBApp } from '@/data/firebase-config';
 import { SET_FOCUSED_CELL } from '@/data/mutation-types';
 
 export default {
@@ -97,16 +97,16 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
 .capacity-subteam {
   flex: 0 0 100%;
   border-bottom: 2px solid purple;
 }
-      .capacity-editable-data {
-        display: flex;
-        flex: 0 0 33.333%;
-        align-items: stretch;
-      }
+.capacity-editable-data {
+  display: flex;
+  flex: 0 0 33.333%;
+  align-items: stretch;
+}
 
 .capacity-data-wrapper {
   flex: 0 0 100%;
