@@ -23,7 +23,7 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
 .capacity-table {
   border-top: 2px solid green;
   border-left: 2px solid green;

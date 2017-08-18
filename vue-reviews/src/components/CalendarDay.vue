@@ -15,9 +15,9 @@
             <md-dialog-title v-else-if="!classObject.past">Reviewers schedule</md-dialog-title>
             <md-dialog-title v-else>Date is in the past, you can't update this.</md-dialog-title>
 
-            <md-dialog-content v-if="!classObject.past">
+            <md-dialog-content v-if="!classObject.past && levelReviewer(activeUserGetter.role)">
                 
-                <md-input-container v-if="revsGetter" v-for="(item, key) in schedule" :key="key">
+                <md-input-container v-for="(item, key) in schedule" :key="key">
                     <label for="reviewers" style="color:inherit">{{ revsGetter ? 'Update reviewer' : 'Something went wrong' }}</label>
                     <md-select name="reviewers" v-model="stuff[key]" :disabled="!revsGetter">
                         <md-option v-for="(option, index) in selectOptions" :key="index" :value="option" @selected="onSelectChange(stuff[key], key)">{{option}}</md-option>
@@ -36,13 +36,14 @@
 <script>
     import firebase from 'firebase'
     import { FBApp } from '@/data/firebase-config'
-    
+    import { levelMixin } from '@/mixins/restrictions'
     var provider = new firebase.auth.GoogleAuthProvider();
     
     import {mapActions, mapGetters } from 'vuex'
     
     export default {
         props : ['day','scheduler'],
+        mixins: [levelMixin],
         data () {
             return {
                 lastInd : null
@@ -95,11 +96,9 @@
                     newVal[index] = model
                 }
                 if (this.scheduler !== newVal.join(',')) {
-                    console.log(newVal.join(','), index, this.day.format('YYYY-MM-DD') )
+                    // console.log(newVal.join(','), index, this.day.format('YYYY-MM-DD') )
                     FBApp.ref(this.firebasePathGetter.schedule +"/" + this.day.format('YYYY-MM-DD')).set(newVal.join(','))
                 }
-                
-                
             }
         }
     }

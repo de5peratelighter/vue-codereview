@@ -21,7 +21,12 @@
               
               <md-layout>
                 <md-avatar class="md-large">
-                  <img :src="item.si" :alt="item.username">
+                  <template v-if="item.si">
+                    <img :src="item.si" :alt="item.username">
+                  </template>
+                  <template v-else>
+                    <md-icon>face</md-icon>
+                  </template>
                 </md-avatar>
               </md-layout>
               
@@ -48,9 +53,9 @@
                       <md-dialog-title>From author</md-dialog-title>
                       <md-dialog-content>{{ item.comment }}</md-dialog-content>
                     </div>
-                    <div v-if="item.reviewerComment">
+                    <div v-if="item.rc">
                       <md-dialog-title>From reviewer</md-dialog-title>
-                      <md-dialog-content>{{ item.reviewerComment }}</md-dialog-content>
+                      <md-dialog-content>{{ item.rc }}</md-dialog-content>
                     </div>
                     <md-dialog-content>
                       <md-input-container>
@@ -68,8 +73,8 @@
               </md-layout>
               
               <md-layout>
-                <md-input-container>
-                <label for="status" style="color:inherit">{{ item.reviewer ? item.reviewer : 'Codereviewer will set the status' }}</label>
+                <md-input-container class="width75">
+                  <label for="status" style="color:inherit">{{ item.reviewer ? item.reviewer : 'Codereviewer will set the status' }}</label>
                   <md-select :disabled="!levelReviewer(activeUserGetter.role)" name="status" v-model="item.status">
                     <md-option v-for="option in selectOptions" :key="option.id" :value="option.name" @selected="onSelectChange(item)">{{option.name}}</md-option>
                   </md-select>
@@ -135,7 +140,6 @@ export default {
         // this.$bindAsObject('todayReviewersArray', FBApp.ref(this.firebasePathGetter.schedule).child(this.today.format('YYYY-MM-DD')), null, () => {
         //   this.reviewers = this.todayReviewersArray['.value'].split(',').slice(0,-1)
         // })
-        
       })
     },
     truncContent (el, typer) {
@@ -173,7 +177,7 @@ export default {
         
         let newData = {} // check whether we should update reviewer's comment or user's Comment
         if (this.activeUserGetter.alias === el.reviewer) {
-          newData = {reviewerComment: this.newInput} 
+          newData = {rc: this.newInput} 
         } else if (this.activeUserGetter.alias === el.username) {
           newData = {comment: this.newInput}
         }
@@ -184,7 +188,6 @@ export default {
       }
     },
     dummyDataMessage () {
-      
       console.log('This is not real data')
     }
   },
@@ -216,6 +219,9 @@ export default {
 <style scoped>
   a, a:visited, a:hover, a:active {
     color: inherit;
+  }
+  .width75 {
+    width: 75%;
   }
   .instance {
     height: 81px !important;

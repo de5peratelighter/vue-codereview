@@ -3,7 +3,10 @@
           
       <md-toolbar class="md-account-header md-theme-default">
             <md-avatar class="md-large">
-              <img :src="activeUserGetter.photoURL" :title="activeUserGetter.displayName">
+              <template v-if="activeUserGetter.isAnonymous">
+                <md-icon>face</md-icon>
+              </template>
+              <img v-else :src="activeUserGetter.photoURL" :title="activeUserGetter.displayName">
             </md-avatar>
             <md-layout class="review-welcome" md-align="center">
               <div>

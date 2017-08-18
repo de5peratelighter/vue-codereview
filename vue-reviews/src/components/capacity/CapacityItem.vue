@@ -102,11 +102,11 @@ export default {
   flex: 0 0 100%;
   border-bottom: 2px solid purple;
 }
-      .capacity-editable-data {
-        display: flex;
-        flex: 0 0 33.333%;
-        align-items: stretch;
-      }
+.capacity-editable-data {
+  display: flex;
+  flex: 0 0 33.333%;
+  align-items: stretch;
+}
 
 .capacity-data-wrapper {
   flex: 0 0 100%;

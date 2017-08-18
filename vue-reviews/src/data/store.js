@@ -52,17 +52,17 @@ export default new Vuex.Store({
             "reviewer" : "user2",
             "status" : "Good",
             "st" : "12/06/2017, 16:27:22",
-            "si" : "https://lh3.googleusercontent.com/-XdUIqdMkCWA/AAAAAAAAAAI/AAAAAAAAAAA/4252rscbv5M/photo.jpg",
             "ticket" : "https://bits.bazaarvoice.com/jira/browse/SUP-21014",
-          "username" : "user1"
+            "rc": "Ok this is good",
+            "username" : "user1"
           }, "-KZwWEmvglByJWO72guy" : {
             "comment" : "WOWO",
             "content" : "https://dev.bazaarvoice.com/trac/bvc/changeset?new=customers%2Fbranches%2Fuser%2Fobodrov-21038-myer%401656411&old=customers%2Fbranches%2Fuser%2Fobodrov-21038-myer%401656400",
             "reviewer" : "user1",
             "status" : "NotOK",
             "st" : "14/06/2017, 14:31:55",
-            "si" : "https://lh3.googleusercontent.com/-XdUIqdMkCWA/AAAAAAAAAAI/AAAAAAAAAAA/4252rscbv5M/photo.jpg",
             "ticket" : "https://bits.bazaarvoice.com/jira/browse/SUP-21038",
+            "rc": "You're playing with fire kid",
             "username" : "user2"
           }, "-KZwWEmvglByJWO72guS" : {
             "comment" : "kk",
@@ -70,8 +70,8 @@ export default new Vuex.Store({
             "reviewer" : "user1",
             "status" : "Looking",
             "st" : "15/06/2017, 12:39:11",
-            "si" : "https://lh3.googleusercontent.com/-XdUIqdMkCWA/AAAAAAAAAAI/AAAAAAAAAAA/4252rscbv5M/photo.jpg",
             "ticket" : "https://bits.bazaarvoice.com/jira/browse/SUP-21035",
+            "rc": "I'll take a look soon",
             "username" : "user1"
           },
         },
@@ -81,7 +81,6 @@ export default new Vuex.Store({
         reviewersScheduleAhead : 14, // Number of days to reschedule
         activeUser : {
           displayName: 'Guest',
-          photoURL : 'https://ssl.gstatic.com/images/icons/material/product/1x/avatar_circle_blue_120dp.png',
           isAnonymous : true,
           role: undefined, // not best practice but very convenient, won't require additional if-elses on user-login
           alias: undefined, // if user isn't in read-only firebase boject "users" - login response always returns 'undefined'
@@ -248,7 +247,6 @@ export default new Vuex.Store({
         state.capacity = payload
       },
       [GET_FBASE] (state, payload) {
-        console.log(payload)
         state.items = payload
       },
       [LOGIN_ME] (state, payload) {

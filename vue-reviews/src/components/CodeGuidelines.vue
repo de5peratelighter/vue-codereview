@@ -4,7 +4,7 @@
            <md-tab v-for="(element,key,index) in guides" :id="key" :md-label="key" :key="index">
     
                 <template v-if="levelDEVORPM(activeUserGetter.role)">
-                    <md-input-container v-for="(el,keynext) in element" :key="keynext" :added="showAddedDate(keynext)">
+                    <md-input-container v-for="(el,keynext) in element" :key="keynext" :added="showAddedDate(keynext)" class="zero__space">
                         <md-input v-model="el.val"></md-input>
                         <md-button class="md-icon-button md-raised md-dense" v-clipboard:copy="el.val">
                           <md-icon>content_copy</md-icon>

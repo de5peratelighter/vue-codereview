@@ -1,8 +1,8 @@
 <template>
     <div>
         <div class="c-main-section">
-            <span v-if="activeUserGetter.isAnonymous" class="md-display-1">This sections is for logged users</span>
-            <span v-if="!levelDEVORPM(activeUserGetter.role)" class="md-display-1">You don't have permission to alter config, if you need one - request from PM/DEVs</span>
+            <h4 v-if="activeUserGetter.isAnonymous">This sections is for logged users</h4>
+            <h4 v-else-if="!levelDEVORPM(activeUserGetter.role)">You don't have permission to alter config, if you need one - request from PM/DEVs</h4>
             <md-button v-else id="configButton" @click="goGetUsers" class="md-accent">Get users</md-button>
         </div>
         

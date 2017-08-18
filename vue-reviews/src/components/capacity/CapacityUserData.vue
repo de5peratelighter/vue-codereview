@@ -18,7 +18,7 @@ export default {
   props: ['user', 'assignedTeam', 'testing'],
 }
 </script>
-<style>
+<style scoped>
 .capacity-user {
   flex: 0 0 20%;
   flex-wrap: nowrap;

@@ -22,7 +22,7 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
 .capacity-team {
   flex: 0 0 100%;
   border-bottom: 2px solid red;
