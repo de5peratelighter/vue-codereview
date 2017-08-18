@@ -98,26 +98,36 @@ export default {
 </script>
 
 <style scoped>
-.capacity-subteam {
-  flex: 0 0 100%;
-  border-bottom: 2px solid purple;
+div:focus {
+  outline: 5px solid blue;
+}
+input:focus {
+  outline: 5px solid yellow;
 }
 .capacity-editable-data {
   display: flex;
   flex: 0 0 33.333%;
   align-items: stretch;
 }
-
-.capacity-data-wrapper {
-  flex: 0 0 100%;
-  display: flex;
-  align-items: center;
+.capacity-cell {
+  border-right: 2px solid green;
+  border-bottom: 2px solid green;
 }
-
-input.capacity-data-wrapper {
-  width: 100%;
-  border: none;
-  text-align: center;
-  background-color: transparent;
-}
+  .capacity-cell span {
+    font-size: 12px;
+    font-family: Roboto, "Noto Sans", Noto, sans-serif;
+    text-align: center;
+    flex: 0 0 100%;
+  }
+  .capacity-data-wrapper {
+    flex: 0 0 100%;
+    display: flex;
+    align-items: center;
+  }
+  input.capacity-data-wrapper {
+    width: 100%;
+    border: none;
+    text-align: center;
+    background-color: transparent;
+  }
 </style>
