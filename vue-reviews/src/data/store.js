@@ -200,37 +200,17 @@ export default new Vuex.Store({
             }
           }
         },
-        usersByTeam: (state) => (team) => {
-          // => TODO
-/*           let capacity = state.capacity;
-          let capacityLength = capacity.length;
-          let splitCapacity;
-          let currentUser;
-          let index;
-          for(let i = 0; i < capacityLength; i++) {
-            currentUser = capacity[i]['.key']
-            if(currentUser === user) {
-              splitCapacity = capacity[i]['.value'].split('|');
-              break;
+        capacityByTeamGetter: (state) => (team) => {
+          let capacity = state.capacity;
+          let teamCapacity = [];
+          capacity.forEach((val, index) => {
+            let currentUser = capacity[index]['.key'];
+            let splitCapacity = capacity[index]['.value'].split('||');
+            if(splitCapacity[1] === team) {
+              teamCapacity.push(splitCapacity[0]);
             }
-          }
-          switch (type) {
-            case 'requested':
-              index = 0;
-              break;
-            case 'received':
-              index = 1;
-              break;
-            case 'tickets':
-              index = 2;
-              break;
-          }
-          if (type !== undefined) {
-            return splitCapacity[index].split(',');
-          } else {
-            return splitCapacity;
-          } */
-
+          })
+          return teamCapacity;
         },
         focusedUserGetter: (state) => {
           return state.focusedCell.user;

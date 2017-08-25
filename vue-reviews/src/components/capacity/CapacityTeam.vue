@@ -1,13 +1,14 @@
 <template>
   <md-layout md-vertical-align="start" class="capacity-team">
     <capacity-subteam v-for="lead in leadsByTeamGetter(team)" :lead="lead" :key="lead"></capacity-subteam>
-    <div>{{ team }}</div>
+    <capacity-team-daily :team="team"></capacity-team-daily>
   </md-layout>
 </template>
 
 <script>
-import { mapActions, mapGetters } from 'vuex';
+import { mapGetters } from 'vuex';
 
+import CapacityTeamDaily from './CapacityTeamDaily';
 import CapacitySubteam from './CapacitySubteam';
 
 export default {
@@ -17,7 +18,8 @@ export default {
     ...mapGetters(['leadsByTeamGetter'])
   },
   components: {
-    CapacitySubteam
+    CapacitySubteam,
+    CapacityTeamDaily
   }
 }
 </script>

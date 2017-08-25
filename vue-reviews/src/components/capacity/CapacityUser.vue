@@ -46,7 +46,7 @@ export default {
   },
   watch: {
     usersCapacity (newCapacityString) {
-      this.splitCapacity(newCapacityString);;
+      this.splitCapacity(newCapacityString);
     }
   },
   mounted() {

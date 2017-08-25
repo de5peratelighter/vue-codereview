@@ -15,7 +15,7 @@
 <script>
 export default {
   name: 'CapacityStatData',
-  props: ['requested', 'received', 'tickets'],
+  props: ['requested', 'received', 'tickets']
 }
 </script>
 
