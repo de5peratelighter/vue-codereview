@@ -1,16 +1,16 @@
 <template>
   <div id="app">
-      
+
       <md-toolbar>
         <div class="md-toolbar-container">
           <md-button class="md-icon-button" @click="$refs.sidenav.toggle()">
             <md-icon >menu</md-icon>
           </md-button>
-      
+
           <span style="flex: 1;"></span>
-      
+
           <md-layout md-align="end" v-if="mainPath && levelEngineer(activeUserGetter.role)">
-            
+
             <md-layout md-flex="55" :class="{ hidden: hiddenInputs.search }">
               <md-input-container md-inline>
                 <label>Number of instances</label>
@@ -20,13 +20,13 @@
                 </md-button>
               </md-input-container>
             </md-layout>
-            
+
             <md-layout md-flex="10">
               <md-button class="md-icon-button"  @click="showElement('search')">
                 <md-icon>search</md-icon>
               </md-button>
             </md-layout>
-            
+
             <md-layout md-flex="25" :class="{ hidden: hiddenInputs.displayNum }">
               <md-input-container md-inline>
                 <label>Number of instances</label>
@@ -36,33 +36,33 @@
                 </md-button>
               </md-input-container>
             </md-layout>
-            
+
             <md-layout md-flex="10">
               <md-button class="md-icon-button" @click="showElement('displayNum')">
                 <md-icon>filter_list</md-icon>
               </md-button>
             </md-layout>
-            
+
           </md-layout>
 
         </div>
       </md-toolbar>
-      
-      
+
+
       <md-sidenav class="md-left" ref="sidenav">
-        
+
         <main-nav>
-          
+
           <md-list-item v-for="(item, index) in routes" :key="index">
             <router-link :to="{name : item.name}" class="router__link">
               <md-icon>{{ item.icon }}</md-icon>  <span>{{ item.title }}</span>
             </router-link>
           </md-list-item>
-          
+
         </main-nav>
-        
+
       </md-sidenav>
-      
+
       <keep-alive>
         <router-view class="c-full-height"></router-view>
       </keep-alive>
@@ -88,7 +88,8 @@ export default {
         { title: 'Reviewers', icon: 'people', name: 'ReviewersList' },
         { title: 'CapacityDoc', icon: 'alarm_add', name: 'CapacityDoc' },
         { title: 'Stats', icon : 'data_usage', name: 'StatsTable'},
-        { title: 'Config', icon: 'settings', name: 'MainConfig' }
+        { title: 'Config', icon: 'settings', name: 'MainConfig' },
+        { title: 'Knowledge Sharing', icon: 'view_stream', name: 'KnowledgeSharing'}
       ],
       hiddenInputs : {
         search : true,
