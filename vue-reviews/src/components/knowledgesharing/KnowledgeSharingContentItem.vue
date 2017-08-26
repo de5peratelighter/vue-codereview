@@ -14,6 +14,7 @@
         <div v-if="showMore" class="kn-content-full-description">
           {{ item.description }}
           <div v-if="item.links" class="kn-content-links">
+            <md-subheader>Useful links</md-subheader>
             {{ item.links }}
           </div>
           <div class="kn-toggle-more" @click="showMore = false">
@@ -47,7 +48,7 @@ export default{
   data() {
     return {
       showMore: false,
-      showMoreCharsNubmer: 350
+      showMoreCharsNubmer: 300
     }
   },
   computed: {
@@ -79,7 +80,7 @@ export default{
       return value.substring(0, value.indexOf(',') !== -1 ? value.indexOf(',') : value.length);
     },
     knShort(value) {
-      return value.length >= 350? (value.substring(0, 350)+'...') : value;
+      return value.length >= 300? (value.substring(0, 400)+'...') : value;
     }
   }
 }
@@ -93,10 +94,11 @@ export default{
     color: #2196f3;
     cursor: pointer;
 }
-#kn-content .kn-content-links {
-    border-top: 1px solid rgba(0, 0, 0, 0.12);
-    padding-top: 5px;
-    margin-top: 5px;
+#kn-content .kn-content-links .md-subheader {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+    margin-top: 15px;
+    padding: 0;
+    min-height: 30px;
 }
 #kn-content .md-card .kn-content-summary {
   font-size: 16px;
@@ -107,6 +109,7 @@ export default{
 #kn-content .md-card .kn-content-description,
 #kn-content .md-card .kn-content-full-description {
   padding-top: 5px;
+  white-space: pre-line;
 }
 #kn-content .md-card-header {
   padding: 5px;

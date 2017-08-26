@@ -32,6 +32,7 @@
     name: 'KnowledgeSharing',
     data(){
       return {
+        // {author: '', title: '', description: '', date: '', tags: [], clients: [], links: []}
         items: [],
         // {value: '', type: ''}
         filters: [],
@@ -59,9 +60,9 @@
           }
         }).sort((a, b) => {
           if(this.sortNewestFirst){
-            return !this.isNextItemDateAfter(a,b);
+            return !this.isNextItemDateAfter(a,b)?1:-1;
           }
-          return this.isNextItemDateAfter(a,b);
+          return this.isNextItemDateAfter(a,b)?1:-1;
         });
       }
     },
