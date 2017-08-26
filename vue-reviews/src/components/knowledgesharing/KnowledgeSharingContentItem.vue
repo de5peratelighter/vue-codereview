@@ -80,7 +80,7 @@ export default{
       return value.substring(0, value.indexOf(',') !== -1 ? value.indexOf(',') : value.length);
     },
     knShort(value) {
-      return value.length >= 300? (value.substring(0, 400)+'...') : value;
+      return value.length >= 300? (value.substring(0, 300)+'...') : value;
     }
   }
 }
