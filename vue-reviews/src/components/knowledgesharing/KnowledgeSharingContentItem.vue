@@ -51,6 +51,11 @@ export default{
       showMoreCharsNubmer: 300
     }
   },
+  watch: {
+    item() {
+      this.showMore = false;
+    }
+  },
   computed: {
     showMoreAvailable() {
       if(!this.item.links && this.item.description.length < this.showMoreCharsNubmer){
