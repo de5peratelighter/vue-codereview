@@ -1,9 +1,9 @@
 export const notificationMixin = {
-  data () {
-    return {
-      authorizationKey : 'AAAAa_TnElc:APA91bHPwaZvdrnnFm5eG3-lcgSpJ1pWMGOBs940x4Wp63ZNA__tfSesEHul8gw4UWzISSsjfEiFJQsTN3Zp5ebYRl1hEew9_vKnf2pUuGNsoFq9uZf5t9JjlG-siyX9CAZKrXgyojNE'
-    }
-  },
+    data () {
+        return {
+            authorizationKey : 'AAAAa_TnElc:APA91bHPwaZvdrnnFm5eG3-lcgSpJ1pWMGOBs940x4Wp63ZNA__tfSesEHul8gw4UWzISSsjfEiFJQsTN3Zp5ebYRl1hEew9_vKnf2pUuGNsoFq9uZf5t9JjlG-siyX9CAZKrXgyojNE'
+        }
+    },
     methods: {
         submitNotification(owner, requester, type, status) {
 
