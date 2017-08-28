@@ -1,14 +1,9 @@
 export const notificationMixin = {
-    data () {
-        return {
-            authorizationKey : 'AAAAC4k508o:APA91bFnkYEk65whx5mjMow2O4S1Y0NjGDWeqoRq6gdAmEw5G_IfolxrtHkQvx4nuFb3qE09djgWi_V0PJmtlLi2v_VPTpOabtpI3ESYoOIpV_mMQPai5TbeYtswoE5zhkk6MruKJumB'
-        }
-    },
-  // data () {
-  //   return {
-  //     authorizationKey : 'AAAAa_TnElc:APA91bHPwaZvdrnnFm5eG3-lcgSpJ1pWMGOBs940x4Wp63ZNA__tfSesEHul8gw4UWzISSsjfEiFJQsTN3Zp5ebYRl1hEew9_vKnf2pUuGNsoFq9uZf5t9JjlG-siyX9CAZKrXgyojNE'
-  //   }
-  // },
+  data () {
+    return {
+      authorizationKey : 'AAAAa_TnElc:APA91bHPwaZvdrnnFm5eG3-lcgSpJ1pWMGOBs940x4Wp63ZNA__tfSesEHul8gw4UWzISSsjfEiFJQsTN3Zp5ebYRl1hEew9_vKnf2pUuGNsoFq9uZf5t9JjlG-siyX9CAZKrXgyojNE'
+    }
+  },
     methods: {
         submitNotification(owner, requester, type, status) {
 
