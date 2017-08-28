@@ -1,0 +1,134 @@
+<template>
+  <md-layout>
+    <md-layout md-vertical-align="start" v-if="!activeUserGetter.isAnonymous" id="kn-tab">
+      <kn-header :items="items"
+                 :filters="filters"
+                 @kn-item-submitted="submitData"
+                 @kn-filter-removed="(data) => {updateFilter(data,'remove')}"
+                 @kn-filters-cleared="(data) => {updateFilter(data,'removeAll')}"
+                 @kn-search-filtered="(data) => {updateFilter(data,'add')}"
+                 @kn-search-applied="(value) => {search = value}"
+                 @kn-sorted-newest="(isNewestFirst) => {sortNewestFirst = isNewestFirst}"
+                 @kn-filtered-date="(date) => {dateFilter = date} ">
+      </kn-header>
+      <kn-content :items="filteredItems"
+                  :filters="filters"
+                  @kn-filter-applied="(data) => {updateFilter(data,'add')}">
+      </kn-content>
+    </md-layout>
+    <md-layout v-else>
+      Please log in to see the data!
+    </md-layout>
+  </md-layout>
+</template>
+<script>
+  import firebase from 'firebase';
+  import {mapActions, mapGetters} from 'vuex';
+  import {FBApp} from '@/data/firebase-config';
+  import knHeader from './KnowledgeSharingHeader'
+  import knContent from './KnowledgeSharingContent.vue'
+
+  export default{
+    components: {knHeader, knContent},
+    name: 'KnowledgeSharing',
+    data(){
+      return {
+        // {author: '', title: '', description: '', date: '', tags: [], clients: [], links: []}
+        items: [],
+        // {value: '', type: ''}
+        filters: [],
+        search: '',
+        sortNewestFirst: true,
+        dateFilter: 'all'
+      }
+    },
+    computed: {
+      ...mapGetters(['activeUserGetter', 'firebasePathGetter']),
+      filteredItems() {
+        return this.items.filter((item) => {
+          if (this.isSearchMatched(item) && this.isDateMatched(item)) {
+            for (let index in this.filters) {
+              let filter = this.filters[index];
+              if (item[filter.type]) {
+                if (item[filter.type].indexOf(filter.value) === -1) {
+                  return false;
+                }
+              } else {
+                return false;
+              }
+            }
+            return true;
+          }
+        }).sort((a, b) => {
+          if (this.sortNewestFirst) {
+            return !this.isNextItemDateAfter(a, b) ? 1 : -1;
+          }
+          return this.isNextItemDateAfter(a, b) ? 1 : -1;
+        });
+      }
+    },
+    methods: {
+      readData(){
+        this.$bindAsArray('data', FBApp.ref(this.firebasePathGetter.knowledgesharing), null, () => {
+          this.items = this.data;
+        });
+      },
+      submitData(data){
+        FBApp.ref(this.firebasePathGetter.knowledgesharing).push(data);
+        this.readData();
+      },
+      updateFilter(data, action){
+          switch (action) {
+            case 'add':
+              if (this.filters.filter(filter => (filter.type === data.type && filter.value === data.value)).length === 0) {
+                this.filters.push(data);
+              }
+              break;
+            case 'remove':
+              this.filters.splice(data, 1);
+              break;
+            case 'removeAll':
+              this.filters = [];
+              break;
+          }
+      },
+//      addToFilter(data){
+//        if (this.filters.filter(filter => (filter.type === data.type && filter.value === data.value)).length === 0) {
+//          this.filters.push(data);
+//        }
+//      },
+//      removeFilter(index){
+//        this.filters.splice(index, 1);
+//      },
+//      removeAllFilters() {
+//        this.filters = [];
+//      },
+      isSearchMatched(item) {
+        return item.title.toLowerCase().indexOf(this.search.toLowerCase()) !== -1 || item.description.toLowerCase().indexOf(this.search.toLowerCase()) !== -1;
+      },
+      isDateMatched(item){
+        if (this.dateFilter !== 'all') {
+          return this.$moment(item.date, 'DD-MM-YYYY, HH:mm:ss').isAfter(this.$moment().startOf(this.dateFilter), 'day');
+        }
+        return true;
+      },
+      isNextItemDateAfter(a, b){
+        return this.$moment(a.date, 'DD-MM-YYYY, HH:mm:ss').isAfter(this.$moment(b.date, 'DD-MM-YYYY, HH:mm:ss'), 'day');
+      }
+    },
+    activated() {
+      if (!this.activeUserGetter.isAnonymous) {
+        this.readData();
+      }
+    },
+    watch: {
+      activeUserGetter (newValue) {
+        if (!newValue.isAnonymous) {
+          this.readData();
+        }
+      }
+    }
+  }
+</script>
+<style scoped>
+</style>

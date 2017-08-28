@@ -41,12 +41,12 @@
       <kn-header-modal @kn-item-submitted="submitItem"></kn-header-modal>
     </md-layout>
     <md-layout md-flex="90">
-      <md-chip v-if="filters.length > 0" @edit="removeAllFilters" md-editable>Remove all filters
+      <md-chip v-if="filters.length > 0" @edit="removeAllFilters" md-editable class="kn-chip">Remove all filters
       </md-chip>
       <md-chip v-for="(filter,index) in filters"
                @delete="removeFilter(index)"
                md-deletable
-               :class="[filter.type === 'tags' ? 'md-primary' : 'md-accent']"
+               :class="[filter.type === 'tags' ? 'md-primary kn-chip' : 'md-accent kn-chip']"
                :key="index">
         {{ filter.value }}
       </md-chip>
@@ -123,8 +123,8 @@
     }
   }
 </script>
-<style>
-.md-menu-content.md-direction-bottom-right.md-active {
-    width: auto;
-}
+<style scoped>
+  .kn-chip {
+    margin: 1px 2px;
+  }
 </style>

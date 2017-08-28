@@ -20,7 +20,7 @@ import knContentItem from './KnowledgeSharingContentItem.vue'
     }
   }
 </script>
-<style>
+<style scoped>
   #kn-content {
     margin-top: 10px;
   }

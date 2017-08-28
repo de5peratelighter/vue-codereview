@@ -7,9 +7,9 @@
                id="kn-modal-add-item">
       <md-dialog-title>
         Add Item
-        <md-subheader>{{ date }}</md-subheader>
+        <md-subheader class="kn-subheader">{{ date }}</md-subheader>
       </md-dialog-title>
-      <md-dialog-content>
+      <md-dialog-content class="kn-dialog-content">
           <md-input-container md-clearable :class="title?'':'md-input-invalid'">
             <label>Summary</label>
             <md-input v-model="title" required maxlength="100"></md-input>
@@ -81,11 +81,11 @@
     }
   }
 </script>
-<style>
-  #kn-modal-add-item .md-dialog {
-    width: 60%;
+<style scoped>
+  #kn-modal-add-item .kn-dialog-content {
+    width: 600px;
   }
-  #kn-modal-add-item .md-subheader {
+  #kn-modal-add-item .kn-subheader {
     padding: 0;
     text-transform: uppercase;
     min-height: 30px;

@@ -5,7 +5,7 @@ import ReviewersList from '@/components/Reviewers'
 import MainConfig from '@/components/MainConfig'
 import CapacityDoc from '@/components/capacity/CapacityDoc'
 import StatsTable from '@/components/StatsTable'
-import KnowledgeSharing from '@/components/knowledgesharing/KnowldedgeSharing'
+import KnowledgeSharing from '@/components/knowledgesharing/KnowledgeSharing'
 
 Vue.use(Router)
 

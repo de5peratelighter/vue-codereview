@@ -1,5 +1,5 @@
 <template>
-  <md-card>
+  <md-card class="kn-content">
     <md-card-area>
       <md-card-content>
         <div class="kn-content-summary">
@@ -14,7 +14,7 @@
         <div v-if="showMore" class="kn-content-full-description">
           {{ item.description }}
           <div v-if="item.links" class="kn-content-links">
-            <md-subheader>Useful links</md-subheader>
+            <md-subheader class="kn-subheader">Useful links</md-subheader>
             {{ item.links }}
           </div>
           <div class="kn-toggle-more" @click="showMore = false">
@@ -22,22 +22,22 @@
           </div>
         </div>
       </md-card-content>
-      <md-card-header>
+      <md-card-header class="kn-card-header">
         <md-chip v-for="(tag,index) in item.tags"
                  @edit="filter('tags', tag)"
                  md-editable
-                 :class="isActive('tags',tag)?'kn-tag-active':'kn-tag'"
+                 :class="isActive('tags',tag)?'kn-tag-active kn-chip':'kn-tag kn-chip'"
                  :key="index">
             {{ tag }}
         </md-chip>
         <md-chip v-for="(client,index) in item.clients"
                  @edit="filter('clients', client)"
                  md-editable class="kn-client"
-                 :class="isActive('clients',client)?'kn-client-active':'kn-client'"
+                 :class="isActive('clients',client)?'kn-client-active kn-chip':'kn-client kn-chip'"
                  :key="index">
             {{ client }}
         </md-chip>
-        <md-subheader>Added by {{ item.author }}  on {{ item.date | knConvertDate }}</md-subheader>
+        <md-subheader class="kn-subheader">Added by {{ item.author }}  on {{ item.date | knConvertDate }}</md-subheader>
       </md-card-header>
     </md-card-area>
   </md-card>
@@ -90,8 +90,8 @@ export default{
   }
 }
 </script>
-<style>
-#kn-content .md-card {
+<style scoped>
+.kn-content {
   width: 100%;
   margin: 5px 0;
 }
@@ -99,47 +99,50 @@ export default{
     color: #2196f3;
     cursor: pointer;
 }
-#kn-content .kn-content-links .md-subheader {
+#kn-content .kn-content-links .kn-subheader {
     border-bottom: 1px solid rgba(0, 0, 0, 0.12);
     margin-top: 15px;
     padding: 0;
     min-height: 30px;
 }
-#kn-content .md-card .kn-content-summary {
+#kn-content .kn-content-summary {
   font-size: 16px;
   font-weight: 500;
   border-bottom: 1px solid rgba(0, 0, 0, 0.12);
   padding: 2px;
 }
-#kn-content .md-card .kn-content-description,
-#kn-content .md-card .kn-content-full-description {
+#kn-content .kn-content-description,
+#kn-content .kn-content-full-description {
   padding-top: 5px;
   white-space: pre-line;
 }
-#kn-content .md-card-header {
+#kn-content .kn-card-header {
   padding: 5px;
   margin-bottom: 0;
 }
-#kn-content .md-card-header .md-subheader {
+#kn-content .kn-card-header .kn-subheader {
   float: right;
   text-transform: uppercase;
   font-size: 13px;
 }
-#kn-tab .md-chip.kn-tag {
+#kn-tab .kn-chip {
+  margin: 1px 2px;
+}
+#kn-tab .kn-chip.kn-tag {
   color: #2196f3;
 }
-#kn-tab .md-chip.kn-client {
+#kn-tab .kn-chip.kn-client {
   color: #f44336;
 }
-#kn-tab .md-chip.kn-tag:hover,
-#kn-tab .md-chip.kn-tag:focus,
-#kn-tab .md-chip.kn-tag-active {
+#kn-tab .kn-chip.kn-tag:hover,
+#kn-tab .kn-chip.kn-tag:focus,
+#kn-tab .kn-chip.kn-tag-active {
   background-color: #2196f3;
   color: white;
 }
-#kn-tab .md-chip.kn-client:hover,
-#kn-tab .md-chip.kn-client:focus,
-#kn-tab .md-chip.kn-client-active {
+#kn-tab .kn-chip.kn-client:hover,
+#kn-tab .kn-chip.kn-client:focus,
+#kn-tab .kn-chip.kn-client-active {
   background-color: #f44336;
   color: white;
 }
