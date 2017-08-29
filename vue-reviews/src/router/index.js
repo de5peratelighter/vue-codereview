@@ -6,12 +6,13 @@ import MainConfig from '@/components/MainConfig'
 import CapacityDoc from '@/components/capacity/CapacityDoc'
 import StatsTable from '@/components/StatsTable'
 import SuperDoc from '@/components/SuperDoc'
+import KnowledgeSharing from '@/components/knowledgesharing/KnowledgeSharing'
 
 Vue.use(Router)
 
 export default new Router({
   routes: [
-    { path: '/', 
+    { path: '/',
       redirect: { name: 'CodeReview' }
     },
     {
@@ -23,13 +24,11 @@ export default new Router({
       path: '/reviewers',
       name: 'ReviewersList',
       component: ReviewersList
-      
     },
     {
       path: '/capacity',
       name: 'CapacityDoc',
       component: CapacityDoc
-      
     },
     {
       path: '/config',
@@ -45,6 +44,11 @@ export default new Router({
       path: '/super',
       name: 'SuperDoc',
       component: SuperDoc
+    },
+    {
+      path: '/knowledge',
+      name: 'KnowledgeSharing',
+      component: KnowledgeSharing
     }
   ]
 })

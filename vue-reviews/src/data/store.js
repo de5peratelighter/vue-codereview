@@ -97,7 +97,8 @@ export default new Vuex.Store({
           users : 'wow/users',
           capacity: 'wow/resources/capacityByWeek',
           notifications : 'wow/notifications',
-          guidelines: 'wow/guidelines'
+          guidelines: 'wow/guidelines',
+          knowledgesharing: 'wow/knowledgesharing'
         },
         eventAppDate : moment(),
         currentYear : Number(moment().format('YYYY')),
