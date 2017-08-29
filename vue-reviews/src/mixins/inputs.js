@@ -1,38 +1,37 @@
 export const newInstanceMixin = {
   data () {
     return {
-        pre : 'newInstance',
         codeReviewInputs : [
           {
-              id : this.pre + 'Changeset',
+              id : 'Changeset',
               label : 'New Changeset',
               val: '',
               required: true,
-              maxLength : 70
+              maxLength : 250
           }, {
-              id : this.pre + 'Ticket',
+              id : 'Ticket',
               label: 'New Ticket',
               val: '',
               required: true,
               maxLength: 70
           }, {
-              id : this.pre + 'Comment',
+              id : 'Comment',
               label: 'New Comment(optional)',
               val: '',
               required : false,
-              maxLength : 100
+              maxLength : 250
           }
         ],
         mainConfigInputs : [
           {
-              id : this.pre + 'Token',
+              id : 'Token',
               label : 'Token',
               val: '',
               required: true,
               maxLength : 70
           },
           {
-              id : this.pre + 'Alias',
+              id : 'Alias',
               label : 'Alias',
               val: '',
               required: true,

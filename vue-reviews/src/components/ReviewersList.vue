@@ -200,6 +200,6 @@
 </script>
 <style scoped>
     .padding40p {
-        padding: 40px;
+        padding: 40px 3px;
     }
 </style>

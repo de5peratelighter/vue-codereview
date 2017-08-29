@@ -5,6 +5,7 @@ import ReviewersList from '@/components/Reviewers'
 import MainConfig from '@/components/MainConfig'
 import CapacityDoc from '@/components/capacity/CapacityDoc'
 import StatsTable from '@/components/StatsTable'
+import SuperDoc from '@/components/SuperDoc'
 
 Vue.use(Router)
 
@@ -39,6 +40,11 @@ export default new Router({
       path: '/stats',
       name: 'StatsTable',
       component: StatsTable
+    },
+    {
+      path: '/super',
+      name: 'SuperDoc',
+      component: SuperDoc
     }
   ]
 })
