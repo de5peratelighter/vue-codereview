@@ -6,7 +6,7 @@ Vue.use(Vuex)
 import moment from 'moment-timezone'
 moment.tz.guess()
 
-import {GET_FBASE, LOGIN_ME, UPDATE_NUM, GET_REVIEWERS, GET_HOLIDAYS, GET_CAPACITY, SET_MONTH, SET_YEAR, GET_TODAYREVIEWERS, SET_FOCUSED_CELL} from './mutation-types'
+import {GET_FBASE, LOGIN_ME, UPDATE_NUM, GET_REVIEWERS, GET_HOLIDAYS, GET_CAPACITY, SET_MONTH, SET_YEAR, GET_TODAYREVIEWERS, SET_FOCUSED_CELL, SET_IS_EDITING} from './mutation-types'
 
 export default new Vuex.Store({
     state : {
@@ -75,6 +75,8 @@ export default new Vuex.Store({
             "username" : "user1"
           },
         },
+        editableItemClass: 'capacity-editable',
+        isEditing: false,
         revs : "", // List of reviewers, filled upon login
         holidays : "", // List of holidays, filled upon login
         reviewersPerDay : 3, // Number of reviewers per day
@@ -215,16 +217,22 @@ export default new Vuex.Store({
         focusedUserGetter: (state) => {
           return state.focusedCell.user;
         },
-        focusedDayGetter: (state) => {
-          return state.focusedCell.day;
+        focusedCellGetter: (state) => {
+          return state.focusedCell.cell
+        },
+        editableItemClassGetter: (state) => {
+          return state.editableItemClass;
+        },
+        isEditingGetter: (state) => {
+          return state.isEditing;
         }
     },
     mutations : {
       [GET_CAPACITY] (state, payload) {
         state.capacity = payload
       },
-      [GET_CAPACITY] (state, payload) {
-        state.capacity = payload
+      [SET_IS_EDITING] (state, payload) {
+        state.isEditing = payload;
       },
       [GET_FBASE] (state, payload) {
         state.items = payload
@@ -260,6 +268,9 @@ export default new Vuex.Store({
       },
       [GET_CAPACITY] (store, payload) {
         store.commit(GET_CAPACITY, payload)
+      },
+      [SET_IS_EDITING] (store, payload) {
+        store.commit(SET_IS_EDITING, payload)
       },
       [GET_FBASE] (store, payload) {
         store.commit(GET_FBASE, payload)
