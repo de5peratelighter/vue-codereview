@@ -45,7 +45,7 @@
               <md-layout>
                 <md-card-content>
                   
-                <md-button :id="'dialog'+key" @click="updateDialog(key,'open')"> <md-icon v-if="item.comment||item.reviewerComment">chat_bubble</md-icon> <md-icon v-else>chat_bubble_outline</md-icon> </md-button>
+                <md-button :id="'dialog'+key" @click="updateDialog(key,'open')"> <md-icon v-if="item.comment||item.rc">chat_bubble</md-icon> <md-icon v-else>chat_bubble_outline</md-icon> </md-button>
                 
                   <md-dialog :md-open-from="'#dialog'+key" :md-close-to="'#dialog'+key" :ref="String(key)"> <!-- String(key) removes dialog undefined bug with the zero-index key -->
                   
@@ -57,12 +57,20 @@
                       <md-dialog-title>From reviewer</md-dialog-title>
                       <md-dialog-content>{{ item.rc }}</md-dialog-content>
                     </div>
-                    <md-dialog-content>
+                    <div v-if="!item.rc && !item.comment">
+                      <md-dialog-content>No comments yet.</md-dialog-content>
+                    </div>
+                    <md-dialog-content v-if="canAddComments(item)">
                       <md-input-container>
                           <label :for="'label'+key">New comment</label>
                           <md-textarea :id="'#label'+key" v-model="newInput"></md-textarea>
                           <md-button class="md-primary" @click="updateComment(item)">Add</md-button>
+                          <md-tooltip md-direction="bottom">
+                            <template v-if="item.username === activeUserGetter.alias">{{ownerCommentMessage}}</template>
+                            <template v-else-if="item.reviewer === activeUserGetter.alias">{{reviewerCommentMessage}}</template>
+                          </md-tooltip>
                       </md-input-container>
+
                     </md-dialog-content>
                     <md-dialog-actions>
                       <md-button class="md-primary" @click="updateDialog(key,'close')">Ok</md-button>
@@ -73,12 +81,16 @@
               </md-layout>
               
               <md-layout>
-                <md-input-container class="width75">
+                <md-input-container>
                   <label for="status" style="color:inherit">{{ item.reviewer ? item.reviewer : 'Codereviewer will set the status' }}</label>
-                  <md-select :disabled="!levelReviewer(activeUserGetter.role)" name="status" v-model="item.status">
+                  <md-select :disabled="cantChangeStatus(item.username)" name="status" v-model="item.status" class="width80" md-flex-offset="50">
                     <md-option v-for="option in selectOptions" :key="option.id" :value="option.name" @selected="onSelectChange(item)">{{option.name}}</md-option>
                   </md-select>
+                  <md-button :disabled="canRemoveInstance(item.username)" class="md-icon-button" @click="removeInstance(item)">
+                    <md-icon style="color:inherit">delete_forever</md-icon>
+                  </md-button>
                 </md-input-container>
+                
               </md-layout>
               
             </md-layout>
@@ -113,14 +125,17 @@ export default {
       initialMessage: 'This is dummy data, please LOG IN to get the real one',
       noaccessMessage : 'Ask PM to activate your account(via skype, hipchat)',
       welcomeMessage: 'Welcome!',
+      ownerCommentMessage : "* Your comment will show/replace 'From Author' comment section",
+      reviewerCommentMessage : "* Your comment will show/replace 'From Reviewer' comment section",
       newInput : '',
       newInstanceRequiredWord: 'bazaarvoice',
       DEFAULT_DATA : this.$store.state.items,
       selectOptions :  [
         { id: 1, name: 'New' },
         { id: 2, name: 'Looking' },
-        { id: 3, name: 'Good' },
-        { id: 4, name: 'NotOK' }],
+        { id: 3, name: 'Questions'},
+        { id: 4, name: 'Good' },
+        { id: 5, name: 'NotOK' }],
       reviewers : []
     }
   },
@@ -137,10 +152,21 @@ export default {
     getData () {
       this.$bindAsArray('itemsArray', FBApp.ref(this.firebasePathGetter.main).limitToLast(Number(this.displayNumGetter)), null, () => {
         this[GET_FBASE](this.itemsArray)
-        // this.$bindAsObject('todayReviewersArray', FBApp.ref(this.firebasePathGetter.schedule).child(this.today.format('YYYY-MM-DD')), null, () => {
-        //   this.reviewers = this.todayReviewersArray['.value'].split(',').slice(0,-1)
-        // })
       })
+    },
+    canAddComments (item) {
+      return item.username === this.activeUserGetter.alias || item.reviewer === this.activeUserGetter.alias
+    },
+    removeInstance (item) {
+      if (this.activeUserGetter.alias === item.username) { // another final verification
+        FBApp.ref(this.firebasePathGetter.main +"/" + item['.key']).set({})
+      }
+    },
+    cantChangeStatus (name) {
+      return !this.levelReviewer(this.activeUserGetter.role) || (this.activeUserGetter.alias === name)
+    },
+    canRemoveInstance (name) {
+      return !(this.activeUserGetter.alias === name)
     },
     truncContent (el, typer) {
       // TIME - for compatibility with old dates $moment is provided with additional parameter (from old Polymer project w/o $moment in place)
@@ -151,7 +177,7 @@ export default {
       )
     },
     onSelectChange (el) {
-      if (event && el['.key'] && !this.activeUserGetter.isAnonymous && this.levelReviewer(this.activeUserGetter.role)) {
+      if (el['.key'] && this.levelReviewer(this.activeUserGetter.role)) {
         FBApp.ref(this.firebasePathGetter.main +"/" + el['.key']).update({status: el.status, reviewer : this.activeUserGetter.alias}).then(()=> {
            this.$bindAsObject('itemOwner', FBApp.ref(this.firebasePathGetter.notifications + '/' + el.username), null, () => {
              if (this.itemOwner.token) { 
@@ -220,8 +246,8 @@ export default {
   a, a:visited, a:hover, a:active {
     color: inherit;
   }
-  .width75 {
-    width: 75%;
+  .width80 {
+    width: 80%;
   }
   .instance {
     height: 81px !important;
@@ -245,5 +271,8 @@ export default {
   }      
   .NotOK {
     background: #f44336 !important;
+  }
+  .Questions {
+    background: #8E7CC3 !important;
   }
 </style>

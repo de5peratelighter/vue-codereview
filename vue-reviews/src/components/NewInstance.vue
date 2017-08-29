@@ -3,7 +3,7 @@
     
         <md-layout>
             <md-layout v-for="(item, index) in inputs" :key="index">
-                <md-input-container>
+                <md-input-container class="side-margin">
                     <label :for="item.id">{{item.label}}</label>
                     <md-input :id="item.id" v-model="item.val" :required="item.required" :maxlength="item.maxLength"></md-input>
                 </md-input-container>
@@ -47,18 +47,17 @@
         data () {
             return {
                 inputsInvalid : true,
-                reviewers : [],
-                workingHours : ['10,11,12' , '13,14,15' , '16,17']
+                reviewers : []
             }
         },
         computed : {
-            ...mapGetters(['activeUserGetter','firebasePathGetter']),
+            ...mapGetters(['activeUserGetter','firebasePathGetter', 'workingHoursGetter']),
             disableSubmit () {
                 return this.inputsInvalid
             },
             today () {
               return this.$store.state.eventAppDate
-            },
+            }
         },
         watch: {
             inputs : {
@@ -95,10 +94,10 @@
                         if (this.inputs[2].val) { newData.comment = this.inputs[2].val }
                         
                         FBApp.ref(this.path).push(newData).then(() => {
-                            let currentReviewer = this.reviewers[ this.workingHours.findIndex((el,index) => el.includes(this.$moment().hours()))]
+                            let currentReviewer = this.reviewers[ this.workingHoursGetter.findIndex((el,index) => el.includes(this.$moment().hours()))]
                             
                             this.$bindAsObject('currentReviewerToken', FBApp.ref(this.firebasePathGetter.notifications+"/"+currentReviewer), null, () => {
-                                if (this.currentReviewerToken) {
+                                if (this.currentReviewerToken.token) {
                                     this.submitNotification(this.currentReviewerToken, this.activeUserGetter, "informReviewer") // from 'notificationMixin'
                                 }
                             })
@@ -141,3 +140,9 @@
         }
     }
 </script>
+<style scoped>
+    .side-margin {
+        margin-left: 3px;
+        margin-right: 3px;
+    }
+</style>

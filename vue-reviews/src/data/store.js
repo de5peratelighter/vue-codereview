@@ -105,11 +105,15 @@ export default new Vuex.Store({
         currentMonth : Number(moment().format('M')),
         currentWeek : Number(moment().week()),
         eventFormActive : false,
-        activeReviewers : []
+        activeReviewers : [],
+        workingHours : ['10,11,12' , '13,14,15' , '16,17']
     },
     getters : {
         firebasePathGetter : (state) => {
           return state.firePath
+        },
+        workingHoursGetter : (state) => {
+          return state.workingHours
         },
         activeUserGetter : (state) => {
           return state.activeUser

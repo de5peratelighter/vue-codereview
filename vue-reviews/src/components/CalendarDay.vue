@@ -5,7 +5,7 @@
             <span class="day__number">{{day.format('D')}}</span>
             <ul class="day__schedule">
                 <li v-for="(item, index) in schedule" :key="index">
-                    {{item}}
+                    <span> {{item}}<md-tooltip md-delay="400" md-direction="right">Review hours: {{workingHoursGetter[index]}}</md-tooltip></span>
                 </li>
             </ul>
         </div>
@@ -50,7 +50,7 @@
             }
         },
         computed: {
-            ...mapGetters(['firebasePathGetter','revPerDayGetter','activeUserGetter', 'revsGetter']),
+            ...mapGetters(['firebasePathGetter','revPerDayGetter','activeUserGetter', 'revsGetter', 'workingHoursGetter']),
             classObject () {
                 let eventFormDate = this.$store.state.eventAppDate
                 let eventFormActive = this.$store.state.eventFormActive

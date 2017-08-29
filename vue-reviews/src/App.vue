@@ -13,7 +13,7 @@
 
             <md-layout md-flex="55" :class="{ hidden: hiddenInputs.search }">
               <md-input-container md-inline>
-                <label>Number of instances</label>
+                <label>Ticket name contains</label>
                 <md-input v-model="search"></md-input>
                 <md-button class="md-icon-button" @click="findChanges(search)">
                   <md-icon>update</md-icon>
@@ -89,7 +89,8 @@ export default {
         { title: 'CapacityDoc', icon: 'alarm_add', name: 'CapacityDoc' },
         { title: 'Stats', icon : 'data_usage', name: 'StatsTable'},
         { title: 'Config', icon: 'settings', name: 'MainConfig' },
-        { title: 'Knowledge Sharing', icon: 'view_stream', name: 'KnowledgeSharing'}
+        { title: 'Knowledge Sharing', icon: 'view_stream', name: 'KnowledgeSharing'},
+        { title: 'SuperDoc', icon: 'book', name: 'SuperDoc' },
       ],
       hiddenInputs : {
         search : true,
