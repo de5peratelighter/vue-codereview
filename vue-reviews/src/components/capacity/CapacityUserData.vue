@@ -23,4 +23,12 @@ export default {
   flex: 0 0 20%;
   flex-wrap: nowrap;
 }
+  .capacity-cell {
+    border-right: 2px solid green;
+    border-bottom: 2px solid green;
+  }
+    .capacity-cell span {
+      text-align: center;
+      flex: 0 0 100%;
+    }
 </style>

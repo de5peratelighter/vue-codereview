@@ -33,36 +33,27 @@ export default {
 </script>
 
 <style scoped>
-  * {
-    font-size: 12px;
-  }
-   div :focus {
-    outline: 5px solid blue;
-  }
-    input:focus {
-      outline: 5px solid yellow;
-    }
-  .capacity-row {
-    flex-wrap: nowrap;
-    word-break: break-all;
-    flex: 0 0 100%;
-  }
+.capacity-row {
+  flex-wrap: nowrap;
+  word-break: break-all;
+  flex: 0 0 100%;
+}
   .capacity-week {
     flex-wrap: nowrap;
   }
-  .capacity-day {
-    flex: 0 0 20%;
-  }
+    .capacity-day {
+      flex: 0 0 20%;
+    }
     .capacity-day-name {
       flex: 0 0 100%;
       flex-wrap: nowrap;
     }
-.capacity-cell {
-  border-right: 2px solid green;
-  border-bottom: 2px solid green;
-}
-  .capacity-cell span {
-    text-align: center;
-    flex: 0 0 100%;
-  }
+    .capacity-cell {
+      border-right: 2px solid green;
+      border-bottom: 2px solid green;
+    }
+      .capacity-cell span {
+        text-align: center;
+        flex: 0 0 100%;
+      }
 </style>

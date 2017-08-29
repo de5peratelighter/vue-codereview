@@ -6,7 +6,7 @@ Vue.use(Vuex)
 import moment from 'moment-timezone'
 moment.tz.guess()
 
-import {GET_FBASE, LOGIN_ME, UPDATE_NUM, GET_REVIEWERS, GET_HOLIDAYS, GET_CAPACITY, SET_MONTH, SET_YEAR, GET_TODAYREVIEWERS, SET_FOCUSED_CELL} from './mutation-types'
+import {GET_FBASE, LOGIN_ME, UPDATE_NUM, GET_REVIEWERS, GET_HOLIDAYS, GET_CAPACITY, SET_MONTH, SET_YEAR, GET_TODAYREVIEWERS, SET_FOCUSED_CELL, SET_IS_EDITING} from './mutation-types'
 
 export default new Vuex.Store({
     state : {
@@ -75,6 +75,8 @@ export default new Vuex.Store({
             "username" : "user1"
           },
         },
+        editableItemClass: 'capacity-editable',
+        isEditing: false,
         revs : "", // List of reviewers, filled upon login
         holidays : "", // List of holidays, filled upon login
         reviewersPerDay : 3, // Number of reviewers per day
@@ -205,51 +207,37 @@ export default new Vuex.Store({
             }
           }
         },
-        usersByTeam: (state) => (team) => {
-          // => TODO
-/*           let capacity = state.capacity;
-          let capacityLength = capacity.length;
-          let splitCapacity;
-          let currentUser;
-          let index;
-          for(let i = 0; i < capacityLength; i++) {
-            currentUser = capacity[i]['.key']
-            if(currentUser === user) {
-              splitCapacity = capacity[i]['.value'].split('|');
-              break;
+        capacityByTeamGetter: (state) => (team) => {
+          let capacity = state.capacity;
+          let teamCapacity = [];
+          capacity.forEach((val, index) => {
+            let currentUser = capacity[index]['.key'];
+            let splitCapacity = capacity[index]['.value'].split('||');
+            if(splitCapacity[1] === team) {
+              teamCapacity.push(splitCapacity[0]);
             }
-          }
-          switch (type) {
-            case 'requested':
-              index = 0;
-              break;
-            case 'received':
-              index = 1;
-              break;
-            case 'tickets':
-              index = 2;
-              break;
-          }
-          if (type !== undefined) {
-            return splitCapacity[index].split(',');
-          } else {
-            return splitCapacity;
-          } */
-
+          })
+          return teamCapacity;
         },
         focusedUserGetter: (state) => {
           return state.focusedCell.user;
         },
-        focusedDayGetter: (state) => {
-          return state.focusedCell.day;
+        focusedCellGetter: (state) => {
+          return state.focusedCell.cell
+        },
+        editableItemClassGetter: (state) => {
+          return state.editableItemClass;
+        },
+        isEditingGetter: (state) => {
+          return state.isEditing;
         }
     },
     mutations : {
       [GET_CAPACITY] (state, payload) {
         state.capacity = payload
       },
-      [GET_CAPACITY] (state, payload) {
-        state.capacity = payload
+      [SET_IS_EDITING] (state, payload) {
+        state.isEditing = payload;
       },
       [GET_FBASE] (state, payload) {
         state.items = payload
@@ -285,6 +273,9 @@ export default new Vuex.Store({
       },
       [GET_CAPACITY] (store, payload) {
         store.commit(GET_CAPACITY, payload)
+      },
+      [SET_IS_EDITING] (store, payload) {
+        store.commit(SET_IS_EDITING, payload)
       },
       [GET_FBASE] (store, payload) {
         store.commit(GET_FBASE, payload)

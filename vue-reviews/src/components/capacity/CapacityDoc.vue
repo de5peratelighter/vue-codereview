@@ -46,7 +46,7 @@ export default {
       }
     }
   },
-  activated () {
+  created () {
     if (!this.activeUserGetter.isAnonymous) {
       this.getCapacityData();
     } else {

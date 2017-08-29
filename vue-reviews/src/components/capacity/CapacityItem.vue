@@ -1,9 +1,9 @@
 <template>
   <div class="capacity-cell capacity-editable-data">
-    <div v-if="!editing" class="capacity-data-wrapper" tabindex="2" @focus="setFocusedUser" @blur="unsetFocusedUser" @keyup="startEditData" @dblclick="startEditData">
+    <div v-show="!editing" class="capacity-data-wrapper" :class="editableItemClassGetter" ref="focusedCell" tabindex="2" @focus="setFocusedUser" @blur="unsetFocusedUser" @keyup="startEditData" @dblclick="startEditData">
       <span>{{ data }}</span>
     </div>
-    <input type="text" class="capacity-data-wrapper" tabindex="2" v-if="editing" @focus="setFocusedUser" @blur="inputBlurred" @keydown="editData"/>
+    <input type="text" class="capacity-data-wrapper" tabindex="2" ref="focusedInput" v-if="editing" @focus="setFocusedUser" @blur="inputBlurred" @keydown="editData"/>
   </div>
 </template>
 
@@ -13,11 +13,13 @@ import firebase from 'firebase';
 import { mapActions, mapGetters } from 'vuex';
 
 import { FBApp } from '@/data/firebase-config';
-import { SET_FOCUSED_CELL } from '@/data/mutation-types';
+import { SET_FOCUSED_CELL, SET_IS_EDITING } from '@/data/mutation-types';
+import { navigationMixin } from './mixins/navigation';
 
 export default {
   name: 'CapacityItem',
   props: ['user', 'type', 'day', 'data'],
+  mixins: [navigationMixin],
   data() {
     return {
       focused: false,
@@ -25,16 +27,17 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['firebasePathGetter', 'capacityByUserGetter', 'activeUserGetter']),
+    ...mapGetters(['firebasePathGetter', 'capacityByUserGetter', 'activeUserGetter', 'editableItemClassGetter']),
   },
   methods: {
-    ...mapActions([SET_FOCUSED_CELL]),
+    ...mapActions([SET_FOCUSED_CELL, SET_IS_EDITING]),
     setFocusedUser(event) {
-      this[SET_FOCUSED_CELL]({
-        user: this.user,
-        type: this.type,
-        day: this.day
-      });
+      this[SET_FOCUSED_CELL](
+        {
+          cell: this.$refs.focusedCell,
+          user: this.user
+        }
+      );
     },
     getUpdatedString(value) {
       let capacityArray = this.capacityByUserGetter(this.user).split('|');
@@ -68,28 +71,38 @@ export default {
       this[SET_FOCUSED_CELL]({});
     },
     startEditData(event) {
-      let allowedKey = /\d/;
+      if(event.type === 'dblclick'){
+        this[SET_IS_EDITING](true);
+      }
+      const allowedKey = /^\d/;
       if(!allowedKey.test(event.key) && event.type !== 'dblclick' || this.activeUserGetter.isAnonymous === true) {
         return;
       }
       this.editing = true;
       this.$nextTick(() => {
-        this.$el.getElementsByTagName('input')[0].focus();
-        this.$el.getElementsByTagName('input')[0].value = event.key ? event.key : this.data;
+        this.$refs.focusedInput.focus();
+        this.$refs.focusedInput.value = event.key ? event.key : this.data;
       });
     },
     inputBlurred(event) {
       this.editing = false;
+      this[SET_IS_EDITING](false);
       this.submitUpdate(event.target.value);
     },
     editData(event) {
       if(event.keyCode === 13) {
-        console.log('TODO =====> check whether new data is different from the old one and handle data SUBMISSION, if necessary, and move focus to the cell below');
+        const cells = document.querySelectorAll(`.${this.editableItemClassGetter}`);
+        const cellsArray = Array.prototype.slice.call(cells, 0);
+        const focusedCell = this.$refs.focusedCell;
+        const nextCell = this.skipCells(cellsArray, focusedCell, 15);
+        if(nextCell) {
+          nextCell.focus();
+        }
       } else if(event.keyCode === 27) {
         event.target.value = this.data;
         this.editing = false;
         this.$nextTick(() => {
-          this.$el.getElementsByTagName('div')[0].focus();
+          this.$refs.focusedCell.focus();
         });
       }
     }
@@ -98,26 +111,36 @@ export default {
 </script>
 
 <style scoped>
-.capacity-subteam {
-  flex: 0 0 100%;
-  border-bottom: 2px solid purple;
+div:focus {
+  outline: 5px solid blue;
+}
+input:focus {
+  outline: 5px solid yellow;
 }
 .capacity-editable-data {
   display: flex;
   flex: 0 0 33.333%;
   align-items: stretch;
 }
-
-.capacity-data-wrapper {
-  flex: 0 0 100%;
-  display: flex;
-  align-items: center;
+.capacity-cell {
+  border-right: 2px solid green;
+  border-bottom: 2px solid green;
 }
-
-input.capacity-data-wrapper {
-  width: 100%;
-  border: none;
-  text-align: center;
-  background-color: transparent;
-}
+  .capacity-cell span {
+    font-size: 12px;
+    font-family: Roboto, "Noto Sans", Noto, sans-serif;
+    text-align: center;
+    flex: 0 0 100%;
+  }
+  .capacity-data-wrapper {
+    flex: 0 0 100%;
+    display: flex;
+    align-items: center;
+  }
+  input.capacity-data-wrapper {
+    width: 100%;
+    border: none;
+    text-align: center;
+    background-color: transparent;
+  }
 </style>
