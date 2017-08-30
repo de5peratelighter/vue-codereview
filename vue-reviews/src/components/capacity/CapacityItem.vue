@@ -13,7 +13,7 @@ import firebase from 'firebase';
 import { mapActions, mapGetters } from 'vuex';
 
 import { FBApp } from '@/data/firebase-config';
-import { SET_FOCUSED_CELL, SET_IS_EDITING } from '@/data/mutation-types';
+import { SET_FOCUSED_CELL, SET_IS_EDITING, SET_COPY_CACHE } from '@/data/mutation-types';
 import { navigationMixin } from './mixins/navigation';
 
 export default {
@@ -23,14 +23,18 @@ export default {
   data() {
     return {
       focused: false,
-      editing: false
+      editing: false,
+      prevKey: {
+        timestamp: '',
+        key: ''
+      }
     }
   },
   computed: {
-    ...mapGetters(['firebasePathGetter', 'capacityByUserGetter', 'activeUserGetter', 'editableItemClassGetter']),
+    ...mapGetters(['firebasePathGetter', 'capacityByUserGetter', 'activeUserGetter', 'editableItemClassGetter', 'copyCacheGetter']),
   },
   methods: {
-    ...mapActions([SET_FOCUSED_CELL, SET_IS_EDITING]),
+    ...mapActions([SET_FOCUSED_CELL, SET_IS_EDITING, SET_COPY_CACHE]),
     setFocusedUser(event) {
       this[SET_FOCUSED_CELL](
         {
@@ -40,7 +44,7 @@ export default {
       );
     },
     getUpdatedString(value) {
-      let capacityArray = this.capacityByUserGetter(this.user).split('|');
+      const capacityArray = this.capacityByUserGetter(this.user).split('|');
       let index;
       switch (this.type) {
         case 'requested':
@@ -53,13 +57,13 @@ export default {
           index = 2;
           break;
       }
-      let splitCapacity = capacityArray[index].split(',');
+      const splitCapacity = capacityArray[index].split(',');
       splitCapacity[this.day] = value;
       capacityArray[index] = splitCapacity.join(',');
       return capacityArray
     },
     submitUpdate(value) {
-      let updatedData = {};
+      const updatedData = {};
       if(value === this.data) {
         return;
       }
@@ -71,18 +75,35 @@ export default {
       this[SET_FOCUSED_CELL]({});
     },
     startEditData(event) {
+      if(event.key === 'c' && this.checkCtrl()){
+          this[SET_COPY_CACHE](this.data)
+      }
+      if(event.key === 'v' && this.checkCtrl()){
+          if(this.copyCacheGetter !== null) {
+            this.submitUpdate(this.copyCacheGetter);
+          }
+      }
       if(event.type === 'dblclick'){
         this[SET_IS_EDITING](true);
       }
-      const allowedKey = /^\d/;
+      if(event.key === 'Delete'){
+        this.submitUpdate('');
+      }
+      this.prevKey.key = event.key;
+      this.prevKey.timestamp = Date.now();
+      const allowedKey = /^\d|^o|^s/;
       if(!allowedKey.test(event.key) && event.type !== 'dblclick' || this.activeUserGetter.isAnonymous === true) {
         return;
       }
       this.editing = true;
       this.$nextTick(() => {
-        this.$refs.focusedInput.focus();
-        this.$refs.focusedInput.value = event.key ? event.key : this.data;
+        const focusedInput = this.$refs.focusedInput;
+        focusedInput.focus();
+        focusedInput.value = event.key ? event.key : this.data;
       });
+    },
+    checkCtrl() {
+      return this.prevKey.key === 'Control' && (Date.now() - this.prevKey.timestamp) < 500
     },
     inputBlurred(event) {
       this.editing = false;
@@ -90,19 +111,25 @@ export default {
       this.submitUpdate(event.target.value);
     },
     editData(event) {
-      if(event.keyCode === 13) {
+      const focusedCell = this.$refs.focusedCell;
+      if(event.key === 'Enter' || event.key === 'NumEnter') {
         const cells = document.querySelectorAll(`.${this.editableItemClassGetter}`);
         const cellsArray = Array.prototype.slice.call(cells, 0);
-        const focusedCell = this.$refs.focusedCell;
         const nextCell = this.skipCells(cellsArray, focusedCell, 15);
         if(nextCell) {
           nextCell.focus();
+        } else {
+          this.editing = false;
+          this[SET_IS_EDITING](false);
+          this.$nextTick(() => {
+            focusedCell.focus();
+          });
         }
-      } else if(event.keyCode === 27) {
+      } else if(event.key === 'Escape') {
         event.target.value = this.data;
         this.editing = false;
         this.$nextTick(() => {
-          this.$refs.focusedCell.focus();
+          focusedCell.focus();
         });
       }
     }

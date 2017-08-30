@@ -12,7 +12,7 @@ import CapacityTeamDaily from './CapacityTeamDaily';
 import CapacitySubteam from './CapacitySubteam';
 
 export default {
-  name: 'CapacityTableBody',
+  name: 'CapacityTableTeam',
   props: ['team'],
   computed: {
     ...mapGetters(['leadsByTeamGetter'])

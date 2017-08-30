@@ -1,13 +1,13 @@
 <template>
   <md-layout md-row class="capacity-data-container">
     <div md-vertical-align="center" class="capacity-data capacity-cell">
-      <span v-if="requested">{{ requested }}</span>
+      <span>{{ requested }}</span>
     </div>
     <div md-vertical-align="center" class="capacity-data capacity-cell">
-      <span v-if="received">{{ received }}</span>
+      <span>{{ received }}</span>
     </div>
     <div md-vertical-align="center" class="capacity-data capacity-cell">
-      <span v-if="tickets">{{ tickets }}</span>
+      <span>{{ tickets }}</span>
     </div>
   </md-layout>
 </template>
