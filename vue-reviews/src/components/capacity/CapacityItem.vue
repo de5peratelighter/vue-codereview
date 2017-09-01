@@ -82,13 +82,13 @@ export default {
       this[SET_FOCUSED_CELL]({});
     },
     startEditData(event) {
-      if(event.key === 'c' && this.checkCtrl(event)){
+      if(event.keyCode === 67 && this.checkCtrl(event)){
         this[SET_COPY_CACHE]({
           data: this.data,
           el: this.$refs.focusedCell
         })
       }
-      if(event.key === 'v' && this.checkCtrl(event)){
+      if(event.keyCode === 86 && this.checkCtrl(event)){
           if(this.copyCacheGetter.data !== undefined) {
             this.submitUpdate(this.copyCacheGetter.data);
           }
