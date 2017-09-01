@@ -6,7 +6,7 @@ Vue.use(Vuex)
 import moment from 'moment-timezone'
 moment.tz.guess()
 
-import {GET_FBASE, LOGIN_ME, UPDATE_NUM, GET_REVIEWERS, GET_HOLIDAYS, GET_CAPACITY, SET_MONTH, SET_YEAR, GET_TODAYREVIEWERS, SET_FOCUSED_CELL, SET_IS_EDITING} from './mutation-types'
+import {GET_FBASE, LOGIN_ME, UPDATE_NUM, GET_REVIEWERS, GET_HOLIDAYS, GET_CAPACITY, SET_MONTH, SET_YEAR, GET_TODAYREVIEWERS, SET_FOCUSED_CELL, SET_IS_EDITING, SET_COPY_CACHE} from './mutation-types'
 
 export default new Vuex.Store({
     state : {
@@ -77,6 +77,10 @@ export default new Vuex.Store({
         },
         editableItemClass: 'capacity-editable',
         isEditing: false,
+        copyCache: {
+          el: null,
+          data: ''
+        },
         revs : "", // List of reviewers, filled upon login
         holidays : "", // List of holidays, filled upon login
         reviewersPerDay : 3, // Number of reviewers per day
@@ -230,6 +234,9 @@ export default new Vuex.Store({
         },
         isEditingGetter: (state) => {
           return state.isEditing;
+        },
+        copyCacheGetter: (state) => {
+          return state.copyCache;
         }
     },
     mutations : {
@@ -238,6 +245,10 @@ export default new Vuex.Store({
       },
       [SET_IS_EDITING] (state, payload) {
         state.isEditing = payload;
+      },
+      [SET_COPY_CACHE] (state, payload) {
+        state.copyCache.data = payload.data;
+        state.copyCache.el = payload.el;
       },
       [GET_FBASE] (state, payload) {
         state.items = payload
@@ -276,6 +287,9 @@ export default new Vuex.Store({
       },
       [SET_IS_EDITING] (store, payload) {
         store.commit(SET_IS_EDITING, payload)
+      },
+      [SET_COPY_CACHE] (store, payload) {
+        store.commit(SET_COPY_CACHE, payload)
       },
       [GET_FBASE] (store, payload) {
         store.commit(GET_FBASE, payload)

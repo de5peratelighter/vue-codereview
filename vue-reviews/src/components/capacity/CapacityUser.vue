@@ -1,6 +1,6 @@
 <template>
   <md-layout md-row md-flex class="capacity-row" :class="{focused: focusedUserGetter === user}">
-    <capacity-user-data :user="user"></capacity-user-data>
+    <capacity-user-data :user="user" :assignedTeam="assignedTeam" :testing="testing"></capacity-user-data>
     <md-layout class="capacity-week">
       <md-layout class="capacity-day" v-for="n in 5" :n="n" :key="n">
         <md-layout md-row class="capacity-data-container">
@@ -28,6 +28,8 @@ export default {
       requestedCapacity: [],
       receivedCapacity: [],
       ticketsCapacity: [],
+      assignedTeam: '',
+      testing: ''
     }
   },
   computed: {
@@ -38,10 +40,13 @@ export default {
   },
   methods: {
     splitCapacity(capacityString) {
-      let capacityArray = capacityString.split('|');
-      this.requestedCapacity = capacityArray[0].split(',');
-      this.receivedCapacity = capacityArray[1].split(',');
-      this.ticketsCapacity = capacityArray[2].split(',');
+      const capacityArray = capacityString.split('||');
+      this.assignedTeam = capacityArray[3];
+      this.testing = capacityArray[4];
+      const capacityData = capacityArray[0].split('|')
+      this.requestedCapacity = capacityData[0].split(',');
+      this.receivedCapacity = capacityData[1].split(',');
+      this.ticketsCapacity = capacityData[2].split(',');
     }
   },
   watch: {
