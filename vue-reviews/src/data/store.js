@@ -78,8 +78,8 @@ export default new Vuex.Store({
         editableItemClass: 'capacity-editable',
         isEditing: false,
         copyCache: {
-          el: undefined,
-          data: undefined
+          el: null,
+          data: ''
         },
         revs : "", // List of reviewers, filled upon login
         holidays : "", // List of holidays, filled upon login

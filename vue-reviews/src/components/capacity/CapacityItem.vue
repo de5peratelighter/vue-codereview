@@ -33,7 +33,7 @@ export default {
   computed: {
     ...mapGetters(['firebasePathGetter', 'capacityByUserGetter', 'activeUserGetter', 'editableItemClassGetter', 'copyCacheGetter']),
     isCopied() {
-      if(this.copyCacheGetter.el) {
+      if(this.copyCacheGetter.el !== null) {
       return this.copyCacheGetter.el === this.$refs.focusedCell
 
       }
@@ -89,7 +89,7 @@ export default {
         })
       }
       if(event.keyCode === 86 && this.checkCtrl(event)){
-          if(this.copyCacheGetter.data !== undefined) {
+          if(this.copyCacheGetter.el !== null) {
             this.submitUpdate(this.copyCacheGetter.data);
           }
       }

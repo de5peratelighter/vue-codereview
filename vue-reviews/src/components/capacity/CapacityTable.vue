@@ -48,7 +48,10 @@ export default {
         }
       }
       if(event.key === 'Escape'){
-        this[SET_COPY_CACHE]({});
+        this[SET_COPY_CACHE]({
+          data: null,
+          el: null
+        });
       }
     },
     isArrow(key) {
