@@ -77,7 +77,10 @@ export default new Vuex.Store({
         },
         editableItemClass: 'capacity-editable',
         isEditing: false,
-        copyCache: null,
+        copyCache: {
+          el: undefined,
+          data: undefined
+        },
         revs : "", // List of reviewers, filled upon login
         holidays : "", // List of holidays, filled upon login
         reviewersPerDay : 3, // Number of reviewers per day
@@ -239,7 +242,8 @@ export default new Vuex.Store({
         state.isEditing = payload;
       },
       [SET_COPY_CACHE] (state, payload) {
-        state.copyCache = payload;
+        state.copyCache.data = payload.data;
+        state.copyCache.el = payload.el;
       },
       [GET_FBASE] (state, payload) {
         state.items = payload

@@ -1,5 +1,5 @@
 <template>
-  <div class="capacity-cell capacity-editable-data">
+  <div class="capacity-cell capacity-editable-data" :class="{'capacity-copied': isCopied}">
     <div v-show="!editing" class="capacity-data-wrapper" :class="editableItemClassGetter" ref="focusedCell" tabindex="2" @focus="setFocusedUser" @blur="unsetFocusedUser" @keyup="startEditData" @dblclick="startEditData">
       <span>{{ data }}</span>
     </div>
@@ -32,6 +32,12 @@ export default {
   },
   computed: {
     ...mapGetters(['firebasePathGetter', 'capacityByUserGetter', 'activeUserGetter', 'editableItemClassGetter', 'copyCacheGetter']),
+    isCopied() {
+      if(this.copyCacheGetter.el) {
+      return this.copyCacheGetter.el === this.$refs.focusedCell
+
+      }
+    }
   },
   methods: {
     ...mapActions([SET_FOCUSED_CELL, SET_IS_EDITING, SET_COPY_CACHE]),
@@ -42,6 +48,7 @@ export default {
           user: this.user
         }
       );
+      
     },
     getUpdatedString(value) {
       const capacityArray = this.capacityByUserGetter(this.user).split('|');
@@ -75,12 +82,15 @@ export default {
       this[SET_FOCUSED_CELL]({});
     },
     startEditData(event) {
-      if(event.key === 'c' && this.checkCtrl()){
-          this[SET_COPY_CACHE](this.data)
+      if(event.key === 'c' && this.checkCtrl(event)){
+        this[SET_COPY_CACHE]({
+          data: this.data,
+          el: this.$refs.focusedCell
+        })
       }
-      if(event.key === 'v' && this.checkCtrl()){
-          if(this.copyCacheGetter !== null) {
-            this.submitUpdate(this.copyCacheGetter);
+      if(event.key === 'v' && this.checkCtrl(event)){
+          if(this.copyCacheGetter.data !== undefined) {
+            this.submitUpdate(this.copyCacheGetter.data);
           }
       }
       if(event.type === 'dblclick'){
@@ -96,14 +106,16 @@ export default {
         return;
       }
       this.editing = true;
+      this[SET_COPY_CACHE]({});
       this.$nextTick(() => {
         const focusedInput = this.$refs.focusedInput;
         focusedInput.focus();
         focusedInput.value = event.key ? event.key : this.data;
       });
     },
-    checkCtrl() {
-      return this.prevKey.key === 'Control' && (Date.now() - this.prevKey.timestamp) < 500
+    checkCtrl(event) {
+      const wasCtrlPressedBefore = this.prevKey.key === 'Control' && (Date.now() - this.prevKey.timestamp) < 500;
+      return wasCtrlPressedBefore || event.ctrlKey
     },
     inputBlurred(event) {
       this.editing = false;
@@ -144,6 +156,11 @@ div:focus {
 input:focus {
   outline: 5px solid yellow;
 }
+
+.capacity-copied {
+  outline: 3px dashed red
+}
+
 .capacity-editable-data {
   display: flex;
   flex: 0 0 33.333%;
