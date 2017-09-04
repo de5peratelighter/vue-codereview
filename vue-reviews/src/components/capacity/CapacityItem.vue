@@ -1,5 +1,5 @@
 <template>
-  <div class="capacity-cell capacity-editable-data" :class="{'capacity-copied': isCopied}">
+  <div class="capacity-cell capacity-editable-data" :class="{'capacity-copied': isCopied, 'capacity-sickness': isSickness, 'capacity-ooo': isOOO}">
     <div v-show="!editing" class="capacity-data-wrapper" :class="editableItemClassGetter" ref="focusedCell" tabindex="2" @focus="setFocusedUser" @blur="unsetFocusedUser" @keyup="startEditData" @dblclick="startEditData">
       <span>{{ data }}</span>
     </div>
@@ -37,6 +37,12 @@ export default {
       return this.copyCacheGetter.el === this.$refs.focusedCell
 
       }
+    },
+    isSickness() {
+      return this.data === 'sickness'
+    },
+    isOOO() {
+      return this.data === 'ooo'
     }
   },
   methods: {
@@ -190,4 +196,11 @@ input:focus {
     text-align: center;
     background-color: transparent;
   }
+  .capacity-sickness {
+    background-color: #caad05;
+  }
+  .capacity-ooo {
+    background-color: #f26522;
+  }
+  
 </style>
