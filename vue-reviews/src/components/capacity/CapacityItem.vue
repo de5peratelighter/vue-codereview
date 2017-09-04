@@ -177,7 +177,6 @@ input:focus {
 .capacity-cell {
   border-right: 1px solid #8397a3;
   border-bottom: 1px solid #8397a3;
-  z-index: 10;
 }
   .capacity-cell span {
     font-size: 12px;
@@ -189,6 +188,7 @@ input:focus {
     flex: 0 0 100%;
     display: flex;
     align-items: center;
+    z-index: 10;
   }
   input.capacity-data-wrapper {
     width: 100%;
