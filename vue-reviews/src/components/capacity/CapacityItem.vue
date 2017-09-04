@@ -1,7 +1,7 @@
 <template>
   <div class="capacity-cell capacity-editable-data" :class="{'capacity-copied': isCopied, 'capacity-sickness': isSickness, 'capacity-ooo': isOOO}">
     <div v-show="!editing" class="capacity-data-wrapper" :class="editableItemClassGetter" ref="focusedCell" tabindex="2" @focus="setFocusedUser" @blur="unsetFocusedUser" @keyup="startEditData" @dblclick="startEditData">
-      <span>{{ data }}</span>
+      <span>{{ data | dataFilter }}</span>
     </div>
     <input type="text" class="capacity-data-wrapper" tabindex="2" ref="focusedInput" v-if="editing" @focus="setFocusedUser" @blur="inputBlurred" @keydown="editData"/>
   </div>
@@ -39,10 +39,22 @@ export default {
       }
     },
     isSickness() {
-      return this.data === 'sickness'
+      return this.data === 's'
     },
     isOOO() {
-      return this.data === 'ooo'
+      return this.data === 'o'
+    }
+  },
+  filters: {
+    dataFilter(val) {
+      switch (val) {
+        case 'o':
+          return 'ooo';
+        case 's':
+          return 'sickness'
+        default:
+          return val
+      }
     }
   },
   methods: {
@@ -58,29 +70,36 @@ export default {
     },
     getUpdatedString(value) {
       const capacityArray = this.capacityByUserGetter(this.user).split('|');
-      let index;
-      switch (this.type) {
-        case 'requested':
-          index = 0;
-          break;
-        case 'received':
-          index = 1;
-          break;
-        case 'tickets':
-          index = 2;
-          break;
+      let indexes = [];
+      if(['o', 's'].indexOf(value) !== -1) {
+        indexes = [0, 1, 2]
+      } else {
+        switch (this.type) {
+          case 'requested':
+            indexes.push(0);
+            break;
+          case 'received':
+            indexes.push(1);
+            break;
+          case 'tickets':
+            indexes.push(2);
+            break;
+        }
       }
-      const splitCapacity = capacityArray[index].split(',');
-      splitCapacity[this.day] = value;
-      capacityArray[index] = splitCapacity.join(',');
-      return capacityArray
+      indexes.forEach((val) => {
+        const splitCapacity = capacityArray[val].split(',');
+        splitCapacity[this.day] = value;
+        capacityArray[val] = splitCapacity.join(',');
+      })
+      console.log('capacityArray', capacityArray);
+      return capacityArray.join('|');
     },
     submitUpdate(value) {
       const updatedData = {};
       if(value === this.data) {
         return;
       }
-      updatedData[this.user] = this.getUpdatedString(value).join('|');
+      updatedData[this.user] = this.getUpdatedString(value);
       FBApp.ref(this.firebasePathGetter.capacity +'/' +  this.$store.state.currentWeek ).update(updatedData);
     },
     unsetFocusedUser(){
