@@ -1,6 +1,6 @@
 <template>
   <md-layout class="capacity-user">
-    <md-layout md-vertical-align="center" class="capacity-cell">
+    <md-layout md-vertical-align="center" class="capacity-cell" :class="{'capacity-highlighted': lead}">
       <span>{{ user }}</span>
     </md-layout>
     <md-layout md-vertical-align="center" class="capacity-cell">
@@ -15,7 +15,7 @@
 <script>
 export default {
   name: 'CapacityUserData',
-  props: ['user', 'assignedTeam', 'testing'],
+  props: ['user', 'assignedTeam', 'testing', 'lead'],
 }
 </script>
 <style scoped>
@@ -30,5 +30,8 @@ export default {
     .capacity-cell span {
       text-align: center;
       flex: 0 0 100%;
+    }
+    .capacity-highlighted {
+      font-weight: 600;
     }
 </style>

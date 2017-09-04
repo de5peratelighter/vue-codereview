@@ -1,6 +1,6 @@
 <template>
   <md-layout md-row md-flex class="capacity-row">
-    <capacity-user-data user="Total"></capacity-user-data>
+    <capacity-user-data user="Total" :lead="true"></capacity-user-data>
     <capacity-stat-data :requested="summarizeStat('requested', n-1)" :received="summarizeStat('received', n-1)" :tickets="summarizeStat('tickets', n-1)" v-for="n in 5" :n="n" :key="n"></capacity-stat-data>
   </md-layout>
 </template>
