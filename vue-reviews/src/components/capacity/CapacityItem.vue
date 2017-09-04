@@ -166,7 +166,8 @@ input:focus {
   outline: 3px solid #b7ddc7;
 }
 .capacity-copied {
-  outline: 3px dashed red
+  outline: 3px dashed red;
+  z-index: 10;
 }
 
 .capacity-editable-data {
