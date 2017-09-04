@@ -6,7 +6,7 @@ Vue.use(Vuex)
 import moment from 'moment-timezone'
 moment.tz.guess()
 
-import {GET_FBASE, LOGIN_ME, UPDATE_NUM, GET_REVIEWERS, GET_HOLIDAYS, GET_CAPACITY, SET_MONTH, SET_YEAR, GET_TODAYREVIEWERS, SET_FOCUSED_CELL, SET_IS_EDITING, SET_COPY_CACHE} from './mutation-types'
+import {GET_FBASE, LOGIN_ME, UPDATE_NUM, GET_REVIEWERS, GET_HOLIDAYS, GET_CAPACITY, SET_MONTH, SET_YEAR, GET_TODAYREVIEWERS, SET_FOCUSED_CELL, SET_IS_EDITING, SET_COPY_CACHE, SET_CURRENT_WEEK} from './mutation-types'
 
 export default new Vuex.Store({
     state : {
@@ -109,7 +109,7 @@ export default new Vuex.Store({
         eventAppDate : moment(),
         currentYear : Number(moment().format('YYYY')),
         currentMonth : Number(moment().format('M')),
-        currentWeek : Number(moment().week()),
+        currentWeek : Number(moment().isoWeek()),
         eventFormActive : false,
         activeReviewers : [],
         workingHours : ['10,11,12' , '13,14,15' , '16,17']
@@ -237,7 +237,10 @@ export default new Vuex.Store({
         },
         copyCacheGetter: (state) => {
           return state.copyCache;
-        }
+        },
+        currentWeekGetter: (state) => {
+          return state.currentWeek;
+        },
     },
     mutations : {
       [GET_CAPACITY] (state, payload) {
@@ -249,6 +252,9 @@ export default new Vuex.Store({
       [SET_COPY_CACHE] (state, payload) {
         state.copyCache.data = payload.data;
         state.copyCache.el = payload.el;
+      },
+      [SET_CURRENT_WEEK] (state, payload) {
+        state.currentWeek = payload;
       },
       [GET_FBASE] (state, payload) {
         state.items = payload
@@ -290,6 +296,9 @@ export default new Vuex.Store({
       },
       [SET_COPY_CACHE] (store, payload) {
         store.commit(SET_COPY_CACHE, payload)
+      },
+      [SET_CURRENT_WEEK] (store, payload) {
+        store.commit(SET_CURRENT_WEEK, payload)
       },
       [GET_FBASE] (store, payload) {
         store.commit(GET_FBASE, payload)

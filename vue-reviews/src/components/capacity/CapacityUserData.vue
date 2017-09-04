@@ -20,7 +20,7 @@ export default {
 </script>
 <style scoped>
 .capacity-user {
-  flex: 0 0 20%;
+  flex: 0 0 19.999%;
   flex-wrap: nowrap;
 }
   .capacity-cell {

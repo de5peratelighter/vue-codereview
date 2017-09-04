@@ -106,7 +106,10 @@ export default {
         return;
       }
       this.editing = true;
-      this[SET_COPY_CACHE]({});
+      this[SET_COPY_CACHE]({
+        el: null,
+        data: ''
+      });
       this.$nextTick(() => {
         const focusedInput = this.$refs.focusedInput;
         focusedInput.focus();
