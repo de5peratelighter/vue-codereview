@@ -197,7 +197,7 @@ export default new Vuex.Store({
             }
           }
           usersByLead.sort();
-          usersByLead.push(lead);
+          usersByLead.unshift(lead);
           return usersByLead;
         },
         capacityByUserGetter: (state) => (user) => {

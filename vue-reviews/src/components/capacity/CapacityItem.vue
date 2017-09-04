@@ -154,12 +154,11 @@ export default {
 
 <style scoped>
 div:focus {
-  outline: 5px solid blue;
+  outline: 3px solid #8397a3;
 }
 input:focus {
-  outline: 5px solid yellow;
+  outline: 3px solid #b7ddc7;
 }
-
 .capacity-copied {
   outline: 3px dashed red
 }
@@ -170,8 +169,9 @@ input:focus {
   align-items: stretch;
 }
 .capacity-cell {
-  border-right: 2px solid green;
-  border-bottom: 2px solid green;
+  border-right: 1px solid #8397a3;
+  border-bottom: 1px solid #8397a3;
+  z-index: 10;
 }
   .capacity-cell span {
     font-size: 12px;

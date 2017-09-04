@@ -48,3 +48,10 @@ export default {
   }
 }
 </script>
+
+<style>
+  .capacity-team > .capacity-row .capacity-cell {
+    border-bottom: 0;
+    background-color: #d6cbe1;
+  }
+</style>

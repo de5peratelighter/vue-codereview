@@ -37,6 +37,7 @@ export default {
   flex-wrap: nowrap;
   word-break: break-all;
   flex: 0 0 100%;
+  background-color: #edf2f4;
 }
   .capacity-week {
     flex-wrap: nowrap;
@@ -49,8 +50,8 @@ export default {
       flex-wrap: nowrap;
     }
     .capacity-cell {
-      border-right: 2px solid green;
-      border-bottom: 2px solid green;
+      border-right: 1px solid #8397a3;
+      border-bottom: 1px solid #8397a3;
     }
       .capacity-cell span {
         text-align: center;

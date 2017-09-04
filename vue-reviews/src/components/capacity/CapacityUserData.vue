@@ -22,10 +22,11 @@ export default {
 .capacity-user {
   flex: 0 0 19.999%;
   flex-wrap: nowrap;
+  background-color: #edf2f4;
 }
   .capacity-cell {
-    border-right: 2px solid green;
-    border-bottom: 2px solid green;
+    border-right: 1px solid #8397a3;
+    border-bottom: 1px solid #8397a3;
   }
     .capacity-cell span {
       text-align: center;
