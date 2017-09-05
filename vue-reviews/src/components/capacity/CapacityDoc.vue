@@ -2,10 +2,10 @@
   <div class="capacity-view" v-if="levelDEVORPM(activeUserGetter.role)">
     <div class="capacity-header-container">
         <div class="capacity-date-range"><span>{{getDate(1)}} - {{getDate(5)}}</span></div>
-        <md-button class="md-icon-button md-raised md-primary" @click="setWeek('prev')" :disabled="isDisabled('prev')">
+        <md-button class="md-icon-button md-raised md-primary" @click="setWeek(-1)" :disabled="isDisabled('prev')">
           <md-icon>remove</md-icon>
         </md-button>
-        <md-button class="md-icon-button md-raised md-accent" @click="setWeek('next')" :disabled="isDisabled('next')">
+        <md-button class="md-icon-button md-raised md-accent" @click="setWeek(1)" :disabled="isDisabled('next')">
           <md-icon>add</md-icon>
         </md-button>
     </div>
@@ -41,14 +41,8 @@ export default {
   firebase: {},
   methods: {
     ...mapActions([GET_CAPACITY, SET_CURRENT_WEEK, SET_COPY_CACHE]),
-    setWeek(type) {
-      switch (type) {
-        case 'next':
-          this[SET_CURRENT_WEEK](this.currentWeekGetter + 1)
-          break;
-        case 'prev':
-          this[SET_CURRENT_WEEK](this.currentWeekGetter - 1)
-      }
+    setWeek(value) {
+      this[SET_CURRENT_WEEK](this.currentWeekGetter + value);
     },
     isDisabled(type) {
       switch (type) {
