@@ -69,7 +69,7 @@ export default {
       
     },
     getUpdatedString(value) {
-      const capacityArray = this.capacityByUserGetter(this.user).split('|');
+      let capacityArray = this.capacityByUserGetter(this.user).split('|');
       let indexes = [];
       if(['o', 's'].indexOf(value) !== -1) {
         indexes = [0, 1, 2]
@@ -86,13 +86,22 @@ export default {
             break;
         }
       }
-      indexes.forEach((val) => {
-        const splitCapacity = capacityArray[val].split(',');
-        splitCapacity[this.day] = value;
-        capacityArray[val] = splitCapacity.join(',');
-      })
-      console.log('capacityArray', capacityArray);
+      capacityArray = this.updateCapacityArray(capacityArray, indexes, value);
+      if(indexes.length === 1 && ['o', 's'].indexOf(this.data) !== -1) {
+        let additionalIndexes = [0, 1, 2].filter((val) => {
+          return val !== indexes[0];
+        });
+        capacityArray = this.updateCapacityArray(capacityArray, additionalIndexes, '');
+      }
       return capacityArray.join('|');
+    },
+    updateCapacityArray(arr, indexes, val) {
+      indexes.forEach((curValue) => {
+        const splitArrItem = arr[curValue].split(',');
+        splitArrItem[this.day] = val;
+        arr[curValue] = splitArrItem.join(',')
+      });
+      return arr;
     },
     submitUpdate(value) {
       const updatedData = {};
