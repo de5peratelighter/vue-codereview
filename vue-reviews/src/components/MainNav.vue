@@ -11,7 +11,7 @@
             <md-layout class="review-welcome" md-align="center">
               <div>
                 <span class="md-headline">{{activeUserGetter.displayName}}</span>
-                <notification-app v-if="!activeUserGetter.isAnonymous"></notification-app>
+                <notification-app v-if="activeUserGetter.role"></notification-app>
               </div>
               <md-button class="md-raised md-accent" @click="logIn">
                 <span v-if="activeUserGetter.isAnonymous">Log In</span>
@@ -57,9 +57,37 @@ export default {
         firebase.auth().signInWithPopup(provider).then((result) => {
           let user = result.user
           this.$bindAsObject('rules', FBApp.ref(this.firebasePathGetter.users + '/' + user.uid), null, () => {
-              let rulez = this.rules
-              this[LOGIN_ME]({displayName: user.displayName, photoURL : user.photoURL, 
-              isAnonymous : user.isAnonymous, role : rulez.role, alias : rulez.alias, team : rulez.team, token : user.uid})
+              // initial login, always saves data, triggered even if user isn't activated
+              let usr = {
+                displayName: user.displayName, 
+                photoURL : user.photoURL, 
+                isAnonymous : user.isAnonymous,
+                token : user.uid,
+                role : this.rules.role, 
+                alias : this.rules.alias, 
+                team : this.rules.team
+              }
+              this[LOGIN_ME](usr)
+              
+              // listener for activeuser in DB, basically rerenders the entire app under if circumstances/role has changed
+              FBApp.ref(this.firebasePathGetter.users +'/' + user.uid).on('child_changed', (el) => {
+                usr.role = el.val()
+                this[LOGIN_ME](usr)
+              })
+              
+              // listener for non-activated users, upon activating the account within DB - rerenders under new circumstances/role
+              this._.isNull(this.rules['.val'])
+              if (!this.activeUserGetter.role) {
+                FBApp.ref(this.firebasePathGetter.users).on("child_added", (el) => {
+                  if (this.activeUserGetter.token == el.key) {
+                    usr.role = el.val().role
+                    usr.alias = el.val().alias 
+                    usr.team = el.val().team
+                    this[LOGIN_ME](usr)
+                  }
+                })
+              }
+              
           })
           
         }).catch(function(error) {
@@ -68,6 +96,7 @@ export default {
       } else {
         firebase.auth().signOut().then(() => {
           // return to default user - this will triggers activeUserGetter watcher and dummy data to render instead of Firebase
+          FBApp.ref(this.firebasePathGetter.users).ref.off('child_changed')
           this[LOGIN_ME](this.DEFAULT_USER)
         }).catch(function(error) {
           console.warn(error)

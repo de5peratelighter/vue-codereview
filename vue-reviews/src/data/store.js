@@ -6,6 +6,10 @@ Vue.use(Vuex)
 import moment from 'moment-timezone'
 moment.tz.guess()
 
+import lodash from 'lodash'
+import VueLodash from 'vue-lodash/dist/vue-lodash.min'
+Vue.use(VueLodash, lodash)
+
 import {GET_FBASE, LOGIN_ME, UPDATE_NUM, GET_REVIEWERS, GET_HOLIDAYS, GET_CAPACITY, SET_MONTH, SET_YEAR, GET_TODAYREVIEWERS, SET_FOCUSED_CELL, SET_IS_EDITING, SET_COPY_CACHE, SET_CURRENT_WEEK} from './mutation-types'
 
 export default new Vuex.Store({
@@ -51,7 +55,7 @@ export default new Vuex.Store({
             "content" : "https://dev.bazaarvoice.com/trac/bvc/changeset/1655761",
             "reviewer" : "user2",
             "status" : "Good",
-            "st" : "12/06/2017, 16:27:22",
+            "st" : "14/06/2017, 16:27:22",
             "ticket" : "https://bits.bazaarvoice.com/jira/browse/SUP-21014",
             "rc": "Ok this is good",
             "username" : "user1"
@@ -88,9 +92,9 @@ export default new Vuex.Store({
         activeUser : {
           displayName: 'Guest',
           isAnonymous : true,
-          role: undefined, // not best practice but very convenient, won't require additional if-elses on user-login
-          alias: undefined, // if user isn't in read-only firebase boject "users" - login response always returns 'undefined'
-          team: undefined,
+          role: "", // not best practice but very convenient, won't require additional if-elses on user-login
+          alias: "", // if user isn't in read-only firebase boject "users" - login response always returns 'undefined'
+          team: "",
           token: 1111111
         },
         displayNum : 5,

@@ -50,7 +50,7 @@ export default {
     methods : {
         ...mapActions([GET_REVIEWERS, GET_HOLIDAYS]),
         receiveScheduleData (user) {
-            if (!user.isAnonymous) {
+            if (!user.isAnonymous && user.role) {
                 this.$bindAsObject('reviewers', FBApp.ref(this.firebasePathGetter.reviewers),null, () => {
                     this[GET_REVIEWERS](this.reviewers['all'])
                     this[GET_HOLIDAYS](this.reviewers['holidays'])
@@ -69,6 +69,7 @@ export default {
                 this.scheduleReady = false;
                 this[GET_HOLIDAYS](String())
                 this[GET_REVIEWERS](String())
+                FBApp.ref(this.firebasePathGetter.reviewers).ref.off('child_changed')
             }
         }
     },
@@ -137,8 +138,8 @@ export default {
         ReviewersList
     },
     watch : {
-        activeUserGetter (newCount, oldCount) {
-            this.receiveScheduleData(this.activeUserGetter)
+        activeUserGetter (newVal) {
+            this.receiveScheduleData(newVal)
         }
     },
     activated () {

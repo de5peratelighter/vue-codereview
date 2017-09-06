@@ -11,12 +11,15 @@
         <div v-else-if="!levelEngineer(activeUserGetter.role)">{{noaccessMessage}}</div>
         
         <li  v-for="(item, key) in items" :key="key">
-          
+
           <md-card :class="[item.status, 'instance']">
             <md-layout md-align="center" md-vertical-align="center" md-gutter md-row>
               
               <md-layout>
-                <md-card-content>{{ truncContent(item.st, 'time') }} <br> {{item.username }}</md-card-content>
+                <md-card-content>
+                  <show-reviewdate :date="item.st"></show-reviewdate> <!-- splitted into seperate component and lazy-loaded -->
+                  <md-tooltip md-delay="400" md-direction="right">{{ truncContent(item.st, 'time') }}</md-tooltip> <br> by {{item.username }}
+                </md-card-content>
               </md-layout>
               
               <md-layout>
@@ -81,16 +84,7 @@
               </md-layout>
               
               <md-layout>
-                <md-input-container>
-                  <label for="status" style="color:inherit">{{ item.reviewer ? item.reviewer : 'Codereviewer will set the status' }}</label>
-                  <md-select :disabled="cantChangeStatus(item.username)" name="status" v-model="item.status" class="width80" md-flex-offset="50">
-                    <md-option v-for="option in selectOptions" :key="option.id" :value="option.name" @selected="onSelectChange(item)">{{option.name}}</md-option>
-                  </md-select>
-                  <md-button :disabled="canRemoveInstance(item.username)" class="md-icon-button" @click="removeInstance(item)">
-                    <md-icon style="color:inherit">delete_forever</md-icon>
-                  </md-button>
-                </md-input-container>
-                
+                <update-status :item="item" @statusUpdate="onSelectChange(item)" @removeInstance="deleteInstanceForever(item)"> </update-status>
               </md-layout>
               
             </md-layout>
@@ -102,6 +96,11 @@
     <div v-if="levelEngineer(activeUserGetter.role)">
       <new-instance :inputs="codeReviewInputs" :requiredword="newInstanceRequiredWord" :path="firebasePathGetter.main" relcomponent="codereview"> </new-instance>
     </div>
+    
+    <md-snackbar md-position="bottom center" ref="coreSnackbar" md-duration="5000">
+        <strong>{{snackbarMessage}}</strong>
+        <md-button class="md-accent" @click="$refs.coreSnackbar.close()">Close</md-button>
+    </md-snackbar>
     
   </div>
 </template>
@@ -117,26 +116,22 @@ import { newInstanceMixin } from '@/mixins/inputs'
 import { notificationMixin } from '@/mixins/notifications'
 
 const NewInstance = () => import('@/components/NewInstance.vue')
+const UpdateStatus = () => import('@/components/codereview/UpdateStatus.vue')
+const ShowReviewdate = () => import('@/components/codereview/ShowReviewdate.vue')
 
 export default {
   name: 'CodeReview',
   data () {
     return {
       initialMessage: 'This is dummy data, please LOG IN to get the real one',
-      noaccessMessage : 'Ask PM to activate your account(via skype, hipchat)',
+      noaccessMessage : 'Your account is NOT ACTIVATED yet, please ask Teamlead/PM to activate it',
       welcomeMessage: 'Welcome!',
       ownerCommentMessage : "* Your comment will show/replace 'From Author' comment section",
       reviewerCommentMessage : "* Your comment will show/replace 'From Reviewer' comment section",
       newInput : '',
       newInstanceRequiredWord: 'bazaarvoice',
       DEFAULT_DATA : this.$store.state.items,
-      selectOptions :  [
-        { id: 1, name: 'New' },
-        { id: 2, name: 'Looking' },
-        { id: 3, name: 'Questions'},
-        { id: 4, name: 'Good' },
-        { id: 5, name: 'NotOK' }],
-      reviewers : []
+      snackbarMessage : ''
     }
   },
   firebase: {},
@@ -154,24 +149,11 @@ export default {
         this[GET_FBASE](this.itemsArray)
       })
     },
-    canAddComments (item) {
-      return item.username === this.activeUserGetter.alias || item.reviewer === this.activeUserGetter.alias
-    },
-    removeInstance (item) {
-      if (this.activeUserGetter.alias === item.username) { // another final verification
-        FBApp.ref(this.firebasePathGetter.main +"/" + item['.key']).set({})
-      }
-    },
-    cantChangeStatus (name) {
-      return !this.levelReviewer(this.activeUserGetter.role) || (this.activeUserGetter.alias === name)
-    },
-    canRemoveInstance (name) {
-      return !(this.activeUserGetter.alias === name)
-    },
+
     truncContent (el, typer) {
       // TIME - for compatibility with old dates $moment is provided with additional parameter (from old Polymer project w/o $moment in place)
       return (
-        typer === "ticket" ? el.substr(el.indexOf("SUP")) :
+        typer === "ticket" ? el.split('/').pop().slice(0,10) :
         typer === "changeset" ? el.slice(-8) :
         typer === "time" ?  this.$moment(el, 'DD-MM-YYYY, hh:mm:ss').format('DD-MMM, h:mm A') : ""
       )
@@ -179,14 +161,20 @@ export default {
     onSelectChange (el) {
       if (el['.key'] && this.levelReviewer(this.activeUserGetter.role)) {
         FBApp.ref(this.firebasePathGetter.main +"/" + el['.key']).update({status: el.status, reviewer : this.activeUserGetter.alias}).then(()=> {
-           this.$bindAsObject('itemOwner', FBApp.ref(this.firebasePathGetter.notifications + '/' + el.username), null, () => {
-             if (this.itemOwner.token) { 
+          this.$bindAsObject('itemOwner', FBApp.ref(this.firebasePathGetter.notifications + '/' + el.username), null, () => {
+            if (this.itemOwner.token) { 
                 this.submitNotification(this.itemOwner, this.activeUserGetter, 'informOwner' , el.status) // from 'notificationMixin'
-             }
-           })
+            }
+          })
         })
       } else {
-        this.dummyDataMessage()
+        this.snackbarMessage = "Status wont be updated in the database, you either ain't allowed to do this or this is the bug";
+        this.$refs.coreSnackbar.open();
+      }
+    },
+    deleteInstanceForever (item) {
+      if (this.activeUserGetter.alias === item.username) { // another final verification
+        FBApp.ref(this.firebasePathGetter.main +"/" + item['.key']).set({})
       }
     },
     updateDialog(ref, type) {
@@ -197,6 +185,9 @@ export default {
       } else if (type==='close') {
         el.close()
       }
+    },
+    canAddComments (item) {
+      return item.username === this.activeUserGetter.alias || item.reviewer === this.activeUserGetter.alias
     },
     updateComment(el) {
       if (el['.key'] && !this.activeUserGetter.isAnonymous) {
@@ -218,26 +209,31 @@ export default {
     }
   },
   watch: {
-    activeUserGetter (newCount, oldCount) {
-      if (!newCount.isAnonymous) {
-        this.getData()
-      } else {
-        this[GET_FBASE](this.DEFAULT_DATA)
-      }
+    activeUserGetter : {
+      handler(newVal){
+        if (!newVal.isAnonymous && newVal.role) {
+          this.getData()
+        } else {
+          this[GET_FBASE](this.DEFAULT_DATA)
+        }
+      },
+      deep: true
     },
-    displayNumGetter (newValue, oldValue) {
+    displayNumGetter (newVal) {
       if (!this.activeUserGetter.isAnonymous) {this.getData () }
     }
   },
   activated () {
-      if (!this.activeUserGetter.isAnonymous) {
+      if (!this.activeUserGetter.isAnonymous && this.activeUserGetter.role) {
         this.getData()
       } else {
         this[GET_FBASE](this.DEFAULT_DATA)
       }
   },
   components : {
-    NewInstance
+    NewInstance,
+    ShowReviewdate,
+    UpdateStatus
   }
 }
 </script>

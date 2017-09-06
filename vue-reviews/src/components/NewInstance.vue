@@ -107,7 +107,9 @@
                         
                         let token = this.inputs[0].val ? this.inputs[0].val : 'WrongToken'
                         let alias = this.inputs[1].val ? this.inputs[1].val : 'WrongAlias'
-                        FBApp.ref(this.path +"/" + token).set({alias: alias, role : this.defaultRoleOption, team : this.defaultTeamOption})
+                        FBApp.ref(this.path +"/" + token).set({
+                            alias: alias, role : this.defaultRoleOption, team : this.defaultTeamOption, tester : this.defaulttestingOption, notes : this.defaultSpecialNote
+                        })
                         
                     }
                     

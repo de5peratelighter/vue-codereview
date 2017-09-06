@@ -13,7 +13,6 @@
 
             <md-layout md-flex="55" :class="{ hidden: hiddenInputs.search }">
               <md-input-container md-inline>
-                <label>Ticket name contains</label>
                 <md-input v-model="search"></md-input>
                 <md-button class="md-icon-button" @click="findChanges(search)">
                   <md-icon>update</md-icon>

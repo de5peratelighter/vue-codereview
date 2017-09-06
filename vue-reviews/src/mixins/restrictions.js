@@ -2,10 +2,10 @@ export const levelMixin = {
     data () {
         return {
             roleOptions : [
-                { id: 2, name: 'Engineer'},
-                { id: 3, name: 'Reviewer'},
-                { id: 4, name: 'TeamLead'},
-                { id: 5, name: 'PM_DEV'},
+                { id: 1, name: 'Engineer'},
+                { id: 2, name: 'Reviewer'},
+                { id: 3, name: 'TeamLead'},
+                { id: 4, name: 'PM_DEV'},
             ],
             defaultRoleOption: 'Engineer',
             teamOptions : [
@@ -15,7 +15,13 @@ export const levelMixin = {
                 { id: 4, name: 'Managers'},
                 { id: 5, name: 'Newcomer'}
             ],
-            defaultTeamOption : 'Newcomer'
+            defaultTeamOption : 'Newcomer',
+            tsetestingOptions : [
+                { id: 1, name: 'Yes'},
+                { id: 2, name: 'No'}
+            ],
+            defaulttestingOption : 'No',
+            defaultSpecialNote : 'No'
         }
     },
     methods: {

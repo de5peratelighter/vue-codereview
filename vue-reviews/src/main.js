@@ -19,10 +19,16 @@ import 'vue-material/dist/vue-material.css'
 
 import VueClipboard from 'vue-clipboard2'
 
+// Lodash
+
+import lodash from 'lodash'
+import VueLodash from 'vue-lodash/dist/vue-lodash.min'
+ 
 Vue.use(Vuex)
 Vue.use(VueFire)
 Vue.use(VueMaterial)
 Vue.use(VueClipboard)
+Vue.use(VueLodash, lodash)
 
 Vue.material.registerTheme('default', {
   primary: 'blue',
