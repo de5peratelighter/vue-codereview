@@ -12,7 +12,7 @@ import CapacityTeamDaily from './CapacityTeamDaily';
 import CapacitySubteam from './CapacitySubteam';
 
 export default {
-  name: 'CapacityTableBody',
+  name: 'CapacityTableTeam',
   props: ['team'],
   computed: {
     ...mapGetters(['leadsByTeamGetter'])
@@ -27,6 +27,6 @@ export default {
 <style scoped>
 .capacity-team {
   flex: 0 0 100%;
-  border-bottom: 2px solid red;
+  border-bottom: 1px solid #000;
 }
 </style>

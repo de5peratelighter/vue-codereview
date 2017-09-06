@@ -14,7 +14,7 @@
                       <md-table-head md-numeric md-tooltip="The total amount of food energy and the given serving size">Changesets</md-table-head>
                       <md-table-head md-numeric>NotOKs</md-table-head>
                       <md-table-head md-numeric>Reviews</md-table-head>
-                      <md-table-head md-numeric>Revs notoks</md-table-head>
+                      <md-table-head md-numeric>NotOKs by reviewer</md-table-head>
                     </md-table-row>
                   </md-table-header>
                 
@@ -24,7 +24,7 @@
                       <md-table-cell>{{row.changesNum}}</md-table-cell>
                       <md-table-cell>{{row.notoks}} {{ findPercentage(row.changesNum,row.notoks) }}</md-table-cell>
                       <md-table-cell>{{row.reviews}}</md-table-cell>
-                      <md-table-cell>{{row.rnotoks}}</md-table-cell>
+                      <md-table-cell>{{row.rnotoks}} {{ findPercentage(row.reviews,row.rnotoks) }}</md-table-cell>
                     </md-table-row>
                   </md-table-body>
                 </md-table> 
@@ -70,7 +70,7 @@
                   let user = value.username ;
                   // checking if user is already in the statistics
                   if (!users[user]) 
-                    {let inst = users[user] = {}; inst.username = user; inst.changesNum = 1;
+                    {let inst = users[user] = {}; inst.username = user; inst.changesNum = 1; inst.notoks = 0;
                     if (value.status == "NotOK") ++inst.notoks;}
                   else {let inst = users[user]; 
                     inst.changesNum++;  

@@ -10,7 +10,7 @@ import lodash from 'lodash'
 import VueLodash from 'vue-lodash/dist/vue-lodash.min'
 Vue.use(VueLodash, lodash)
 
-import {GET_FBASE, LOGIN_ME, UPDATE_NUM, GET_REVIEWERS, GET_HOLIDAYS, GET_CAPACITY, SET_MONTH, SET_YEAR, GET_TODAYREVIEWERS, SET_FOCUSED_CELL, SET_IS_EDITING} from './mutation-types'
+import {GET_FBASE, LOGIN_ME, UPDATE_NUM, GET_REVIEWERS, GET_HOLIDAYS, GET_CAPACITY, SET_MONTH, SET_YEAR, GET_TODAYREVIEWERS, SET_FOCUSED_CELL, SET_IS_EDITING, SET_COPY_CACHE, SET_CURRENT_WEEK} from './mutation-types'
 
 export default new Vuex.Store({
     state : {
@@ -81,6 +81,10 @@ export default new Vuex.Store({
         },
         editableItemClass: 'capacity-editable',
         isEditing: false,
+        copyCache: {
+          el: null,
+          data: ''
+        },
         revs : "", // List of reviewers, filled upon login
         holidays : "", // List of holidays, filled upon login
         reviewersPerDay : 3, // Number of reviewers per day
@@ -109,7 +113,7 @@ export default new Vuex.Store({
         eventAppDate : moment(),
         currentYear : Number(moment().format('YYYY')),
         currentMonth : Number(moment().format('M')),
-        currentWeek : Number(moment().week()),
+        currentWeek : Number(moment().isoWeek()),
         eventFormActive : false,
         activeReviewers : [],
         workingHours : ['10,11,12' , '13,14,15' , '16,17']
@@ -197,7 +201,7 @@ export default new Vuex.Store({
             }
           }
           usersByLead.sort();
-          usersByLead.push(lead);
+          usersByLead.unshift(lead);
           return usersByLead;
         },
         capacityByUserGetter: (state) => (user) => {
@@ -234,7 +238,13 @@ export default new Vuex.Store({
         },
         isEditingGetter: (state) => {
           return state.isEditing;
-        }
+        },
+        copyCacheGetter: (state) => {
+          return state.copyCache;
+        },
+        currentWeekGetter: (state) => {
+          return state.currentWeek;
+        },
     },
     mutations : {
       [GET_CAPACITY] (state, payload) {
@@ -242,6 +252,13 @@ export default new Vuex.Store({
       },
       [SET_IS_EDITING] (state, payload) {
         state.isEditing = payload;
+      },
+      [SET_COPY_CACHE] (state, payload) {
+        state.copyCache.data = payload.data;
+        state.copyCache.el = payload.el;
+      },
+      [SET_CURRENT_WEEK] (state, payload) {
+        state.currentWeek = payload;
       },
       [GET_FBASE] (state, payload) {
         state.items = payload
@@ -280,6 +297,12 @@ export default new Vuex.Store({
       },
       [SET_IS_EDITING] (store, payload) {
         store.commit(SET_IS_EDITING, payload)
+      },
+      [SET_COPY_CACHE] (store, payload) {
+        store.commit(SET_COPY_CACHE, payload)
+      },
+      [SET_CURRENT_WEEK] (store, payload) {
+        store.commit(SET_CURRENT_WEEK, payload)
       },
       [GET_FBASE] (store, payload) {
         store.commit(GET_FBASE, payload)
