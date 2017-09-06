@@ -67,7 +67,7 @@ export default {
 
 <style scoped>
 .capacity-table {
-  border-top: 2px solid green;
-  border-left: 2px solid green;
+  border-top: 1px solid #8397a3;
+  border-left: 1px solid #8397a3;
 }
 </style>

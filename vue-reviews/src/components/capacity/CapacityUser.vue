@@ -1,6 +1,6 @@
 <template>
   <md-layout md-row md-flex class="capacity-row" :class="{focused: focusedUserGetter === user}">
-    <capacity-user-data :user="user" :assignedTeam="assignedTeam" :testing="testing"></capacity-user-data>
+    <capacity-user-data :user="user" :assignedTeam="assignedTeam" :testing="testing" :lead="lead"></capacity-user-data>
     <md-layout class="capacity-week">
       <md-layout class="capacity-day" v-for="n in 5" :n="n" :key="n">
         <md-layout md-row class="capacity-data-container">
@@ -29,7 +29,8 @@ export default {
       receivedCapacity: [],
       ticketsCapacity: [],
       assignedTeam: '',
-      testing: ''
+      testing: '',
+      lead: false
     }
   },
   computed: {
@@ -43,6 +44,7 @@ export default {
       const capacityArray = capacityString.split('||');
       this.assignedTeam = capacityArray[3];
       this.testing = capacityArray[4];
+      this.lead = this.user === capacityArray[2];
       const capacityData = capacityArray[0].split('|')
       this.requestedCapacity = capacityData[0].split(',');
       this.receivedCapacity = capacityData[1].split(',');
@@ -66,7 +68,7 @@ export default {
 
 <style scoped>
 .focused {
-   background-color: red;
+   background-color: #9dc2e5;
 }
 .capacity-row {
   flex-wrap: nowrap;
@@ -84,8 +86,8 @@ export default {
         flex-wrap: nowrap;
       }
       .capacity-cell {
-        border-right: 2px solid green;
-        border-bottom: 2px solid green;
+        border-right: 1px solid #8397a3;
+        border-bottom: 1px solid #8397a3;
       }
         .capacity-cell span {
           text-align: center;

@@ -1,7 +1,7 @@
 <template>
-  <div class="capacity-cell capacity-editable-data" :class="{'capacity-copied': isCopied}">
+  <div class="capacity-cell capacity-editable-data" :class="{'capacity-copied': isCopied, 'capacity-sickness': isSickness, 'capacity-ooo': isOOO}">
     <div v-show="!editing" class="capacity-data-wrapper" :class="editableItemClassGetter" ref="focusedCell" tabindex="2" @focus="setFocusedUser" @blur="unsetFocusedUser" @keyup="startEditData" @dblclick="startEditData">
-      <span>{{ data }}</span>
+      <span>{{ data | dataFilter }}</span>
     </div>
     <input type="text" class="capacity-data-wrapper" tabindex="2" ref="focusedInput" v-if="editing" @focus="setFocusedUser" @blur="inputBlurred" @keydown="editData"/>
   </div>
@@ -37,6 +37,24 @@ export default {
       return this.copyCacheGetter.el === this.$refs.focusedCell
 
       }
+    },
+    isSickness() {
+      return this.data === 's'
+    },
+    isOOO() {
+      return this.data === 'o'
+    }
+  },
+  filters: {
+    dataFilter(val) {
+      switch (val) {
+        case 'o':
+          return 'ooo';
+        case 's':
+          return 'sickness'
+        default:
+          return val
+      }
     }
   },
   methods: {
@@ -51,30 +69,46 @@ export default {
       
     },
     getUpdatedString(value) {
-      const capacityArray = this.capacityByUserGetter(this.user).split('|');
-      let index;
-      switch (this.type) {
-        case 'requested':
-          index = 0;
-          break;
-        case 'received':
-          index = 1;
-          break;
-        case 'tickets':
-          index = 2;
-          break;
+      let capacityArray = this.capacityByUserGetter(this.user).split('|');
+      let indexes = [];
+      if(['o', 's'].indexOf(value) !== -1) {
+        indexes = [0, 1, 2]
+      } else {
+        switch (this.type) {
+          case 'requested':
+            indexes.push(0);
+            break;
+          case 'received':
+            indexes.push(1);
+            break;
+          case 'tickets':
+            indexes.push(2);
+            break;
+        }
       }
-      const splitCapacity = capacityArray[index].split(',');
-      splitCapacity[this.day] = value;
-      capacityArray[index] = splitCapacity.join(',');
-      return capacityArray
+      capacityArray = this.updateCapacityArray(capacityArray, indexes, value);
+      if(indexes.length === 1 && ['o', 's'].indexOf(this.data) !== -1) {
+        let additionalIndexes = [0, 1, 2].filter((val) => {
+          return val !== indexes[0];
+        });
+        capacityArray = this.updateCapacityArray(capacityArray, additionalIndexes, '');
+      }
+      return capacityArray.join('|');
+    },
+    updateCapacityArray(arr, indexes, val) {
+      indexes.forEach((curValue) => {
+        const splitArrItem = arr[curValue].split(',');
+        splitArrItem[this.day] = val;
+        arr[curValue] = splitArrItem.join(',')
+      });
+      return arr;
     },
     submitUpdate(value) {
       const updatedData = {};
       if(value === this.data) {
         return;
       }
-      updatedData[this.user] = this.getUpdatedString(value).join('|');
+      updatedData[this.user] = this.getUpdatedString(value);
       FBApp.ref(this.firebasePathGetter.capacity +'/' +  this.$store.state.currentWeek ).update(updatedData);
     },
     unsetFocusedUser(){
@@ -106,7 +140,10 @@ export default {
         return;
       }
       this.editing = true;
-      this[SET_COPY_CACHE]({});
+      this[SET_COPY_CACHE]({
+        el: null,
+        data: ''
+      });
       this.$nextTick(() => {
         const focusedInput = this.$refs.focusedInput;
         focusedInput.focus();
@@ -151,14 +188,14 @@ export default {
 
 <style scoped>
 div:focus {
-  outline: 5px solid blue;
+  outline: 3px solid #8397a3;
 }
 input:focus {
-  outline: 5px solid yellow;
+  outline: 3px solid #b7ddc7;
 }
-
 .capacity-copied {
-  outline: 3px dashed red
+  outline: 3px dashed red;
+  z-index: 10;
 }
 
 .capacity-editable-data {
@@ -167,8 +204,8 @@ input:focus {
   align-items: stretch;
 }
 .capacity-cell {
-  border-right: 2px solid green;
-  border-bottom: 2px solid green;
+  border-right: 1px solid #8397a3;
+  border-bottom: 1px solid #8397a3;
 }
   .capacity-cell span {
     font-size: 12px;
@@ -180,6 +217,7 @@ input:focus {
     flex: 0 0 100%;
     display: flex;
     align-items: center;
+    z-index: 10;
   }
   input.capacity-data-wrapper {
     width: 100%;
@@ -187,4 +225,11 @@ input:focus {
     text-align: center;
     background-color: transparent;
   }
+  .capacity-sickness {
+    background-color: #caad05;
+  }
+  .capacity-ooo {
+    background-color: #f26522;
+  }
+  
 </style>
