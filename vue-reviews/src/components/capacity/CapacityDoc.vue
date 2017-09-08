@@ -74,9 +74,42 @@ export default {
           this[GET_CAPACITY]([]);
         } else {
           this[GET_CAPACITY](this.capacityData);
-          console.log('Todo ===> create a new record')
+          this.createNewWeekRecord();
         }
       })
+    },
+    createNewWeekRecord() {
+      FBApp.ref(this.firebasePathGetter.users).once('value').then((snapshot) => {
+        let user;
+        const users = snapshot.val();
+        const leadsByTeam = {};
+        for (user in users) {
+          if(users[user].role === 'TeamLead'){
+            leadsByTeam[users[user]['team']] = users[user]['alias']
+          }
+        }
+        const weekData = {};
+        for (user in users) {
+          if(this.skipUser(users[user])) {
+            continue;
+          }
+          const team = users[user]['team'].match(/([a-z]|[A-Z])*/gi)[0];
+          const lead = leadsByTeam[users[user]['team']];
+          const notes = users[user]['notes'] ? users[user]['notes'] : '';
+          let tester = '';
+          if(users[user]['tester'] === 'Yes') {
+            tester = 'Yes';
+          }
+          const userString = `,,,,|,,,,|,,,,||${team}||${lead}||${notes}||${tester}`;
+          weekData[users[user]['alias']] = userString;
+        }
+        FBApp.ref(this.firebasePathGetter.capacity +"/" + this.currentWeekGetter).set(weekData)
+      });
+    },
+    skipUser(user) {
+      if(user['team'] === 'Newcomer' || ['TeamLead', 'Engineer'].indexOf(user['role']) === -1) {
+        return true
+      }
     }
   },
   watch: {

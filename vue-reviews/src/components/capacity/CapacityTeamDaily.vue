@@ -1,7 +1,11 @@
 <template>
   <md-layout md-row md-flex class="capacity-row">
     <capacity-user-data user="Total" :lead="true"></capacity-user-data>
-    <capacity-stat-data :requested="summarizeStat('requested', n-1)" :received="summarizeStat('received', n-1)" :tickets="summarizeStat('tickets', n-1)" v-for="n in 5" :n="n" :key="n"></capacity-stat-data>
+    <md-layout>
+      <md-layout class="capacity-day" v-for="n in 5" :n="n" :key="n">
+        <capacity-stat-data :requested="summarizeStat('requested', n-1)" :received="summarizeStat('received', n-1)" :tickets="summarizeStat('tickets', n-1)"></capacity-stat-data>
+      </md-layout>
+    </md-layout>
   </md-layout>
 </template>
 
@@ -53,5 +57,8 @@ export default {
   .capacity-team > .capacity-row .capacity-cell {
     border-bottom: 0;
     background-color: #d6cbe1;
+  }
+  .capacity-day {
+    flex: 0 0 20%
   }
 </style>
