@@ -2,12 +2,13 @@ export const levelMixin = {
     data () {
         return {
             roleOptions : [
-                { id: 1, name: 'Engineer'},
-                { id: 2, name: 'Reviewer'},
-                { id: 3, name: 'TeamLead'},
-                { id: 4, name: 'PM_DEV'},
+                { id: 1, name: 'Guest'},
+                { id: 2, name: 'Engineer'},
+                { id: 3, name: 'Reviewer'},
+                { id: 4, name: 'TeamLead'},
+                { id: 5, name: 'PM_DEV'},
             ],
-            defaultRoleOption: 'Engineer',
+            defaultRoleOption: 'Guest',
             teamOptions : [
                 { id: 1, name: 'NA1'},
                 { id: 2, name: 'NA2'},
@@ -30,6 +31,9 @@ export const levelMixin = {
         },
         levelEngineer (role) {
             return role === 'Engineer' || role === 'Reviewer' || role === 'PM_DEV'
+        },
+        levelGuest(role) {
+            return role === 'Engineer' || role === 'Reviewer' || role === 'PM_DEV' || role === 'Guest'
         },
         levelDEVORPM(role) {
             return role === 'PM_DEV'
