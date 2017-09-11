@@ -1,4 +1,21 @@
 export const levelMixin = {
+    methods: {
+        levelReviewer(role) {
+            return role === 'Reviewer' || role === 'PM_DEV'
+        },
+        levelEngineer (role) {
+            return role === 'Engineer' || role === 'Reviewer' || role === 'PM_DEV'
+        },
+        levelGuest(role) {
+            return role === 'Engineer' || role === 'Reviewer' || role === 'PM_DEV' || role === 'Guest'
+        },
+        levelDEVORPM(role) {
+            return role === 'PM_DEV'
+        }
+    }
+};
+
+export const optionsMixin = {
     data () {
         return {
             roleOptions : [
@@ -23,20 +40,6 @@ export const levelMixin = {
             ],
             defaulttestingOption : 'No',
             defaultSpecialNote : 'No'
-        }
-    },
-    methods: {
-        levelReviewer(role) {
-            return role === 'Reviewer' || role === 'PM_DEV'
-        },
-        levelEngineer (role) {
-            return role === 'Engineer' || role === 'Reviewer' || role === 'PM_DEV'
-        },
-        levelGuest(role) {
-            return role === 'Engineer' || role === 'Reviewer' || role === 'PM_DEV' || role === 'Guest'
-        },
-        levelDEVORPM(role) {
-            return role === 'PM_DEV'
         }
     }
 };

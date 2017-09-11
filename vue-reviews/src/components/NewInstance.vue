@@ -1,6 +1,6 @@
 <template>
-    <div class="c-main-section">
-    
+    <div style="width: 100%">
+        
         <md-layout>
             <md-layout v-for="(item, index) in inputs" :key="index">
                 <md-input-container class="side-margin">

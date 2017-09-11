@@ -52,7 +52,7 @@
 
         <main-nav>
 
-          <md-list-item v-for="(item, index) in routes" :key="index">
+          <md-list-item v-for="(item, index) in routes" :key="index" :class="{hidden: checkAccess(item.access) }">
             <router-link :to="{name : item.name}" class="router__link">
               <md-icon>{{ item.icon }}</md-icon>  <span>{{ item.title }}</span>
             </router-link>
@@ -83,13 +83,13 @@ export default {
   data () {
     return {
       routes: [
-        { title: 'Home', icon: 'home', name: 'CodeReview'},
-        { title: 'Reviewers', icon: 'people', name: 'ReviewersList' },
-        { title: 'CapacityDoc', icon: 'alarm_add', name: 'CapacityDoc' },
-        { title: 'Stats', icon : 'data_usage', name: 'StatsTable'},
-        { title: 'Config', icon: 'settings', name: 'MainConfig' },
-        { title: 'Knowledge Sharing', icon: 'view_stream', name: 'KnowledgeSharing'},
-        { title: 'SuperDoc', icon: 'book', name: 'SuperDoc' },
+        { title: 'Home', icon: 'home', name: 'CodeReview', acess : "ALL" },
+        { title: 'Reviewers', icon: 'people', name: 'ReviewersList', access : "ENGINEERING" },
+        { title: 'CapacityDoc', icon: 'alarm_add', name: 'CapacityDoc', access : "PM" },
+        { title: 'Stats', icon : 'data_usage', name: 'StatsTable', access : "ENGINEERING" },
+        { title: 'Knowledge Sharing', icon: 'view_stream', name: 'KnowledgeSharing', access : "ENGINEERING" },
+        // { title: 'SuperDoc', icon: 'book', name: 'SuperDoc', access : "ALL" },
+        { title: 'Config', icon: 'settings', name: 'MainConfig', access : "PM" },
       ],
       hiddenInputs : {
         search : true,
@@ -119,7 +119,10 @@ export default {
           let changes = Object.values(this.allItems).filter((el)=> el.ticket.toLowerCase().includes(ticket.toLowerCase()))
           this[GET_FBASE](changes)
       })
-    }
+    },
+    checkAccess (el) {
+      return (el == 'PM' && !this.levelDEVORPM(this.activeUserGetter.role)) || (el == 'ENGINEERING' && !this.levelEngineer(this.activeUserGetter.role))
+    } 
   },
   created () {
     // resistering and using SW
