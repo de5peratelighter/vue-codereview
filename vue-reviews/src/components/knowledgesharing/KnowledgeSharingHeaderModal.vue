@@ -73,8 +73,8 @@
           tags: this.tags,
           clients: this.clients,
           author: this.activeUserGetter.alias,
-          links: this.links,
-          date: this.$moment().format('DD-MM-YYYY, HH:mm:ss')
+          links: this.links
+//          date: this.$moment().format('DD-MM-YYYY, HH:mm:ss')
         });
         this.closeDialog();
       }

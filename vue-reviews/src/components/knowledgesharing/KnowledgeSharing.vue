@@ -69,12 +69,16 @@
     },
     methods: {
       readData(){
+        this.items = [];
         this.$bindAsArray('data', FBApp.ref(this.firebasePathGetter.knowledgesharing), null, () => {
-          this.items = this.data;
+          this.data.forEach((el) => {
+            el.date = parseInt(el['.key']);
+            this.items.push(el);
+          });
         });
       },
       submitData(data){
-        FBApp.ref(this.firebasePathGetter.knowledgesharing).push(data);
+        FBApp.ref(this.firebasePathGetter.knowledgesharing + '/' + this.$moment().valueOf()).set(data);
         this.readData();
       },
       updateFilter(data, action){
@@ -92,28 +96,17 @@
               break;
           }
       },
-//      addToFilter(data){
-//        if (this.filters.filter(filter => (filter.type === data.type && filter.value === data.value)).length === 0) {
-//          this.filters.push(data);
-//        }
-//      },
-//      removeFilter(index){
-//        this.filters.splice(index, 1);
-//      },
-//      removeAllFilters() {
-//        this.filters = [];
-//      },
       isSearchMatched(item) {
         return item.title.toLowerCase().indexOf(this.search.toLowerCase()) !== -1 || item.description.toLowerCase().indexOf(this.search.toLowerCase()) !== -1;
       },
       isDateMatched(item){
         if (this.dateFilter !== 'all') {
-          return this.$moment(item.date, 'DD-MM-YYYY, HH:mm:ss').isAfter(this.$moment().startOf(this.dateFilter), 'day');
+          return this.$moment(item.date).isAfter(this.$moment().startOf(this.dateFilter), 'day');
         }
         return true;
       },
       isNextItemDateAfter(a, b){
-        return this.$moment(a.date, 'DD-MM-YYYY, HH:mm:ss').isAfter(this.$moment(b.date, 'DD-MM-YYYY, HH:mm:ss'), 'day');
+        return this.$moment(a.date).isAfter(this.$moment(b.date), 'day');
       }
     },
     activated() {
