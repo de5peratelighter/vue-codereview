@@ -24,8 +24,7 @@
         name: 'CodeGuidelines',
         data () {
           return {
-              guides : {},
-              active : false
+              guides : {}
           }
         },
         computed : {
@@ -41,7 +40,6 @@
         created () {
             this.$bindAsObject('guidelines', FBApp.ref(this.firebasePathGetter.guidelines), null, () => {
                 this.guides = this.guidelines
-                console.warn(this.guides)
                 FBApp.ref(this.firebasePathGetter.guidelines).on('value', (el) => {
                     this.guides = el.val()
                 })
