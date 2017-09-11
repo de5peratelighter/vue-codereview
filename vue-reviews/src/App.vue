@@ -52,7 +52,7 @@
 
         <main-nav>
 
-          <md-list-item v-for="(item, index) in routes" :key="index" :class="{hidden: checkAccess(item.access) }">
+          <md-list-item v-for="(item, index) in routes" :key="index" v-if="!checkAccess(item.access)">
             <router-link :to="{name : item.name}" class="router__link">
               <md-icon>{{ item.icon }}</md-icon>  <span>{{ item.title }}</span>
             </router-link>

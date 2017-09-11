@@ -18,7 +18,7 @@
             </div>
         </div>
             
-        <div>
+        <div v-if="levelDEVORPM(activeUserGetter.role)">
             
             <div :class="{ hidden: !tickers.usersTicker }">
                
@@ -31,6 +31,7 @@
                 <guidelines-config></guidelines-config>
                 
             </div>
+
          </div>
     </div>
 </template>

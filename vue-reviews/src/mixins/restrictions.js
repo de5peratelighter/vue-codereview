@@ -1,13 +1,13 @@
 export const levelMixin = {
     methods: {
         levelReviewer(role) {
-            return role === 'Reviewer' || role === 'PM_DEV'
+            return role === 'Reviewer' || role === 'PM_DEV' || role === 'TeamLead'
         },
         levelEngineer (role) {
-            return role === 'Engineer' || role === 'Reviewer' || role === 'PM_DEV'
+            return role === 'Engineer' || role === 'Reviewer' || role === 'PM_DEV' || role === 'TeamLead'
         },
         levelGuest(role) {
-            return role === 'Engineer' || role === 'Reviewer' || role === 'PM_DEV' || role === 'Guest'
+            return role === 'Engineer' || role === 'Reviewer' || role === 'PM_DEV' || role === 'TeamLead' || role === 'Guest'
         },
         levelDEVORPM(role) {
             return role === 'PM_DEV'
