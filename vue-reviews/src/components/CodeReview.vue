@@ -93,9 +93,9 @@
         </li>
       </ul>
     </md-layout>
-    <div v-if="levelEngineer(activeUserGetter.role)">
+    <md-layout v-if="levelEngineer(activeUserGetter.role)" md-flex-offset="5">
       <new-instance :inputs="codeReviewInputs" :requiredword="newInstanceRequiredWord" :path="firebasePathGetter.main" relcomponent="codereview"> </new-instance>
-    </div>
+    </md-layout>
     
     <md-snackbar md-position="bottom center" ref="coreSnackbar" md-duration="5000">
         <strong>{{snackbarMessage}}</strong>
