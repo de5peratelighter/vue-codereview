@@ -10,44 +10,11 @@ import lodash from 'lodash'
 import VueLodash from 'vue-lodash/dist/vue-lodash.min'
 Vue.use(VueLodash, lodash)
 
-import {GET_FBASE, LOGIN_ME, UPDATE_NUM, GET_REVIEWERS, GET_HOLIDAYS, GET_CAPACITY, SET_MONTH, SET_YEAR, GET_TODAYREVIEWERS, SET_FOCUSED_CELL, SET_IS_EDITING, SET_COPY_CACHE, SET_CURRENT_WEEK} from './mutation-types'
+import {GET_FBASE, LOGIN_ME, UPDATE_NUM, GET_REVIEWERS, GET_HOLIDAYS, GET_CAPACITY, SET_MONTH, SET_YEAR, GET_TODAYREVIEWERS, SET_FOCUSED_CELL, SET_IS_EDITING, SET_COPY_CACHE, SET_CURRENT_WEEK, GET_USERS} from './mutation-types'
 
 export default new Vuex.Store({
     state : {
-        capacity: [
-          {
-            '.key': 'Fake Blade',
-            '.value': '4,4,4,4,4|0,1.5,3,2,0|1,2,1,1,0||NA||Fake Blade'
-          },
-          {
-            '.key': 'Fake Batman',
-            '.value': '4,4,4,4,4|0,1.5,3,2,0|1,2,1,1,0||NA||Fake Blade'
-          },
-          {
-            '.key': 'Fake Gambit',
-            '.value': '4,4,4,4,4|0,1.5,3,2,0|1,2,1,1,0||NA||Fake Gambit'
-          },
-          {
-            '.key': 'Fake Wolverine',
-            '.value': '4,4,4,4,4|0,1.5,3,2,0|1,2,1,1,0||NA||Fake Gambit'
-          },
-          {
-            '.key': 'Fake Spiderman',
-            '.value': '4,4,4,4,4|0,1.5,3,2,0|1,2,1,1,0||EMEA||Fake Spiderman'
-          },
-          {
-            '.key': 'Fake Green Goblin',
-            '.value': '4,4,4,4,4|0,1.5,3,2,0|1,2,1,1,0||EMEA||Fake Spiderman'
-          },
-          {
-            '.key': 'Fake Tony Stark',
-            '.value': '4,4,4,4,4|0,1.5,3,2,0|1,2,1,1,0||EMEA||Fake Tony Stark'
-          },
-          {
-            '.key': 'Fake Tor',
-            '.value': '4,4,4,4,4|0,1.5,3,2,0|1,2,1,1,0||EMEA||Fake Tony Stark'
-          }
-        ],
+        capacity: [],
         focusedCell: {},
         items : {
           "-KZvonwRi7MBVk7YEiCe" : {
@@ -99,6 +66,7 @@ export default new Vuex.Store({
         },
         displayNum : 5,
         searchTerm : 'SUP',
+        users: [],
         firePath : {
           main : 'wow/nice',
           resources : 'wow/resources',
@@ -148,61 +116,51 @@ export default new Vuex.Store({
           return state.reviewersScheduleAhead
         },
         teamsGetter: (state) => {
-          let capacity = state.capacity;
-          let capacityLength = capacity.length;
-          let teams = [];
-          let team = '';
-          for(let i = 0; i < capacityLength; i++) {
-            team = capacity[i]['.value'].split('||')[1];
-            if(teams.indexOf(team) === -1) {
-              teams.push(team);
+          const usersArr = state.users;
+          const teams = [];
+          const teamRegExp = /([a-z]|[A-Z])*/gi;
+          usersArr.forEach((userItem, index) => {
+            const userTeam = userItem['team'].match(teamRegExp)[0];
+            if(teams.indexOf(userTeam) === -1 && userTeam !== 'Newcomer') {
+              teams.push(userTeam);
             }
-          }
+          });
           teams.sort();
           return teams;
         },
-        leadsByTeamGetter: (state) => (team) => {
-          let capacity = state.capacity;
-          let capacityLength = capacity.length;
-          let leadsByTeam = [];
-          let lead;
-          let leadsTeam;
-          let splitCapacity;
-          for(let i = 0; i < capacityLength; i++) {
-            splitCapacity = capacity[i]['.value'].split('||');
-            lead = splitCapacity[2];
-            leadsTeam = splitCapacity[1];
-            if (leadsTeam !== team) {
-              continue;
+        subTeamsByTeamGetter: (state) => (team) => {
+          const usersArr = state.users;
+          const subTeams = [];
+          const subTeamRegExp = new RegExp('^' + team, 'i');
+          usersArr.forEach((userItem, index) => {
+            const userSubTeam = userItem['team'];
+            const isSubTeaminTeam = subTeamRegExp.test(userSubTeam);
+            if(isSubTeaminTeam && subTeams.indexOf(userSubTeam) === -1 && userSubTeam !== 'Newcomer') {
+              subTeams.push(userSubTeam);
             }
-            if(leadsByTeam.indexOf(lead) === -1) {
-              leadsByTeam.push(lead);
-            }
-          }
-          leadsByTeam.sort();
-          return leadsByTeam;
+          });
+          subTeams.sort();
+          return subTeams;
         },
-        usersByLeadGetter: (state) => (lead) => {
-          let capacity = state.capacity;
-          let capacityLength = capacity.length;
-          let usersByLead = [];
-          let user;
-          let usersLead;
-          let splitCapacity;
-          for(let i = 0; i < capacityLength; i++) {
-            splitCapacity = capacity[i]['.value'].split('||');
-            usersLead = splitCapacity[2];
-            user = capacity[i]['.key']
-            if (usersLead !== lead || usersLead === user) {
-              continue;
+        usersBySubTeamGetter: (state) => (subTeam) => {
+          const usersArr = state.users;
+          const usersBySubTeam = [];
+          let subTeamLead;
+          usersArr.forEach((userItem, index) => {
+            const userSubTeam = userItem['team'];
+            if(userItem['team'] === subTeam && ['Engineer', 'TeamLead'].indexOf(userItem['role']) !== -1) {
+              if(userItem['role'] === 'TeamLead') {
+                subTeamLead = userItem['alias'];
+              } else {
+                usersBySubTeam.push(userItem['alias']);
+              }
             }
-            if(usersByLead.indexOf(user) === -1) {
-              usersByLead.push(user);
-            }
+          });
+          usersBySubTeam.sort();
+          if(subTeamLead) {
+            usersBySubTeam.unshift(subTeamLead);
           }
-          usersByLead.sort();
-          usersByLead.unshift(lead);
-          return usersByLead;
+          return usersBySubTeam;
         },
         capacityByUserGetter: (state) => (user) => {
           let capacity = state.capacity;
@@ -216,16 +174,39 @@ export default new Vuex.Store({
           }
         },
         capacityByTeamGetter: (state) => (team) => {
-          let capacity = state.capacity;
-          let teamCapacity = [];
+          const usersArr = state.users;
+          const users = [];
+          const subTeamRegExp = new RegExp('^' + team, 'i');
+          usersArr.forEach((userItem) => {
+            const userSubTeam = userItem['team'];
+            if(subTeamRegExp.test(userSubTeam)) {
+              users.push(userItem['alias']);
+            }
+          });
+          const capacity = state.capacity;
+          const teamCapacity = [];
           capacity.forEach((val, index) => {
-            let currentUser = capacity[index]['.key'];
-            let splitCapacity = capacity[index]['.value'].split('||');
-            if(splitCapacity[1] === team) {
+            const currentUser = capacity[index]['.key'];
+            if(users.indexOf(currentUser) !== -1) {
+              const splitCapacity = capacity[index]['.value'].split('||');
               teamCapacity.push(splitCapacity[0]);
             }
           })
           return teamCapacity;
+        },
+        userInfoGetter: (state) => (alias, info) => {
+          const usersArr = state.users;
+          let i = 0;
+          while(1) {
+            if(usersArr[i]['alias'] === alias) {
+              if(info) {
+                return usersArr[i][info];
+              } else {
+                return usersArr[i];
+              }
+            }
+            i++;
+          }
         },
         focusedUserGetter: (state) => {
           return state.focusedCell.user;
@@ -249,6 +230,9 @@ export default new Vuex.Store({
     mutations : {
       [GET_CAPACITY] (state, payload) {
         state.capacity = payload
+      },
+      [GET_USERS] (state, payload) {
+        state.users = payload
       },
       [SET_IS_EDITING] (state, payload) {
         state.isEditing = payload;
@@ -294,6 +278,9 @@ export default new Vuex.Store({
       },
       [GET_CAPACITY] (store, payload) {
         store.commit(GET_CAPACITY, payload)
+      },
+      [GET_USERS] (store, payload) {
+        store.commit(GET_USERS, payload)
       },
       [SET_IS_EDITING] (store, payload) {
         store.commit(SET_IS_EDITING, payload)

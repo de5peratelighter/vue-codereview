@@ -31,7 +31,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['firebasePathGetter', 'capacityByUserGetter', 'activeUserGetter', 'editableItemClassGetter', 'copyCacheGetter']),
+    ...mapGetters(['firebasePathGetter', 'capacityByUserGetter', 'activeUserGetter', 'editableItemClassGetter', 'copyCacheGetter', 'activeUserGetter']),
     isCopied() {
       if(this.copyCacheGetter.el !== null) {
       return this.copyCacheGetter.el === this.$refs.focusedCell
@@ -116,6 +116,9 @@ export default {
       this[SET_FOCUSED_CELL]({});
     },
     startEditData(event) {
+      if(this.activeUserGetter.isAnonymous) {
+        return;
+      }
       if(event.keyCode === 67 && this.checkCtrl(event)){
         this[SET_COPY_CACHE]({
           data: this.data,

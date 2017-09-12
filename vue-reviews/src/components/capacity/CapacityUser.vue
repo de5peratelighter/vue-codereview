@@ -1,6 +1,6 @@
 <template>
-  <md-layout md-row md-flex class="capacity-row" :class="{focused: focusedUserGetter === user}">
-    <capacity-user-data :user="user" :assignedTeam="assignedTeam" :testing="testing" :lead="lead"></capacity-user-data>
+  <md-layout v-if="hasData" md-row md-flex class="capacity-row" :class="{focused: focusedUserGetter === user}">
+    <capacity-user-data :user="user" :assignedTeam="userInfoGetter(user, 'notes')" :testing="userInfoGetter(user, 'tester')" :lead="isLead"></capacity-user-data>
     <md-layout class="capacity-week">
       <md-layout class="capacity-day" v-for="n in 5" :n="n" :key="n">
         <md-layout md-row class="capacity-data-container">
@@ -16,39 +16,69 @@
 <script>
 
 import { mapGetters } from 'vuex';
+import { FBApp } from '@/data/firebase-config';
 
 import CapacityItem from './CapacityItem';
 import CapacityUserData from './CapacityUserData';
+import { capacityRecordMixin } from './mixins/capacityRecords';
 
 export default {
   name: 'CapacityUser',
   props: ['user'],
+  mixins: [capacityRecordMixin],
   data() {
     return {
       requestedCapacity: [],
       receivedCapacity: [],
       ticketsCapacity: [],
-      assignedTeam: '',
-      testing: '',
-      lead: false
+      hasData: true
     }
   },
   computed: {
-    ...mapGetters(['capacityByUserGetter', 'focusedUserGetter']),
+    ...mapGetters(['capacityByUserGetter', 'focusedUserGetter', 'userInfoGetter', 'firebasePathGetter', 'currentWeekGetter']),
     usersCapacity() {
-      return this.capacityByUserGetter(this.user);
+      if(this.$store.state.capacity.length === 0) {
+        return null;
+      } else {
+        return this.capacityByUserGetter(this.user);
+      }
+    },
+    isLead () {
+      return this.userInfoGetter(this.user, 'role') === 'TeamLead';
     }
   },
   methods: {
     splitCapacity(capacityString) {
+      if(capacityString === null) {
+        this.hasData = false;
+        return;
+      }
+      if(capacityString === undefined) {
+        if(this.$moment().isoWeek() === this.currentWeekGetter) {
+          this.createNewUserRecord();
+        }
+        this.hasData = false;
+        return;
+      }
+      this.hasData = true;
       const capacityArray = capacityString.split('||');
-      this.assignedTeam = capacityArray[3];
-      this.testing = capacityArray[4];
-      this.lead = this.user === capacityArray[2];
       const capacityData = capacityArray[0].split('|')
       this.requestedCapacity = capacityData[0].split(',');
       this.receivedCapacity = capacityData[1].split(',');
       this.ticketsCapacity = capacityData[2].split(',');
+    },
+    
+    createNewUserRecord() {
+      const user = this.userInfoGetter(this.user);
+      if(this.skipUser(user)) {
+        return;
+      } else {
+        this.createUserString(user)
+        const userString = this.createUserString(user);
+        const newUserData = {};
+        newUserData[this.user] = userString;
+        return FBApp.ref(this.firebasePathGetter.capacity +"/" + this.currentWeekGetter).update(newUserData);
+      }
     }
   },
   watch: {
