@@ -71,7 +71,7 @@ export default {
               
               // listener for activeuser in DB, basically rerenders the entire app under if circumstances/role has changed
               FBApp.ref(this.firebasePathGetter.users +'/' + user.uid).on('child_changed', (el) => {
-                usr.role = el.val()
+                usr[el.key] = el.val()
                 this[LOGIN_ME](usr)
               })
               
