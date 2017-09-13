@@ -97,13 +97,16 @@ export default {
 </script>
 
 <style scoped>
-.focused {
-   background-color: #9dc2e5;
-}
 .capacity-row {
   flex-wrap: nowrap;
   word-break: break-all;
   flex: 0 0 100%;
+}
+.separate .capacity-row {
+  background-color: #fff8dc;
+}
+.capacity-row.focused {
+   background-color: #9dc2e5;
 }
   .capacity-week {
     flex-wrap: nowrap;

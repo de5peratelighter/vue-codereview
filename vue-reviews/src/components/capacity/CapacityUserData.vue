@@ -21,14 +21,19 @@ export default {
       switch (val) {
         case 'Yes':
           return 'Yes';
+        case 'No':
+          return '';
         default:
-          return ''
+          return 'TSE Testing'
       }
     }
   }
 }
 </script>
 <style scoped>
+.separate .capacity-user {
+  background-color: #ffefdb;
+}
 .capacity-user {
   flex: 0 0 19.999%;
   flex-wrap: nowrap;
