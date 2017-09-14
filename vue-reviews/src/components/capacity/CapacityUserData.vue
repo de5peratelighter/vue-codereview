@@ -7,7 +7,7 @@
       <span v-if="assignedTeam">{{ assignedTeam }}</span>
     </md-layout>
     <md-layout md-vertical-align="center" class="capacity-cell">
-      <span v-if="testing">{{ testing }}</span>
+      <span v-if="testing">{{ testing | testingFilter }}</span>
     </md-layout>
   </md-layout>
 </template>
@@ -16,9 +16,24 @@
 export default {
   name: 'CapacityUserData',
   props: ['user', 'assignedTeam', 'testing', 'lead'],
+  filters: {
+    testingFilter(val) {
+      switch (val) {
+        case 'Yes':
+          return 'Yes';
+        case 'No':
+          return '';
+        default:
+          return 'TSE Testing'
+      }
+    }
+  }
 }
 </script>
 <style scoped>
+.separate .capacity-user {
+  background-color: #ffefdb;
+}
 .capacity-user {
   flex: 0 0 19.999%;
   flex-wrap: nowrap;

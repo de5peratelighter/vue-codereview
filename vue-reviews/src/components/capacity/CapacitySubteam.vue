@@ -1,6 +1,6 @@
 <template>
-  <md-layout md-vertical-align="start" class="capacity-subteam">
-    <capacity-user v-for="user in usersByLeadGetter(lead)" :user="user" :key="user"></capacity-user>
+  <md-layout md-vertical-align="start" class="capacity-subteam" :class="{separate: shouldSeparate}">
+    <capacity-user v-for="user in usersBySubTeamGetter(subTeam)" :user="user" :key="user"></capacity-user>
   </md-layout>
 </template>
 
@@ -11,9 +11,12 @@ import CapacityUser from './CapacityUser';
 
 export default {
   name: 'CapacitySubteam',
-  props: ['lead'],
+  props: ['subTeam', 'index', 'subTeamsNumber'],
   computed: {
-    ...mapGetters(['usersByLeadGetter'])
+    ...mapGetters(['usersBySubTeamGetter']),
+    shouldSeparate() {
+      return this.subTeamsNumber > 1 && (this.index + 1) % 2 === 0
+    }
   },
   components: {
     CapacityUser

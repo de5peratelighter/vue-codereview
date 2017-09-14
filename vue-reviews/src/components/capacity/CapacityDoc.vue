@@ -1,5 +1,5 @@
 <template>
-  <div class="capacity-view" v-if="levelDEVORPM(activeUserGetter.role)">
+  <div v-if="levelDEVORPM(activeUserGetter.role)" class="capacity-view">
     <div class="capacity-header-container">
         <div class="capacity-date-range"><span>{{getDate(1)}} - {{getDate(5)}}</span></div>
         <md-button class="md-icon-button md-raised md-primary" @click="setWeek(-1)" :disabled="isDisabled('prev')">
@@ -20,18 +20,18 @@ import { mapActions, mapGetters } from 'vuex';
 
 import CapacityTable from './CapacityTable';
 import { FBApp } from '@/data/firebase-config';
-import { GET_CAPACITY, SET_CURRENT_WEEK, SET_COPY_CACHE } from '@/data/mutation-types';
+import { GET_CAPACITY, SET_CURRENT_WEEK, SET_COPY_CACHE, GET_USERS } from '@/data/mutation-types';
 import { levelMixin } from '@/mixins/restrictions';
+import { capacityRecordMixin } from './mixins/capacityRecords';
 
 export default {
   name: 'CapacityDoc',
   data() {
     return {
-      DEFAULT_DATA : this.$store.state.capacity,
       noPrevData: false
     };
   },
-  mixins: [levelMixin],
+  mixins: [levelMixin, capacityRecordMixin],
   computed: {
     ...mapGetters(['firebasePathGetter', 'activeUserGetter', 'currentWeekGetter']),
     capacity () {
@@ -40,7 +40,7 @@ export default {
   },
   firebase: {},
   methods: {
-    ...mapActions([GET_CAPACITY, SET_CURRENT_WEEK, SET_COPY_CACHE]),
+    ...mapActions([GET_CAPACITY, SET_CURRENT_WEEK, SET_COPY_CACHE, GET_USERS]),
     setWeek(value) {
       this[SET_CURRENT_WEEK](this.currentWeekGetter + value);
     },
@@ -78,46 +78,38 @@ export default {
         }
       })
     },
+    getUsersData() {
+      this.$bindAsArray('usersData', FBApp.ref(this.firebasePathGetter.users), null, () => {
+          this[GET_USERS](this.usersData);
+          this.getCapacityData()
+      })
+    },
     createNewWeekRecord() {
       FBApp.ref(this.firebasePathGetter.users).once('value').then((snapshot) => {
         let user;
         const users = snapshot.val();
-        const leadsByTeam = {};
-        for (user in users) {
-          if(users[user].role === 'TeamLead'){
-            leadsByTeam[users[user]['team']] = users[user]['alias']
-          }
-        }
         const weekData = {};
         for (user in users) {
+          const userString = this.createUserString(users[user]);
           if(this.skipUser(users[user])) {
             continue;
           }
-          const team = users[user]['team'].match(/([a-z]|[A-Z])*/gi)[0];
-          const lead = leadsByTeam[users[user]['team']];
-          const notes = users[user]['notes'] ? users[user]['notes'] : '';
-          let tester = '';
-          if(users[user]['tester'] === 'Yes') {
-            tester = 'Yes';
-          }
-          const userString = `,,,,|,,,,|,,,,||${team}||${lead}||${notes}||${tester}`;
           weekData[users[user]['alias']] = userString;
         }
         FBApp.ref(this.firebasePathGetter.capacity +"/" + this.currentWeekGetter).set(weekData)
+          .then(() => {
+            this.getCapacityData();
+          })
       });
-    },
-    skipUser(user) {
-      if(user['team'] === 'Newcomer' || ['TeamLead', 'Engineer'].indexOf(user['role']) === -1) {
-        return true
-      }
     }
   },
   watch: {
     activeUserGetter (newCount, oldCount) {
       if (!newCount.isAnonymous) {
-        this.getCapacityData();
+        this.getUsersData();
       } else {
-        this[GET_CAPACITY](this.DEFAULT_DATA);
+        this[GET_USERS]([]);
+        this[GET_CAPACITY]([]);
       }
     },
     currentWeekGetter (newCount) {
@@ -126,9 +118,10 @@ export default {
   },
   created () {
     if (!this.activeUserGetter.isAnonymous) {
-      this.getCapacityData();
+      this.getUsersData();
     } else {
-      this[GET_CAPACITY](this.DEFAULT_DATA);
+        this[GET_USERS]([]);
+        this[GET_CAPACITY]([]);
     }
   },
   components: {

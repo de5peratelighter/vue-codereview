@@ -1,6 +1,6 @@
 <template>
   <md-layout md-vertical-align="start" class="capacity-team">
-    <capacity-subteam v-for="lead in leadsByTeamGetter(team)" :lead="lead" :key="lead"></capacity-subteam>
+    <capacity-subteam v-for="(subTeam, index) in subTeamsByTeamGetter(team)" :subTeam="subTeam" :index="index" :key="index" :subTeamsNumber="subTeamsByTeamGetter(team).length"></capacity-subteam>
     <capacity-team-daily :team="team"></capacity-team-daily>
   </md-layout>
 </template>
@@ -15,7 +15,7 @@ export default {
   name: 'CapacityTableTeam',
   props: ['team'],
   computed: {
-    ...mapGetters(['leadsByTeamGetter'])
+    ...mapGetters(['subTeamsByTeamGetter'])
   },
   components: {
     CapacitySubteam,
