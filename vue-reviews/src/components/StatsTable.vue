@@ -1,7 +1,7 @@
 <template>
     <div>
         <div class="c-main-section">
-          <template v-if="levelDEVORPM(activeUserGetter.role)">
+          <template v-if="levelTeamlead(activeUserGetter.role)">
             <md-layout md-gutter md-align="center">
               <md-button class="md-raised md-primary" @click="getFullData">Calculate codereview statistics</md-button>
               <md-button class="md-raised md-primary" disabled>Calculate capacity statistics</md-button>

@@ -35,14 +35,14 @@
     import firebase from 'firebase'
     import { FBApp } from '@/data/firebase-config'
     var provider = new firebase.auth.GoogleAuthProvider();
-    import { levelMixin } from '@/mixins/restrictions'
+    import { levelMixin, optionsMixin } from '@/mixins/restrictions'
     import {GET_TODAYREVIEWERS} from '@/data/mutation-types'
     import {mapActions, mapGetters } from 'vuex'
     import { notificationMixin } from '@/mixins/notifications'
     const CodeGuidelines = () => import('@/components/CodeGuidelines.vue')
     
     export default {
-        mixins: [levelMixin, notificationMixin],
+        mixins: [levelMixin, optionsMixin, notificationMixin],
         props : ['inputs','requiredword', 'path', 'relcomponent'],
         data () {
             return {
@@ -104,7 +104,7 @@
                         })
                         
                     } else if (this.relcomponent === 'mainconfig' && this.defaultRoleOption && this.defaultTeamOption) {
-                        
+                        console.warn('lol')
                         let token = this.inputs[0].val ? this.inputs[0].val : 'WrongToken'
                         let alias = this.inputs[1].val ? this.inputs[1].val : 'WrongAlias'
                         FBApp.ref(this.path +"/" + token).set({

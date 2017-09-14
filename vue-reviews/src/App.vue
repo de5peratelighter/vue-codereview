@@ -85,8 +85,8 @@ export default {
       routes: [
         { title: 'Home', icon: 'home', name: 'CodeReview', acess : "ALL" },
         { title: 'Reviewers', icon: 'people', name: 'ReviewersList', access : "ENGINEERING" },
-        { title: 'CapacityDoc', icon: 'alarm_add', name: 'CapacityDoc', access : "PM" },
-        { title: 'Stats', icon : 'data_usage', name: 'StatsTable', access : "ENGINEERING" },
+        { title: 'CapacityDoc', icon: 'alarm_add', name: 'CapacityDoc', access : "TEAMLEAD" },
+        { title: 'Stats', icon : 'data_usage', name: 'StatsTable', access : "TEAMLEAD" },
         { title: 'Knowledge Sharing', icon: 'view_stream', name: 'KnowledgeSharing', access : "ENGINEERING" },
         // { title: 'SuperDoc', icon: 'book', name: 'SuperDoc', access : "ALL" },
         { title: 'Config', icon: 'settings', name: 'MainConfig', access : "PM" },
@@ -121,7 +121,7 @@ export default {
       })
     },
     checkAccess (el) {
-      return (el === 'PM' && !this.levelDEVORPM(this.activeUserGetter.role)) || (el === 'ENGINEERING' && !this.levelEngineer(this.activeUserGetter.role))
+      return (el === 'PM' && !this.levelDEVORPM(this.activeUserGetter.role)) || (el === 'ENGINEERING' && !this.levelEngineer(this.activeUserGetter.role)) || (el === 'TEAMLEAD' && !this.levelTeamlead(this.activeUserGetter.role))
     } 
   },
   created () {

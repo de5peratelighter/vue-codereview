@@ -157,7 +157,7 @@ export default new Vuex.Store({
           let subTeamLead;
           usersArr.forEach((userItem, index) => {
             const userSubTeam = userItem['team'];
-            if(userItem['team'] === subTeam && ['Engineer', 'TeamLead'].indexOf(userItem['role']) !== -1) {
+            if(userItem['team'] === subTeam && ['Engineer', 'TeamLead', 'Reviewer'].indexOf(userItem['role']) !== -1) {
               if(userItem['role'] === 'TeamLead') {
                 subTeamLead = userItem['alias'];
               } else {
