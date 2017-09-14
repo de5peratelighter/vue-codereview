@@ -34,7 +34,7 @@
 <script>
 import firebase from 'firebase'
 import { FBApp } from '@/data/firebase-config'
-import {LOGIN_ME} from '@/data/mutation-types'
+import {LOGIN_ME, SET_PREFIXES} from '@/data/mutation-types'
 import {mapActions, mapGetters} from 'vuex'
 const NotificationApp = () => import('@/components/NotificationApp.vue')
 
@@ -51,7 +51,7 @@ export default {
     ...mapGetters(['activeUserGetter', 'firebasePathGetter'])
   },
   methods : {
-    ...mapActions([LOGIN_ME]),
+    ...mapActions([LOGIN_ME, SET_PREFIXES]),
     logIn () {
       if (this.activeUserGetter.isAnonymous) {
         firebase.auth().signInWithPopup(provider).then((result) => {
@@ -107,6 +107,11 @@ export default {
   },
   components : {
     NotificationApp
+  },
+  mounted () {
+    this.$bindAsObject('prefs', FBApp.ref(this.firebasePathGetter.prefixes), null, () => {
+        this[SET_PREFIXES](this.prefs)
+    })
   }
 }
 </script>

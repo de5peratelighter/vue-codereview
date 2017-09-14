@@ -51,7 +51,7 @@
             }
         },
         computed : {
-            ...mapGetters(['activeUserGetter','firebasePathGetter', 'workingHoursGetter']),
+            ...mapGetters(['activeUserGetter','firebasePathGetter', 'workingHoursGetter', 'globalPrefixesGetter']),
             disableSubmit () {
                 return this.inputsInvalid
             },
@@ -81,19 +81,19 @@
                     
                     // relcomponent indicates the component that is relevant for our concrete newInstance component
                     if (this.relcomponent === 'codereview') {
-                        
+                        let prefz = this.globalPrefixesGetter
                         let newData = {
                             username: user.alias,
                             si:  user.photoURL,
-                            content: this.inputs[0].val,
-                            ticket: this.inputs[1].val,
+                            content : prefz.changes.val ? this.inputs[0].val.replace(prefz.changes.val, '') : this.inputs[0].val,
+                            ticket : prefz.changes.val ? this.inputs[1].val.replace(prefz.tickets.val, '') : this.inputs[1].val,
                             status: 'New',
-                            reviewer: '',
-                            st : this.$moment().format('DD-MM-YYYY, hh:mm:ss')
-                        } 
+                            reviewer: ''
+                        }
+
                         if (this.inputs[2].val) { newData.comment = this.inputs[2].val }
                         
-                        FBApp.ref(this.path).push(newData).then(() => {
+                        FBApp.ref(this.path + '/' + this.$moment().valueOf()).set(newData).then(() => {
                             let currentReviewer = this.reviewers[ this.workingHoursGetter.findIndex((el,index) => el.includes(this.$moment().hours()))]
                             
                             this.$bindAsObject('currentReviewerToken', FBApp.ref(this.firebasePathGetter.notifications+"/"+currentReviewer), null, () => {

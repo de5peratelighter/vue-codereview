@@ -121,7 +121,7 @@ export default {
       })
     },
     checkAccess (el) {
-      return (el == 'PM' && !this.levelDEVORPM(this.activeUserGetter.role)) || (el == 'ENGINEERING' && !this.levelEngineer(this.activeUserGetter.role))
+      return (el === 'PM' && !this.levelDEVORPM(this.activeUserGetter.role)) || (el === 'ENGINEERING' && !this.levelEngineer(this.activeUserGetter.role))
     } 
   },
   created () {

@@ -13,12 +13,12 @@
         <li  v-for="(item, key) in items" :key="key">
 
           <md-card :class="[item.status, 'instance']">
-            <md-layout md-align="center" md-vertical-align="center" md-gutter md-row>
+            <md-layout md-align="left" md-vertical-align="center" md-gutter md-row>
               
               <md-layout>
                 <md-card-content>
-                  <show-reviewdate :date="item.st"></show-reviewdate> <!-- splitted into seperate component and lazy-loaded -->
-                  <md-tooltip md-delay="400" md-direction="right">{{ truncContent(item.st, 'time') }}</md-tooltip> <br> by {{item.username }}
+                  <show-reviewdate :date="item['.key']"></show-reviewdate> <!-- splitted into seperate component and lazy-loaded -->
+                  <md-tooltip md-delay="400" md-direction="right">{{ truncContent(item['.key'], 'time') }}</md-tooltip> <br> by {{item.username }}
                 </md-card-content>
               </md-layout>
               
@@ -34,13 +34,13 @@
               </md-layout>
               
               <md-layout>
-                <md-button :href="item.content" target="_blank">
+                <md-button :href="prependPrefix(item.content, 'changeset')" target="_blank">
                   {{ truncContent(item.content, 'changeset') }}
                 </md-button>
               </md-layout>
               
               <md-layout>
-                <md-button :href="item.ticket" target="_blank">
+                <md-button :href="prependPrefix(item.ticket, 'ticket')" target="_blank">
                   {{ truncContent(item.ticket, 'ticket') }}
                 </md-button>
               </md-layout>
@@ -131,7 +131,8 @@ export default {
       newInput : '',
       newInstanceRequiredWord: 'bazaarvoice',
       DEFAULT_DATA : this.$store.state.items,
-      snackbarMessage : ''
+      snackbarMessage : '',
+      prefixes : {}
     }
   },
   firebase: {},
@@ -140,7 +141,7 @@ export default {
     items () {
       return this.$store.state.items
     },
-    ...mapGetters(['activeUserGetter', 'displayNumGetter', 'firebasePathGetter'])
+    ...mapGetters(['activeUserGetter', 'displayNumGetter', 'firebasePathGetter', 'globalPrefixesGetter'])
   },
   methods : {
     ...mapActions([GET_FBASE]),
@@ -149,13 +150,18 @@ export default {
         this[GET_FBASE](this.itemsArray)
       })
     },
-
+    prependPrefix (el, typer) {
+      return (
+        typer === "ticket" ? (el.includes(this.globalPrefixesGetter.tickets.val) ? el : this.globalPrefixesGetter.tickets.val + el) :
+        typer === "changeset" ? (el.includes(this.globalPrefixesGetter.changes.val) ? el : this.globalPrefixesGetter.changes.val + el) :
+        el
+      )
+    },
     truncContent (el, typer) {
-      // TIME - for compatibility with old dates $moment is provided with additional parameter (from old Polymer project w/o $moment in place)
       return (
         typer === "ticket" ? el.split('/').pop().slice(0,10) :
         typer === "changeset" ? el.slice(-8) :
-        typer === "time" ?  this.$moment(el, 'DD-MM-YYYY, hh:mm:ss').format('DD-MMM, h:mm A') : ""
+        typer === "time" ?  this.$moment(Number(el)).format('DD-MMM, h:mm A') : ""
       )
     },
     onSelectChange (el) {
