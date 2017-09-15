@@ -104,7 +104,6 @@
                         })
                         
                     } else if (this.relcomponent === 'mainconfig' && this.defaultRoleOption && this.defaultTeamOption) {
-                        console.warn('lol')
                         let token = this.inputs[0].val ? this.inputs[0].val : 'WrongToken'
                         let alias = this.inputs[1].val ? this.inputs[1].val : 'WrongAlias'
                         FBApp.ref(this.path +"/" + token).set({
