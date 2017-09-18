@@ -1,54 +1,83 @@
 <template>
-  <md-card class="kn-content">
-    <md-card-area>
-      <md-card-content>
-        <div class="kn-content-summary">
-          {{item.title}}
-        </div>
-        <div v-if="!showMore" class="kn-content-description">
-          {{item.description | knShort}}
-          <div v-if="showMoreAvailable" class="kn-toggle-more" @click="showMore = true">
-            + more
+  <md-layout md-flex md-align="end">
+    <md-card @mouseover.native="showButtons=true" @mouseleave.native="showButtons=false" class="kn-content">
+      <md-card-area>
+        <md-card-content>
+          <div class="kn-content-summary">
+            {{item.title}}
           </div>
-        </div>
-        <div v-if="showMore" class="kn-content-full-description">
-          {{ item.description }}
-          <div v-if="item.links" class="kn-content-links">
-            <md-subheader class="kn-subheader">Useful links</md-subheader>
-            {{ item.links }}
+          <div v-if="!showMore" class="kn-content-description">
+            {{item.description | knShort}}
+            <div v-if="showMoreAvailable" class="kn-toggle-more" @click="showMore = true">
+              + more
+            </div>
           </div>
-          <div class="kn-toggle-more" @click="showMore = false">
-            - less
+          <div v-if="showMore" class="kn-content-full-description">
+            {{ item.description }}
+            <div v-if="item.links" class="kn-content-links">
+              <md-subheader class="kn-subheader">Useful links</md-subheader>
+              {{ item.links }}
+            </div>
+            <div class="kn-toggle-more" @click="showMore = false">
+              - less
+            </div>
           </div>
-        </div>
-      </md-card-content>
-      <md-card-header class="kn-card-header">
-        <md-chip v-for="(tag,index) in item.tags"
-                 @edit="filter('tags', tag)"
-                 md-editable
-                 :class="isActive('tags',tag)?'kn-tag-active kn-chip':'kn-tag kn-chip'"
-                 :key="index">
-          {{ tag }}
-        </md-chip>
-        <md-chip v-for="(client,index) in item.clients"
-                 @edit="filter('clients', client)"
-                 md-editable class="kn-client"
-                 :class="isActive('clients',client)?'kn-client-active kn-chip':'kn-client kn-chip'"
-                 :key="index">
-          {{ client }}
-        </md-chip>
-        <md-subheader class="kn-subheader">Added by {{ item.author }}  on {{ $moment(item.date).format('DD MMM YYYY') }}</md-subheader>
-      </md-card-header>
-    </md-card-area>
-  </md-card>
+        </md-card-content>
+        <md-card-header class="kn-card-header">
+          <md-chip v-for="(tag,index) in item.tags"
+                   @edit="filter('tags', tag)"
+                   md-editable
+                   :class="isActive('tags',tag)?'kn-tag-active kn-chip':'kn-tag kn-chip'"
+                   :key="index">
+            {{ tag }}
+          </md-chip>
+          <md-chip v-for="(client,index) in item.clients"
+                   @edit="filter('clients', client)"
+                   md-editable class="kn-client"
+                   :class="isActive('clients',client)?'kn-client-active kn-chip':'kn-client kn-chip'"
+                   :key="index">
+            {{ client }}
+          </md-chip>
+          <md-subheader class="kn-subheader">Added by {{ item.author }}  on {{ $moment(item.date).format('DD MMM YYYY')
+            }}
+          </md-subheader>
+        </md-card-header>
+      </md-card-area>
+    </md-card>
+    <div v-if="allowEdit"
+         v-show="showButtons"
+         class="kn-action-buttons"
+         @mouseover="showButtons=true"
+         @mouseleave="showButtons=false">
+      <md-button class="md-icon-button md-raised md-dense" @click="$refs['update-modal'].$refs['kn-modal'].open()">
+        <md-icon>edit</md-icon>
+      </md-button>
+      <kn-header-modal ref="update-modal" @kn-item-submitted="updateItem" :item="item"></kn-header-modal>
+      <md-button class="md-icon-button md-raised md-dense" @click="$refs['modal-delete'].open();">
+        <md-icon>delete</md-icon>
+      </md-button>
+      <md-dialog-confirm
+        md-title="Delete this item?"
+        md-ok-text="Delete"
+        md-content=""
+        md-cancel-text="Cancel"
+        @close="deleteItem"
+        ref="modal-delete">
+      </md-dialog-confirm>
+    </div>
+  </md-layout>
 </template>
 <script>
+  import MdLayout from "../../../node_modules/vue-material/src/components/mdLayout/mdLayout";
+  import knHeaderModal from './KnowledgeSharingHeaderModal.vue'
   export default{
-    props: ['item', 'filters'],
+    components: {MdLayout, knHeaderModal},
+    props: ['item', 'filters', 'allowEdit'],
     data() {
       return {
         showMore: false,
-        showMoreCharsNubmer: 300
+        showMoreCharsNubmer: 300,
+        showButtons: false
       }
     },
     watch: {
@@ -78,6 +107,21 @@
             }
             return false;
           }).length > 0;
+      },
+      updateItem(data) {
+        this.$emit('kn-item-updated', {
+          key: this.item['.key'],
+          action: 'update',
+          data: data
+        });
+      },
+      deleteItem(type) {
+        if(type === 'ok'){
+          this.$emit('kn-item-updated', {
+            key: this.item['.key'],
+            action: 'delete'
+          });
+        }
       }
     },
     filters: {
@@ -153,5 +197,22 @@
   #kn-tab .kn-chip.kn-client-active {
     background-color: #f44336;
     color: white;
+  }
+
+  .kn-action-buttons {
+    position: relative;
+    width: 50px;
+    left: 50px;
+    padding: 5px;
+    margin-top: -100px;
+  }
+
+  .kn-action-buttons button {
+    margin: 5px 10px;
+  }
+
+  .kn-action-buttons button:hover,
+  .kn-action-buttons button:active {
+    color: #2196f3;
   }
 </style>
