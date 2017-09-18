@@ -1,7 +1,7 @@
 <template>
     <div>
         <md-layout md-flex-offset="5"> 
-            <md-button id="configButton" @click="goGetUsers" class="md-accent md-raised">
+            <md-button id="configButton" @click="goGetUsers" class="md-warn md-raised">
                 Update users 
                 <md-tooltip md-direction="right">Will display global users setup(you can update most of the data/roles/teams on user basis)</md-tooltip>
             </md-button>

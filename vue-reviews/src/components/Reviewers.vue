@@ -4,17 +4,13 @@
             <reviewers-list v-if="levelDEVORPM(activeUserGetter.role)"></reviewers-list>
             <md-layout md-flex="85">
                 <div style="width: 100%">
-                    <md-layout md-align="end" md-vertical-align="center">
-                        <current-month></current-month>
+                    <md-layout md-align="end" md-flex="40"> 
+                        <current-month></current-month> 
                     </md-layout>
                     <div id="day-bar">
-                        <div>MON</div>
-                        <div>TUE</div>
-                        <div>WED</div>
-                        <div>THU</div>
-                        <div>FRI</div>
-                        <div>SAT</div>
-                        <div>SUN</div>
+                        <div v-for="(d,key) in daysArray" :key="key">
+                            {{d}}
+                        </div>
                     </div>
                     <div id="calendar">
                         <div v-for="week in weeks" class="calendar-week">
@@ -42,7 +38,9 @@ export default {
     name: 'Reviewers',
     data () {
         return {
-            scheduleReady : false
+            scheduleReady : false,
+            welcomeMessage : "Reviewer schedule(by days/month)",
+            daysArray : ['MON','TUE','WED','THU','FRI','SAT','SUN']
         }
     },
     firebase: {},

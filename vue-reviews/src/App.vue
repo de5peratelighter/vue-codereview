@@ -16,12 +16,14 @@
                 <md-input v-model="search"></md-input>
                 <md-button class="md-icon-button" @click="findChanges(search)">
                   <md-icon>update</md-icon>
+                  <md-tooltip md-delay="300" md-direction="bottom"> {{helperTexts.clicker}} </md-tooltip>
                 </md-button>
               </md-input-container>
             </md-layout>
 
             <md-layout md-flex="10">
               <md-button class="md-icon-button"  @click="showElement('search')">
+                <md-tooltip md-delay="300" md-direction="bottom"> {{helperTexts.finder}} </md-tooltip>
                 <md-icon>search</md-icon>
               </md-button>
             </md-layout>
@@ -32,12 +34,15 @@
                 <md-input v-model="displayNum"></md-input>
                 <md-button class="md-icon-button" @click="updateItemsNum(displayNum)">
                   <md-icon>update</md-icon>
+                  <md-tooltip md-delay="300" md-direction="bottom"> {{helperTexts.clicker}} </md-tooltip>
                 </md-button>
+                
               </md-input-container>
             </md-layout>
 
             <md-layout md-flex="10">
               <md-button class="md-icon-button" @click="showElement('displayNum')">
+                <md-tooltip md-delay="300" md-direction="bottom"> {{helperTexts.numbers}} </md-tooltip>
                 <md-icon>filter_list</md-icon>
               </md-button>
             </md-layout>
@@ -46,7 +51,6 @@
 
         </div>
       </md-toolbar>
-
 
       <md-sidenav class="md-left" ref="sidenav">
 
@@ -73,8 +77,9 @@ import 'animate.css/animate.min.css'
 
 import firebase from 'firebase'
 import { FBApp, messaging } from '@/data/firebase-config'
-import {UPDATE_NUM, GET_FBASE} from './data/mutation-types'
+import {UPDATE_NUM, GET_FBASE, SET_PREFIXES} from './data/mutation-types'
 import { levelMixin } from '@/mixins/restrictions'
+import { toolbarLabelMixin } from '@/mixins/labels'
 import {mapActions, mapGetters} from 'vuex'
 import MainNav from './components/MainNav.vue'
 
@@ -85,8 +90,8 @@ export default {
       routes: [
         { title: 'Home', icon: 'home', name: 'CodeReview', acess : "ALL" },
         { title: 'Reviewers', icon: 'people', name: 'ReviewersList', access : "ENGINEERING" },
-        { title: 'CapacityDoc', icon: 'alarm_add', name: 'CapacityDoc', access : "PM" },
-        { title: 'Stats', icon : 'data_usage', name: 'StatsTable', access : "ENGINEERING" },
+        { title: 'CapacityDoc', icon: 'alarm_add', name: 'CapacityDoc', access : "TEAMLEAD" },
+        { title: 'Stats', icon : 'data_usage', name: 'StatsTable', access : "TEAMLEAD" },
         { title: 'Knowledge Sharing', icon: 'view_stream', name: 'KnowledgeSharing', access : "ENGINEERING" },
         // { title: 'SuperDoc', icon: 'book', name: 'SuperDoc', access : "ALL" },
         { title: 'Config', icon: 'settings', name: 'MainConfig', access : "PM" },
@@ -99,7 +104,8 @@ export default {
       search: this.$store.state.searchTerm
     }
   },
-  mixins: [levelMixin],
+  firebase : {},
+  mixins: [levelMixin, toolbarLabelMixin],
   computed : {
     ...mapGetters(['activeUserGetter', 'firebasePathGetter']),
     mainPath () {
@@ -107,7 +113,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions([UPDATE_NUM,GET_FBASE]),
+    ...mapActions([UPDATE_NUM,GET_FBASE,SET_PREFIXES]),
     showElement (el) {
       this.hiddenInputs[el] = !this.hiddenInputs[el]
     },
@@ -121,16 +127,19 @@ export default {
       })
     },
     checkAccess (el) {
-      return (el == 'PM' && !this.levelDEVORPM(this.activeUserGetter.role)) || (el == 'ENGINEERING' && !this.levelEngineer(this.activeUserGetter.role))
+      return (el === 'PM' && !this.levelDEVORPM(this.activeUserGetter.role)) || (el === 'ENGINEERING' && !this.levelEngineer(this.activeUserGetter.role)) || (el === 'TEAMLEAD' && !this.levelTeamlead(this.activeUserGetter.role))
     } 
   },
   created () {
+    this.$bindAsObject('prefz', FBApp.ref(this.firebasePathGetter.prefixes), null, () => {
+      this[SET_PREFIXES](this.prefz)
+    })
+  },
+  mounted () {
     // resistering and using SW
     navigator.serviceWorker.register('./static/firebase-messaging-sw.js').then((registration) => {
         messaging.useServiceWorker(registration)
     })
-  },
-  mounted () {
   },
   components : {
     MainNav

@@ -6,10 +6,12 @@
                 <md-input-container class="side-margin">
                     <label :for="item.id">{{item.label}}</label>
                     <md-input :id="item.id" v-model="item.val" :required="item.required" :maxlength="item.maxLength"></md-input>
+                    <md-tooltip md-delay="300" md-direction="bottom">{{item.tooltip}}</md-tooltip>
                 </md-input-container>
             </md-layout>
             <md-layout md-flex="15">
                 <md-button class="md-raised md-accent" :disabled="disableSubmit" @click="submitData(activeUserGetter, $event)">Submit</md-button>
+                <md-tooltip md-delay="300" md-direction="bottom">Push this data to Firebase</md-tooltip>
                 <md-button class="md-raised" @click="clearData">Clear</md-button>
             </md-layout>
         </md-layout>
@@ -20,7 +22,7 @@
                 {{item}}
                 </span>
             </div>
-            <div>
+            <div v-if="levelEngineer(activeUserGetter.role)">
                 <md-button id="guidelinesDialog" @click="openDialog('guidelinesDialog')"> Code review guidelines </md-button>
                 <md-dialog md-open-from="guidelinesDialog" md-close-to="guidelinesDialog" ref="guidelinesDialog"> <!-- String(key) removes dialog undefined bug with the zero-index key -->
                     <code-guidelines></code-guidelines>
@@ -34,15 +36,14 @@
 <script>
     import firebase from 'firebase'
     import { FBApp } from '@/data/firebase-config'
-    var provider = new firebase.auth.GoogleAuthProvider();
-    import { levelMixin } from '@/mixins/restrictions'
+    import { levelMixin, optionsMixin } from '@/mixins/restrictions'
     import {GET_TODAYREVIEWERS} from '@/data/mutation-types'
     import {mapActions, mapGetters } from 'vuex'
     import { notificationMixin } from '@/mixins/notifications'
     const CodeGuidelines = () => import('@/components/CodeGuidelines.vue')
     
     export default {
-        mixins: [levelMixin, notificationMixin],
+        mixins: [levelMixin, optionsMixin, notificationMixin],
         props : ['inputs','requiredword', 'path', 'relcomponent'],
         data () {
             return {
@@ -51,7 +52,7 @@
             }
         },
         computed : {
-            ...mapGetters(['activeUserGetter','firebasePathGetter', 'workingHoursGetter']),
+            ...mapGetters(['activeUserGetter','firebasePathGetter', 'workingHoursGetter', 'globalPrefixesGetter']),
             disableSubmit () {
                 return this.inputsInvalid
             },
@@ -81,19 +82,19 @@
                     
                     // relcomponent indicates the component that is relevant for our concrete newInstance component
                     if (this.relcomponent === 'codereview') {
-                        
+                        let prefz = this.globalPrefixesGetter
                         let newData = {
                             username: user.alias,
                             si:  user.photoURL,
-                            content: this.inputs[0].val,
-                            ticket: this.inputs[1].val,
+                            content : prefz.changes.val ? this.inputs[0].val.replace(prefz.changes.val, '') : this.inputs[0].val,
+                            ticket : prefz.changes.val ? this.inputs[1].val.replace(prefz.tickets.val, '') : this.inputs[1].val,
                             status: 'New',
-                            reviewer: '',
-                            st : this.$moment().format('DD-MM-YYYY, hh:mm:ss')
-                        } 
+                            reviewer: ''
+                        }
+
                         if (this.inputs[2].val) { newData.comment = this.inputs[2].val }
                         
-                        FBApp.ref(this.path).push(newData).then(() => {
+                        FBApp.ref(this.path + '/' + this.$moment().valueOf()).set(newData).then(() => {
                             let currentReviewer = this.reviewers[ this.workingHoursGetter.findIndex((el,index) => el.includes(this.$moment().hours()))]
                             
                             this.$bindAsObject('currentReviewerToken', FBApp.ref(this.firebasePathGetter.notifications+"/"+currentReviewer), null, () => {
@@ -104,7 +105,6 @@
                         })
                         
                     } else if (this.relcomponent === 'mainconfig' && this.defaultRoleOption && this.defaultTeamOption) {
-                        
                         let token = this.inputs[0].val ? this.inputs[0].val : 'WrongToken'
                         let alias = this.inputs[1].val ? this.inputs[1].val : 'WrongAlias'
                         FBApp.ref(this.path +"/" + token).set({

@@ -1,13 +1,13 @@
 <template>
     <div>
         <md-layout md-flex-offset="5"> 
-            <md-button id="configButton" @click="goGetGuidelines" class="md-accent md-raised">
+            <md-button @click="goGetGuidelines" class="md-warn md-raised">
                 Update guidelines 
                 <md-tooltip md-direction="right">Will display code review guidelines</md-tooltip>
             </md-button>
         </md-layout>
         
-        <md-layout md-flex-offset="5" md-flex="95">
+        <md-layout v-if="isPM" md-flex-offset="5" md-flex="95">
                 <md-tabs md-fixed md-centered>
                     <md-tab v-for="(topic,label,index) in guides" :id="label" :md-label="label" :key="index">
                         <template>
@@ -25,7 +25,7 @@
                             <md-layout>
                                 <md-input-container>
                                     <label>Add new rule</label>
-                                    <md-textarea maxlength="270" class="md-fab md-mini md-clean" v-model="index" ></md-textarea>
+                                    <md-textarea maxlength="1300" class="md-fab md-mini md-clean" v-model="index" ></md-textarea>
                                     <md-button class="md-raised md-primary" @click="pushNewGuideline(label, index)">Add</md-button>
                                 </md-input-container>
                             </md-layout>
@@ -47,6 +47,7 @@
         name: 'GuidelinesConfig',
         data () {
             return {
+                isPM : false,
                 guides : {}
             }
         },
@@ -59,6 +60,7 @@
             goGetGuidelines () {
                 this.$bindAsObject('guidelines', FBApp.ref(this.firebasePathGetter.guidelines), null, () => {
                     this.guides = this.guidelines
+                    this.isPM = true
                     FBApp.ref(this.firebasePathGetter.guidelines).on('value', (el) => {
                         this.guides = el.val()
                     })

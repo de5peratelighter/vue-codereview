@@ -161,8 +161,8 @@
                     
                 }
                 if (resultData) {
-                    //  && !this.$moment(this.lastIndex[0]['.key']).isSameOrAfter(this.$moment(dater))
-                    console.warn('New schedule',resultData )
+                    //  && !this.$moment(this.lastIndex[0]['.key']).isSameOrAfter(this.$moment(resultData[resultData.length - 1]))
+                    console.warn('New schedule',resultData, this.lastIndex[0]['.key'])
                     FBApp.ref(this.firebasePathGetter.schedule).update(resultData)
                 }
                     

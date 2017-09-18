@@ -10,38 +10,39 @@ import lodash from 'lodash'
 import VueLodash from 'vue-lodash/dist/vue-lodash.min'
 Vue.use(VueLodash, lodash)
 
-import {GET_FBASE, LOGIN_ME, UPDATE_NUM, GET_REVIEWERS, GET_HOLIDAYS, GET_CAPACITY, SET_MONTH, SET_YEAR, GET_TODAYREVIEWERS, SET_FOCUSED_CELL, SET_IS_EDITING, SET_COPY_CACHE, SET_CURRENT_WEEK, GET_USERS} from './mutation-types'
+
+import {GET_FBASE, LOGIN_ME, UPDATE_NUM, GET_REVIEWERS, GET_HOLIDAYS, GET_CAPACITY, SET_MONTH, SET_YEAR, GET_TODAYREVIEWERS, SET_FOCUSED_CELL, SET_IS_EDITING, SET_COPY_CACHE, SET_CURRENT_WEEK, GET_USERS, SET_PREFIXES} from './mutation-types'
 
 export default new Vuex.Store({
     state : {
         capacity: [],
         focusedCell: {},
         items : {
-          "-KZvonwRi7MBVk7YEiCe" : {
+          "0" : {
+            ".key" : "1503202651791",
             "comment" : "css fix",
-            "content" : "https://dev.bazaarvoice.com/trac/bvc/changeset/1655761",
+            "content" : "/1655761",
             "reviewer" : "user2",
             "status" : "Good",
-            "st" : "14/06/2017, 16:27:22",
-            "ticket" : "https://bits.bazaarvoice.com/jira/browse/SUP-21014",
+            "ticket" : "/SUP-21014",
             "rc": "Ok this is good",
             "username" : "user1"
-          }, "-KZwWEmvglByJWO72guy" : {
+          }, "1" : {
+            ".key" : "1504503651791",
             "comment" : "WOWO",
-            "content" : "https://dev.bazaarvoice.com/trac/bvc/changeset?new=customers%2Fbranches%2Fuser%2Fobodrov-21038-myer%401656411&old=customers%2Fbranches%2Fuser%2Fobodrov-21038-myer%401656400",
+            "content" : "/1656321",
             "reviewer" : "user1",
             "status" : "NotOK",
-            "st" : "14/06/2017, 14:31:55",
-            "ticket" : "https://bits.bazaarvoice.com/jira/browse/SUP-21038",
+            "ticket" : "/SUP-21038",
             "rc": "You're playing with fire kid",
             "username" : "user2"
-          }, "-KZwWEmvglByJWO72guS" : {
+          }, "2" : {
+            ".key" : "1505006651791",
             "comment" : "kk",
-            "content" : "https://dev.bazaarvoice.com/trac/bvc/changeset/1656377",
+            "content" : "/1656377",
             "reviewer" : "user1",
             "status" : "Looking",
-            "st" : "15/06/2017, 12:39:11",
-            "ticket" : "https://bits.bazaarvoice.com/jira/browse/SUP-21035",
+            "ticket" : "/SUP-21035",
             "rc": "I'll take a look soon",
             "username" : "user1"
           },
@@ -55,7 +56,7 @@ export default new Vuex.Store({
         revs : "", // List of reviewers, filled upon login
         holidays : "", // List of holidays, filled upon login
         reviewersPerDay : 3, // Number of reviewers per day
-        reviewersScheduleAhead : 14, // Number of days to reschedule
+        reviewersScheduleAhead : 21, // Number of days to reschedule
         activeUser : {
           displayName: 'Guest',
           isAnonymous : true,
@@ -76,7 +77,12 @@ export default new Vuex.Store({
           capacity: 'wow/resources/capacityByWeek',
           notifications : 'wow/notifications',
           guidelines: 'wow/guidelines',
-          knowledgesharing: 'wow/knowledgesharing'
+          knowledgesharing: 'wow/knowledgesharing',
+          prefixes: 'wow/resources/prefixes'
+        },
+        globalPrefixes : {
+          tickets : {label : '', val : 'https://bits.bazaarvoice.com/jira/browse'},
+          changes : {label : '', val : 'https://dev.bazaarvoice.com/trac/bvc/changeset'}
         },
         eventAppDate : moment(),
         currentYear : Number(moment().format('YYYY')),
@@ -89,6 +95,9 @@ export default new Vuex.Store({
     getters : {
         firebasePathGetter : (state) => {
           return state.firePath
+        },
+        globalPrefixesGetter : (state) => {
+          return state.globalPrefixes
         },
         workingHoursGetter : (state) => {
           return state.workingHours
@@ -148,7 +157,7 @@ export default new Vuex.Store({
           let subTeamLead;
           usersArr.forEach((userItem, index) => {
             const userSubTeam = userItem['team'];
-            if(userItem['team'] === subTeam && ['Engineer', 'TeamLead'].indexOf(userItem['role']) !== -1) {
+            if(userItem['team'] === subTeam && ['Engineer', 'TeamLead', 'Reviewer'].indexOf(userItem['role']) !== -1) {
               if(userItem['role'] === 'TeamLead') {
                 subTeamLead = userItem['alias'];
               } else {
@@ -228,6 +237,9 @@ export default new Vuex.Store({
         },
     },
     mutations : {
+      [SET_PREFIXES] (state, payload) {
+        state.globalPrefixes = payload
+      },
       [GET_CAPACITY] (state, payload) {
         state.capacity = payload
       },
@@ -251,7 +263,7 @@ export default new Vuex.Store({
         state.activeUser = payload
       },
       [UPDATE_NUM] (state, payload) {
-        state.displayNum = Number(payload)
+        state.displayNum = payload
       },
       [GET_REVIEWERS] (state, payload) {
         state.revs = payload
@@ -302,7 +314,12 @@ export default new Vuex.Store({
       },
       [UPDATE_NUM] (store, payload) {
         // check if number is positive
-        if ((payload) > 0) store.commit(UPDATE_NUM, payload)
+        payload = Number(payload)
+        if (payload > 0 && payload < 200 ) {
+          store.commit(UPDATE_NUM, payload)
+        } else {
+          console.assert(false,'Your number is less than 0 or bigger than 200.')
+        }
       },
       [GET_HOLIDAYS] (store,payload) {
         store.commit(GET_HOLIDAYS, payload)
@@ -312,6 +329,9 @@ export default new Vuex.Store({
       },
       [SET_YEAR] (store,payload) {
         store.commit(SET_YEAR, payload)
+      },
+      [SET_PREFIXES] (store,payload) {
+        store.commit(SET_PREFIXES, payload)
       }
     }
 })

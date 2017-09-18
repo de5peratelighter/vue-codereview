@@ -10,7 +10,7 @@
         methods : {
             submittedFromDate (el) {
                 
-              el = this.$moment(el, 'DD-MM-YYYY, hh:mm:ss')
+              el = this.$moment(Number(el))
               
               if ((el).isSame(this.$moment(), 'day')) {
                 return 'Today'

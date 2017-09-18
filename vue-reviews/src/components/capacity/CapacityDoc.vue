@@ -1,5 +1,5 @@
 <template>
-  <div v-if="levelDEVORPM(activeUserGetter.role)" class="capacity-view">
+  <div v-if="levelTeamlead(activeUserGetter.role)" class="capacity-view">
     <div class="capacity-header-container">
         <div class="capacity-date-range"><span>{{getDate(1)}} - {{getDate(5)}}</span></div>
         <md-button class="md-icon-button md-raised md-primary" @click="setWeek(-1)" :disabled="isDisabled('prev')">

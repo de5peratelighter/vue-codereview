@@ -3,12 +3,10 @@
         <md-tabs md-fixed md-centered>
            <md-tab v-for="(topic,label,index) in guides" :id="label" :md-label="label" :key="index">
 
-                <template>
-                    <p v-for="(rule,k,i) in topic">
-                        {{rule.val}}
-                        <md-tooltip md-direction="top">Added {{showAddedDate(Object.keys(topic)[0])}}</md-tooltip>
-                    </p>
-                </template>
+                <div v-for="rule in topic">
+                    <pre v-html="rule.val"></pre>
+                    <md-tooltip md-direction="top">Added {{showAddedDate(Object.keys(topic)[0])}}</md-tooltip>
+                </div>
                 
             </md-tab>
         </md-tabs>
@@ -49,9 +47,19 @@
     }
 </script>
 <style scoped>
-    p { margin: 3px 0}
-    p:hover {
+    pre {
+        white-space: pre-wrap;
+        margin: 5px 0;
+        text-align: left;
+        line-height: initial;
+        font-family: inherit;
+        font-size: 11.5px;
+    }
+    pre:hover {
         transition: all 0.3s ease-in;
         background: rgba(242,130,10,.15)
+    }
+    .md-tab {
+       padding-top: 5px; 
     }
 </style>

@@ -1,7 +1,7 @@
 export const capacityRecordMixin = {
   methods: {
     skipUser(user) {
-      if(user['team'] === 'Newcomer' || ['TeamLead', 'Engineer'].indexOf(user['role']) === -1) {
+      if(user['team'] === 'Newcomer' || ['TeamLead', 'Engineer', 'Reviewer'].indexOf(user['role']) === -1) {
         return true
       }
     },

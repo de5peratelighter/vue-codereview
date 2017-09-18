@@ -1,5 +1,8 @@
 export const levelMixin = {
     methods: {
+        levelTeamlead (role) {
+            return role === 'PM_DEV' || role === 'TeamLead'
+        },
         levelReviewer(role) {
             return role === 'Reviewer' || role === 'PM_DEV' || role === 'TeamLead'
         },
@@ -39,7 +42,7 @@ export const optionsMixin = {
                 { id: 2, name: 'No'}
             ],
             defaulttestingOption : 'No',
-            defaultSpecialNote : 'No'
+            defaultSpecialNote : ''
         }
     }
 };

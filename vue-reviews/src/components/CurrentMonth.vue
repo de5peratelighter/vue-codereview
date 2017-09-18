@@ -1,6 +1,6 @@
 <template>
     <div>
-        <span class="md-headline">Schedule, {{formattedDate}}</span>
+        <span class="md-headline">Review Schedule, {{formattedDate}}</span>
         <md-button class="md-icon-button md-accent" @click="dec"><md-icon>remove_circle</md-icon></md-button>
         <md-button class="md-icon-button md-accent" @click="inc"><md-icon>add_circle</md-icon></md-button>
     </div>
