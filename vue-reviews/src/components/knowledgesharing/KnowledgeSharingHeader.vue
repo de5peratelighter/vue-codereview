@@ -38,7 +38,10 @@
       </md-input-container>
     </md-layout>
     <md-layout md-flex="5" md-flex-offset="5">
-      <kn-header-modal @kn-item-submitted="submitItem"></kn-header-modal>
+      <md-layout>
+        <md-button class="md-raised md-primary" id="kn-add-item" @click="$refs.modal.$refs['kn-modal'].open()">Add Item</md-button>
+      </md-layout>
+      <kn-header-modal ref="modal" @kn-item-submitted="submitItem"></kn-header-modal>
     </md-layout>
     <md-layout md-flex="90">
       <md-chip v-if="filters.length > 0" @edit="removeAllFilters" md-editable class="kn-chip">Remove all filters
@@ -70,7 +73,10 @@
         this.$emit('kn-filter-removed', index);
       },
       submitItem(data){
-        this.$emit('kn-item-submitted', data);
+        this.$emit('kn-item-submitted', {
+            action: 'add',
+            data: data
+        });
       },
       removeAllFilters() {
         this.$emit('kn-filters-cleared');
