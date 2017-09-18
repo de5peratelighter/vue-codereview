@@ -68,10 +68,9 @@
   </md-layout>
 </template>
 <script>
-  import MdLayout from "../../../node_modules/vue-material/src/components/mdLayout/mdLayout";
   import knHeaderModal from './KnowledgeSharingHeaderModal.vue'
   export default{
-    components: {MdLayout, knHeaderModal},
+    components: {knHeaderModal},
     props: ['item', 'filters', 'allowEdit'],
     data() {
       return {
