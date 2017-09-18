@@ -3,7 +3,7 @@
     <md-layout md-vertical-align="start" v-if="!activeUserGetter.isAnonymous" id="kn-tab">
       <kn-header :items="items"
                  :filters="filters"
-                 @kn-item-submitted="submitData"
+                 @kn-item-submitted="updateData"
                  @kn-filter-removed="(data) => {updateFilter(data,'remove')}"
                  @kn-filters-cleared="(data) => {updateFilter(data,'removeAll')}"
                  @kn-search-filtered="(data) => {updateFilter(data,'add')}"
@@ -13,6 +13,8 @@
       </kn-header>
       <kn-content :items="filteredItems"
                   :filters="filters"
+                  :allowEdit="levelDEVORPM(activeUserGetter.role)"
+                  @kn-item-updated="updateData"
                   @kn-filter-applied="(data) => {updateFilter(data,'add')}">
       </kn-content>
     </md-layout>
@@ -27,6 +29,7 @@
   import {FBApp} from '@/data/firebase-config';
   import knHeader from './KnowledgeSharingHeader'
   import knContent from './KnowledgeSharingContent.vue'
+  import { levelMixin } from '@/mixins/restrictions'
 
   export default{
     components: {knHeader, knContent},
@@ -42,6 +45,7 @@
         dateFilter: 'all'
       }
     },
+    mixins: [levelMixin],
     computed: {
       ...mapGetters(['activeUserGetter', 'firebasePathGetter']),
       filteredItems() {
@@ -69,12 +73,28 @@
     },
     methods: {
       readData(){
+        this.items = [];
         this.$bindAsArray('data', FBApp.ref(this.firebasePathGetter.knowledgesharing), null, () => {
-          this.items = this.data;
+          this.data.forEach((el) => {
+            el.date = parseInt(el['.key']);
+            this.items.push(el);
+          });
         });
       },
-      submitData(data){
-        FBApp.ref(this.firebasePathGetter.knowledgesharing).push(data);
+      updateData(item){
+        switch (item.action) {
+          case 'update':
+            delete item.data['.key'];
+            delete item.data['date'];
+            FBApp.ref(this.firebasePathGetter.knowledgesharing + '/' + item.key).set(item.data);
+            break;
+          case 'delete':
+            FBApp.ref(this.firebasePathGetter.knowledgesharing + '/' + item.key).remove();
+            break;
+          case 'add':
+            FBApp.ref(this.firebasePathGetter.knowledgesharing + '/' + this.$moment().valueOf()).set(item.data);
+            break;
+        }
         this.readData();
       },
       updateFilter(data, action){
@@ -92,28 +112,17 @@
               break;
           }
       },
-//      addToFilter(data){
-//        if (this.filters.filter(filter => (filter.type === data.type && filter.value === data.value)).length === 0) {
-//          this.filters.push(data);
-//        }
-//      },
-//      removeFilter(index){
-//        this.filters.splice(index, 1);
-//      },
-//      removeAllFilters() {
-//        this.filters = [];
-//      },
       isSearchMatched(item) {
         return item.title.toLowerCase().indexOf(this.search.toLowerCase()) !== -1 || item.description.toLowerCase().indexOf(this.search.toLowerCase()) !== -1;
       },
       isDateMatched(item){
         if (this.dateFilter !== 'all') {
-          return this.$moment(item.date, 'DD-MM-YYYY, HH:mm:ss').isAfter(this.$moment().startOf(this.dateFilter), 'day');
+          return this.$moment(item.date).isAfter(this.$moment().startOf(this.dateFilter), 'day');
         }
         return true;
       },
       isNextItemDateAfter(a, b){
-        return this.$moment(a.date, 'DD-MM-YYYY, HH:mm:ss').isAfter(this.$moment(b.date, 'DD-MM-YYYY, HH:mm:ss'), 'day');
+        return this.$moment(a.date).isAfter(this.$moment(b.date), 'day');
       }
     },
     activated() {
