@@ -6,10 +6,12 @@
                 <md-input-container class="side-margin">
                     <label :for="item.id">{{item.label}}</label>
                     <md-input :id="item.id" v-model="item.val" :required="item.required" :maxlength="item.maxLength"></md-input>
+                    <md-tooltip md-delay="300" md-direction="bottom">{{item.tooltip}}</md-tooltip>
                 </md-input-container>
             </md-layout>
             <md-layout md-flex="15">
                 <md-button class="md-raised md-accent" :disabled="disableSubmit" @click="submitData(activeUserGetter, $event)">Submit</md-button>
+                <md-tooltip md-delay="300" md-direction="bottom">Push this data to Firebase</md-tooltip>
                 <md-button class="md-raised" @click="clearData">Clear</md-button>
             </md-layout>
         </md-layout>
@@ -20,7 +22,7 @@
                 {{item}}
                 </span>
             </div>
-            <div>
+            <div v-if="levelEngineer(activeUserGetter.role)">
                 <md-button id="guidelinesDialog" @click="openDialog('guidelinesDialog')"> Code review guidelines </md-button>
                 <md-dialog md-open-from="guidelinesDialog" md-close-to="guidelinesDialog" ref="guidelinesDialog"> <!-- String(key) removes dialog undefined bug with the zero-index key -->
                     <code-guidelines></code-guidelines>
@@ -34,7 +36,6 @@
 <script>
     import firebase from 'firebase'
     import { FBApp } from '@/data/firebase-config'
-    var provider = new firebase.auth.GoogleAuthProvider();
     import { levelMixin, optionsMixin } from '@/mixins/restrictions'
     import {GET_TODAYREVIEWERS} from '@/data/mutation-types'
     import {mapActions, mapGetters } from 'vuex'

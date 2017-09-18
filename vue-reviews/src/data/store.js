@@ -56,7 +56,7 @@ export default new Vuex.Store({
         revs : "", // List of reviewers, filled upon login
         holidays : "", // List of holidays, filled upon login
         reviewersPerDay : 3, // Number of reviewers per day
-        reviewersScheduleAhead : 14, // Number of days to reschedule
+        reviewersScheduleAhead : 21, // Number of days to reschedule
         activeUser : {
           displayName: 'Guest',
           isAnonymous : true,
@@ -81,8 +81,8 @@ export default new Vuex.Store({
           prefixes: 'wow/resources/prefixes'
         },
         globalPrefixes : {
-          tickets : {label : '', val : ''},
-          changes : {label : '', val : ''}
+          tickets : {label : '', val : 'https://bits.bazaarvoice.com/jira/browse'},
+          changes : {label : '', val : 'https://dev.bazaarvoice.com/trac/bvc/changeset'}
         },
         eventAppDate : moment(),
         currentYear : Number(moment().format('YYYY')),

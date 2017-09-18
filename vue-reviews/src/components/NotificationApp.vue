@@ -62,7 +62,6 @@
             // check whether user is subscribed and update UI correspondingly (also checks whether current token is same as in DB on component creation
             // token can be accessed before requestPermission() call 
             this.$bindAsObject('tokenGetter', FBApp.ref(this.firebasePathGetter.notifications +"/" + this.activeUserGetter.alias), null, () => {
-
                 messaging.getToken().then((currentToken) => {
                     if (this.tokenGetter && currentToken) {
                         if (this.tokenGetter.token != currentToken) {

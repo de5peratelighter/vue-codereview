@@ -11,7 +11,9 @@
             <md-layout class="review-welcome" md-align="center">
               <div>
                 <span class="md-headline">{{activeUserGetter.displayName}}</span>
-                <notification-app v-if="activeUserGetter.role"></notification-app>
+                <template v-if="levelEngineer(activeUserGetter.role)">
+                  <notification-app></notification-app>
+                </template>
               </div>
               <md-button class="md-raised md-accent" @click="logIn">
                 <span v-if="activeUserGetter.isAnonymous">Log In</span>
@@ -34,7 +36,8 @@
 <script>
 import firebase from 'firebase'
 import { FBApp } from '@/data/firebase-config'
-import {LOGIN_ME, SET_PREFIXES} from '@/data/mutation-types'
+import { levelMixin } from '@/mixins/restrictions'
+import {LOGIN_ME} from '@/data/mutation-types'
 import {mapActions, mapGetters} from 'vuex'
 const NotificationApp = () => import('@/components/NotificationApp.vue')
 
@@ -47,11 +50,13 @@ export default {
       DEFAULT_USER : this.$store.state.activeUser
     }
   },
+  firebase: {},
+  mixins : [levelMixin],
   computed : {
     ...mapGetters(['activeUserGetter', 'firebasePathGetter'])
   },
   methods : {
-    ...mapActions([LOGIN_ME, SET_PREFIXES]),
+    ...mapActions([LOGIN_ME]),
     logIn () {
       if (this.activeUserGetter.isAnonymous) {
         firebase.auth().signInWithPopup(provider).then((result) => {
@@ -107,11 +112,6 @@ export default {
   },
   components : {
     NotificationApp
-  },
-  mounted () {
-    this.$bindAsObject('prefs', FBApp.ref(this.firebasePathGetter.prefixes), null, () => {
-        this[SET_PREFIXES](this.prefs)
-    })
   }
 }
 </script>
