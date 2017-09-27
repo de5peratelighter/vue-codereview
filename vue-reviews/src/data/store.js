@@ -63,7 +63,8 @@ export default new Vuex.Store({
           role: "", // not best practice but very convenient, won't require additional if-elses on user-login
           alias: "", // if user isn't in read-only firebase boject "users" - login response always returns 'undefined'
           team: "",
-          token: 1111111
+          token: 1111111,
+          notes: ""
         },
         displayNum : 5,
         searchTerm : 'SUP',

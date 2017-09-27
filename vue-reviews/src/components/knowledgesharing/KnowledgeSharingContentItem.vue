@@ -59,7 +59,7 @@
       <md-dialog-confirm
         md-title="Delete this item?"
         md-ok-text="Delete"
-        md-content=""
+        md-content=" "
         md-cancel-text="Cancel"
         @close="deleteItem"
         ref="modal-delete">

@@ -35,6 +35,7 @@
 
 <script>
 import firebase from 'firebase'
+import fauth from'firebase/auth'
 import { FBApp } from '@/data/firebase-config'
 import { levelMixin } from '@/mixins/restrictions'
 import {LOGIN_ME} from '@/data/mutation-types'
@@ -70,7 +71,8 @@ export default {
                 token : user.uid,
                 role : this.rules.role, 
                 alias : this.rules.alias, 
-                team : this.rules.team
+                team : this.rules.team,
+                notes: this.rules.notes
               }
               this[LOGIN_ME](usr)
               
@@ -88,6 +90,7 @@ export default {
                     usr.role = el.val().role
                     usr.alias = el.val().alias 
                     usr.team = el.val().team
+                    usr.notes = el.val().notes
                     this[LOGIN_ME](usr)
                   }
                 })
