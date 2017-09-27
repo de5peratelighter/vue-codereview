@@ -67,7 +67,7 @@
       </md-sidenav>
 
       <keep-alive>
-        <router-view class="c-full-height"></router-view>
+        <router-view></router-view>
       </keep-alive>
   </div>
 </template>
@@ -173,9 +173,6 @@ export default {
 }
 .c-full-width {
   width: 100%;
-}
-.c-full-height {
-  min-height: 100vh;
 }
 .c-main-section {
   margin: 0 auto;
