@@ -44,7 +44,7 @@
                   {{ truncContent(item.content, 'changeset') }}
                   <md-tooltip md-delay="300" md-direction="right"> {{helperTexts.cset}} </md-tooltip>
                 </md-button>
-                <md-button class="md-icon-button md-raised md-dense" v-clipboard:copy="copyCset(item.content)" v-clipboard:success="onCopy">
+                <md-button class="md-icon-button md-raised md-dense" v-clipboard:copy="copyCset(item.content)">
                   <md-icon>content_copy</md-icon>
                   <md-tooltip md-direction="bottom">Copy (branchname | chageset number) to clipboard</md-tooltip>
                 </md-button>
@@ -170,9 +170,6 @@ export default {
         el
       )
     },
-    onCopy (event) {
-      console.warn('Copied ',event)
-    },
     copyCset(el) {
       return el.includes('user') ? el.substr(el.lastIndexOf('user%2F')).split(/%2F|%40/)[1] : el.split('/').slice(-1).pop()
     },
@@ -282,18 +279,18 @@ export default {
     background-size: 50px !important;
   }
   .Good {
-    background: #66bb6a !important;
+    background: rgba(102,187,106,.9) !important;
   }
   .Looking {
-    background: #F1C232 !important;
+    background: rgba(241,194,50,.9) !important;
   }
   .New {
-    background: #039be5 !important;
+    background: rgba(3,155,229,.9) !important;
   }      
   .NotOK {
-    background: #f44336 !important;
+    background: rgba(244,67,54,.9) !important;
   }
   .Questions {
-    background: #8E7CC3 !important;
+    background: rgba(142,124,195,.9) !important;
   }
 </style>
