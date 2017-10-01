@@ -150,6 +150,13 @@ export default {
 </script>
 
 <style>
+.md-toolbar {
+  min-height: 55px;
+}
+
+.md-toolbar .md-toolbar-container {
+  height: 50px;
+}
 
 .review-welcome > * {
   width: 100%;

@@ -75,7 +75,7 @@ export default new Vuex.Store({
           token: 1111111,
           notes: ""
         },
-        displayNum : 5,
+        displayNum : 6,
         searchTerm : 'SUP',
         users: [],
         firePath : {

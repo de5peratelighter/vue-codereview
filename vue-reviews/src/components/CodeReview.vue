@@ -21,14 +21,14 @@
               
               <md-layout>
                 <md-card-content>
-                  <show-reviewdate :date="item['.key']"></show-reviewdate> <!-- splitted into seperate component and lazy-loaded -->
-                  <md-tooltip md-delay="300" md-direction="right"> {{helperTexts.author }} at {{ truncContent(item['.key'], 'time') }}</md-tooltip> 
+                  <span>{{ truncContent(item['.key'], 'time') }}</span>
+                  <md-tooltip md-delay="300" md-direction="right"> Submission time </md-tooltip> 
                   <br> by {{item.username }} 
                 </md-card-content>
               </md-layout>
               
               <md-layout>
-                <md-avatar class="md-large">
+                <md-avatar >
                   <template v-if="item.si">
                     <img :src="item.si" :alt="item.username">
                   </template>
@@ -83,7 +83,7 @@
                     <md-dialog-content v-if="canAddComments(item)">
                       <md-input-container>
                           <label :for="'label'+key">New comment</label>
-                          <md-textarea :id="'#label'+key" v-model="newInput"></md-textarea>
+                          <md-textarea :id="'#label'+key" v-model="newInput" @keyup.enter.native="updateComment(item)"></md-textarea>
                           <md-button class="md-primary" @click="updateComment(item)">Add</md-button>
                           <md-tooltip md-direction="bottom">
                             <template v-if="item.username === activeUserGetter.alias">{{ownerCommentMessage}}</template>
@@ -136,7 +136,6 @@ import { notificationMixin } from '@/mixins/notifications'
 
 const NewInstance = () => import('@/components/NewInstance.vue')
 const UpdateStatus = () => import('@/components/codereview/UpdateStatus.vue')
-const ShowReviewdate = () => import('@/components/codereview/ShowReviewdate.vue')
 
 export default {
   name: 'CodeReview',
@@ -178,7 +177,7 @@ export default {
       return (
         typer === "ticket" ? el.split('/').pop().slice(0,10) :
         typer === "changeset" ? el.slice(-8) :   
-        typer === "time" ?  this.$moment(Number(el)).format('DD-MMM, h:mm A') : ""
+        typer === "time" ?  this.$moment(Number(el)).format('DD MMMM, h:mm A') : ""
       )
     },
     onSelectChange (el) {
@@ -255,7 +254,6 @@ export default {
   },
   components : {
     NewInstance,
-    ShowReviewdate,
     UpdateStatus
   }
 }
@@ -269,7 +267,8 @@ export default {
     width: 80%;
   }
   .instance {
-    height: 81px !important;
+    height: 74px !important;
+    padding: 0 10px;
     overflow: hidden;
   }
   .instance, .instance label {

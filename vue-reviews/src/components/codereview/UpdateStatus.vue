@@ -1,5 +1,5 @@
 <template>
-  <md-input-container>
+  <md-input-container class="status-input">
     <label for="status" style="color:inherit">{{ item.reviewer ? item.reviewer : 'Codereviewer will set the status' }}</label>
     <md-select :disabled="cantChangeStatus(item.username)" name="status" v-model="item.status" class="width80" md-flex-offset="50">
       <md-option v-for="option in selectOptions" :key="option.id" :value="option.name" @selected="onStatusChange(item)">{{option.name}}</md-option>
@@ -45,3 +45,8 @@
         }
     }
 </script>
+<style scoped>
+  .status-input {
+    margin-bottom: 15px;
+  }
+</style>
