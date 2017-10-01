@@ -16,8 +16,17 @@
                 </template>
               </div>
               <md-button class="md-raised md-accent" @click="logIn">
-                <span v-if="activeUserGetter.isAnonymous">Log In</span>
-                <span v-else>Log Out</span>
+                
+                <template v-if="activeUserGetter.isAnonymous">
+                  Log In
+                  <md-tooltip md-delay="300" md-direction="bottom">Log in into the app</md-tooltip>
+                </template>
+              
+                <template v-else>
+                  Log out
+                  <md-tooltip md-delay="300" md-direction="bottom">This will clear your session as well</md-tooltip>
+                </template>
+                
               </md-button>
             </md-layout>
       </md-toolbar>
@@ -35,6 +44,7 @@
 
 <script>
 import firebase from 'firebase'
+import fauth from'firebase/auth'
 import { FBApp } from '@/data/firebase-config'
 import { levelMixin } from '@/mixins/restrictions'
 import {LOGIN_ME} from '@/data/mutation-types'
@@ -63,16 +73,19 @@ export default {
           let user = result.user
           this.$bindAsObject('rules', FBApp.ref(this.firebasePathGetter.users + '/' + user.uid), null, () => {
               // initial login, always saves data, triggered even if user isn't activated
-              let usr = {
-                displayName: user.displayName, 
-                photoURL : user.photoURL, 
-                isAnonymous : user.isAnonymous,
-                token : user.uid,
-                role : this.rules.role, 
-                alias : this.rules.alias, 
-                team : this.rules.team
-              }
+              
+              let usr = this.setUserData(user)
+              
               this[LOGIN_ME](usr)
+              
+              this.$ls.set('displayName', user.displayName)
+              this.$ls.set('photoURL', user.photoURL)
+              this.$ls.set('isAnonymous', user.isAnonymous)
+              this.$ls.set('token', user.uid)
+              this.$ls.set('role', this.rules.role)
+              this.$ls.set('alias', this.rules.alias)
+              this.$ls.set('team', this.rules.team)
+              this.$ls.set('notes', this.rules.notes)
               
               // listener for activeuser in DB, basically rerenders the entire app under if circumstances/role has changed
               FBApp.ref(this.firebasePathGetter.users +'/' + user.uid).on('child_changed', (el) => {
@@ -88,6 +101,7 @@ export default {
                     usr.role = el.val().role
                     usr.alias = el.val().alias 
                     usr.team = el.val().team
+                    usr.notes = el.val().notes
                     this[LOGIN_ME](usr)
                   }
                 })
@@ -102,12 +116,40 @@ export default {
         firebase.auth().signOut().then(() => {
           // return to default user - this will triggers activeUserGetter watcher and dummy data to render instead of Firebase
           FBApp.ref(this.firebasePathGetter.users).ref.off('child_changed')
+          this.$ls.clear()
           this[LOGIN_ME](this.DEFAULT_USER)
         }).catch(function(error) {
           console.warn(error)
         });
       }
       
+    },
+    setUserData (user) {
+      return ({
+        displayName: user.displayName, 
+        photoURL : user.photoURL, 
+        isAnonymous : user.isAnonymous,
+        token : user.uid,
+        role : this.rules.role, 
+        alias : this.rules.alias, 
+        team : this.rules.team,
+        notes: this.rules.notes
+      })
+    }
+  },
+  created () {
+    let user = {
+      displayName : this.$ls.get('displayName'),
+      photoURL : this.$ls.get('photoURL'),
+      isAnonymous : this.$ls.get('isAnonymous'),
+      token : this.$ls.get('token'),
+      role : this.$ls.get('role'),
+      alias : this.$ls.get('alias'),
+      team : this.$ls.get('team'),
+      notes : this.$ls.get('notes')
+    }
+    if (user.displayName) {
+      this[LOGIN_ME](user)
     }
   },
   components : {
