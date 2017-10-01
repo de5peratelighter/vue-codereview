@@ -37,7 +37,6 @@
     import firebase from 'firebase'
     import { FBApp } from '@/data/firebase-config'
     import { levelMixin, optionsMixin } from '@/mixins/restrictions'
-    import {GET_TODAYREVIEWERS} from '@/data/mutation-types'
     import {mapActions, mapGetters } from 'vuex'
     import { notificationMixin } from '@/mixins/notifications'
     const CodeGuidelines = () => import('@/components/CodeGuidelines.vue')
@@ -55,9 +54,6 @@
             ...mapGetters(['activeUserGetter','firebasePathGetter', 'workingHoursGetter', 'globalPrefixesGetter']),
             disableSubmit () {
                 return this.inputsInvalid
-            },
-            today () {
-              return this.$store.state.eventAppDate
             }
         },
         watch: {
@@ -70,7 +66,6 @@
             }
           },
         methods : {
-            ...mapActions([GET_TODAYREVIEWERS]),
             openDialog (ref) {
                 this.$refs[ref].open()
             },
@@ -94,14 +89,18 @@
 
                         if (this.inputs[2].val) { newData.comment = this.inputs[2].val }
                         
+                        // add instance to Firebase
                         FBApp.ref(this.path + '/' + this.$moment().valueOf()).set(newData).then(() => {
-                            let currentReviewer = this.reviewers[ this.workingHoursGetter.findIndex((el,index) => el.includes(this.$moment().hours()))]
-                            
-                            this.$bindAsObject('currentReviewerToken', FBApp.ref(this.firebasePathGetter.notifications+"/"+currentReviewer), null, () => {
-                                if (this.currentReviewerToken.token) {
-                                    this.submitNotification(this.currentReviewerToken, this.activeUserGetter, "informReviewer") // from 'notificationMixin'
+                            // if app session isn't from today
+                            if (!(this.$moment(this.todayReviewersArray['.key'], 'YYYY-MM-DD').isSame(this.$moment(),'day'))) {
+                                this.getTodayReviewers().then(() => {      // then get Today reviewers 
+                                    this.findReviewerAndSendNotification() // AND triger notification to current reviewer
                                 }
-                            })
+                                ) 
+                            } else {
+                                this.findReviewerAndSendNotification() // else simply trigger notification to current reviewer
+                            }
+                            
                         })
                         
                     } else if (this.relcomponent === 'mainconfig' && this.defaultRoleOption && this.defaultTeamOption) {
@@ -110,31 +109,43 @@
                         FBApp.ref(this.path +"/" + token).set({
                             alias: alias, role : this.defaultRoleOption, team : this.defaultTeamOption, tester : this.defaulttestingOption, notes : this.defaultSpecialNote
                         })
-                        
                     }
                     
-                }
-                
-                this.clearData()
+                } this.clearData() // clear the inputs
             },
             clearData (el) {
                 this.inputs.map(el=> el.val = "")
+            },
+            findReviewerAndSendNotification () {
+                let currentReviewer = this.reviewers[ this.workingHoursGetter.findIndex((el,index) => el.includes(this.$moment().hours()))]
+                            
+                this.$bindAsObject('currentReviewerToken', FBApp.ref(this.firebasePathGetter.notifications+"/"+currentReviewer), null, () => {
+                    if (this.currentReviewerToken.token) {
+                        this.submitNotification(this.currentReviewerToken, this.activeUserGetter, "informReviewer") // from 'notificationMixin'
+                    }
+                })
+            },
+            getTodayReviewers () {
+                return new Promise((resolve,reject) => { // making it a promise due to THEN statements for lazy users (whenever session is not reloaded nextday)
+                  this.$bindAsObject('todayReviewersArray', FBApp.ref(this.firebasePathGetter.schedule).child(this.$moment().format('YYYY-MM-DD')), null, () => {
+                        if (this.todayReviewersArray['.value']) {
+                            this.reviewers = this.todayReviewersArray['.value'].split(',').slice(0,-1)
+                            resolve()
+                        }
+                        // start listening whether reviewers might have changed for today
+                        FBApp.ref(this.firebasePathGetter.schedule).child(this.$moment().format('YYYY-MM-DD')).on('value', (el) => {
+                            if (this.todayReviewersArray['.value']) { 
+                                this.reviewers = el.val().split(',').slice(0,-1)
+                            }
+                        })
+    
+                    })  
+                })
             }
         },
         created () {
             if (this.relcomponent === 'codereview') {
-                this.$bindAsObject('todayReviewersArray', FBApp.ref(this.firebasePathGetter.schedule).child(this.today.format('YYYY-MM-DD')), null, () => {
-                    if (this.todayReviewersArray['.value']) {
-                        this.reviewers = this.todayReviewersArray['.value'].split(',').slice(0,-1)
-                    }
-                    // start listening whether reviewers might have changed for today
-                    FBApp.ref(this.firebasePathGetter.schedule).child(this.today.format('YYYY-MM-DD')).on('value', (el) => {
-                        if (this.todayReviewersArray['.value']) { 
-                            this.reviewers = el.val().split(',').slice(0,-1)
-                        }
-                    })
-
-                })
+                this.getTodayReviewers()
             }
         },
         components : {
