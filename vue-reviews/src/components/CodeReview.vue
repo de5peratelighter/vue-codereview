@@ -44,7 +44,7 @@
                   {{ truncContent(item.content, 'changeset') }}
                   <md-tooltip md-delay="300" md-direction="right"> {{helperTexts.cset}} </md-tooltip>
                 </md-button>
-                <md-button class="md-icon-button md-raised md-dense" v-clipboard:copy="copyCset(item.content)">
+                <md-button class="md-icon-button md-raised md-dense" v-clipboard:copy="copyCset(item.content)" v-clipboard:success="onCopy">
                   <md-icon>content_copy</md-icon>
                   <md-tooltip md-direction="bottom">Copy (branchname | chageset number) to clipboard</md-tooltip>
                 </md-button>
@@ -169,6 +169,9 @@ export default {
         typer === "changeset" ? (el.includes(this.globalPrefixesGetter.changes.val) ? el : this.globalPrefixesGetter.changes.val + el) :
         el
       )
+    },
+    onCopy (event) {
+      console.warn('Copied ',event)
     },
     copyCset(el) {
       return el.includes('user') ? el.substr(el.lastIndexOf('user%2F')).split(/%2F|%40/)[1] : el.split('/').slice(-1).pop()

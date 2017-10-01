@@ -23,12 +23,16 @@ import VueClipboard from 'vue-clipboard2'
 
 import lodash from 'lodash'
 import VueLodash from 'vue-lodash/dist/vue-lodash.min'
+
+// Local storage
+import VueLocalStorage from 'vue-ls'
  
 Vue.use(Vuex)
 Vue.use(VueFire)
 Vue.use(VueMaterial)
 Vue.use(VueClipboard)
 Vue.use(VueLodash, lodash)
+Vue.use(VueLocalStorage)
 
 Vue.material.registerTheme('default', {
   primary: 'blue',
