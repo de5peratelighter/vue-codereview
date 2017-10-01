@@ -20,6 +20,7 @@
             <div>Today reviewers:
                 <span class="md-subheading" v-for="(item,index) in reviewers" :key="index">
                 {{item}}
+                <md-tooltip md-delay="300x" md-direction="top"> Review hours: {{workingHoursGetter[index]}}</md-tooltip>
                 </span>
             </div>
             <div v-if="levelEngineer(activeUserGetter.role)">

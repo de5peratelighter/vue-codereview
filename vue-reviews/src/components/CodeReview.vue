@@ -8,9 +8,6 @@
               <template v-if="activeUserGetter.isAnonymous">
                 {{ initialMessage }}
               </template>
-              <template v-else-if="levelEngineer(activeUserGetter.role)">
-                {{ welcomeMessage }}
-              </template>
               <template v-else-if="!levelEngineer(activeUserGetter.role)">
                 {{ noaccessMessage }}
               </template>
