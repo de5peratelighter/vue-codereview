@@ -38,12 +38,21 @@ export default new Vuex.Store({
             "username" : "user2"
           }, "2" : {
             ".key" : "1505006651791",
-            "comment" : "kk",
+            "comment" : "interesting case!",
             "content" : "/1656377",
             "reviewer" : "user1",
             "status" : "Looking",
             "ticket" : "/SUP-21035",
             "rc": "I'll take a look soon",
+            "username" : "user1"
+          }, "3" : {
+            ".key" : "1505006651712",
+            "comment" : "if your changeset is 'urgent' just use this word in any form",
+            "content" : "/1656376",
+            "reviewer" : "user1",
+            "status" : "New",
+            "ticket" : "/SUP-21039",
+            "rc": "wow!",
             "username" : "user1"
           },
         },

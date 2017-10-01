@@ -44,6 +44,10 @@
                   {{ truncContent(item.content, 'changeset') }}
                   <md-tooltip md-delay="300" md-direction="right"> {{helperTexts.cset}} </md-tooltip>
                 </md-button>
+                <md-button class="md-icon-button md-raised md-dense" v-clipboard:copy="copyCset(item.content)">
+                  <md-icon>content_copy</md-icon>
+                  <md-tooltip md-direction="bottom">Copy (branchname | chageset number) to clipboard</md-tooltip>
+                </md-button>
               </md-layout>
               
               <md-layout>
@@ -58,7 +62,9 @@
                   
                   <md-button :id="'dialog'+key" @click="updateDialog(key,'open')"> 
                     <md-tooltip md-delay="300" md-direction="right"> {{helperTexts.comments}} </md-tooltip>
-                    <md-icon v-if="item.comment||item.rc">chat_bubble</md-icon> <md-icon v-else>chat_bubble_outline</md-icon> 
+                    <md-icon v-if="(item.comment || '').toLowerCase().includes('urgent') && item.status === 'New' " class="shake">alarm</md-icon>
+                    <md-icon v-else-if="item.comment||item.rc">chat_bubble</md-icon> 
+                    <md-icon v-else>chat_bubble_outline</md-icon> 
                   </md-button>
                   
                   <md-dialog :md-open-from="'#dialog'+key" :md-close-to="'#dialog'+key" :ref="String(key)"> <!-- String(key) removes dialog undefined bug with the zero-index key -->
@@ -165,10 +171,13 @@ export default {
         el
       )
     },
+    copyCset(el) {
+      return el.includes('user') ? el.substr(el.lastIndexOf('user%2F')).split(/%2F|%40/)[1] : el.split('/').slice(-1).pop()
+    },
     truncContent (el, typer) {
       return (
         typer === "ticket" ? el.split('/').pop().slice(0,10) :
-        typer === "changeset" ? el.slice(-8) :
+        typer === "changeset" ? el.slice(-8) :   
         typer === "time" ?  this.$moment(Number(el)).format('DD-MMM, h:mm A') : ""
       )
     },
