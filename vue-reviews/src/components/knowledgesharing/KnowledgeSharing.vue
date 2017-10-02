@@ -49,8 +49,6 @@
     computed: {
       ...mapGetters(['activeUserGetter', 'firebasePathGetter']),
       isEditable() {
-          console.log(this.activeUserGetter);
-          console.log(this.activeUserGetter.notes?this.activeUserGetter.notes:'not found');
           return this.levelDEVORPM(this.activeUserGetter.role)||(this.activeUserGetter.notes?this.activeUserGetter.notes.toLowerCase() === 'knowledge sharing':false);
       },
       filteredItems() {
