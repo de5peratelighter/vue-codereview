@@ -13,7 +13,7 @@
       </kn-header>
       <kn-content :items="filteredItems"
                   :filters="filters"
-                  :allowEdit="levelDEVORPM(activeUserGetter.role)"
+                  :allowEdit="isEditable"
                   @kn-item-updated="updateData"
                   @kn-filter-applied="(data) => {updateFilter(data,'add')}">
       </kn-content>
@@ -48,6 +48,11 @@
     mixins: [levelMixin],
     computed: {
       ...mapGetters(['activeUserGetter', 'firebasePathGetter']),
+      isEditable() {
+          console.log(this.activeUserGetter);
+          console.log(this.activeUserGetter.notes?this.activeUserGetter.notes:'not found');
+          return this.levelDEVORPM(this.activeUserGetter.role)||(this.activeUserGetter.notes?this.activeUserGetter.notes.toLowerCase() === 'knowledge sharing':false);
+      },
       filteredItems() {
         return this.items.filter((item) => {
           if (this.isSearchMatched(item) && this.isDateMatched(item)) {
@@ -126,6 +131,7 @@
       }
     },
     activated() {
+      console.log(this.activeUserGetter.isAnonymous);
       if (!this.activeUserGetter.isAnonymous) {
         this.readData();
       }
