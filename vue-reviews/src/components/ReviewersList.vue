@@ -94,10 +94,7 @@
             },
             year () {
                 return this.$store.state.currentYear
-            },
-            nowDate () {
-                return this.$store.state.eventAppDate
-            },
+            }
        },
        firebase: {},
        methods : {
@@ -127,14 +124,19 @@
                 }
                 
                 if (allowUpdating) {
-                    this.rescheduleData(this.revsGetter, this.lastIndex)
+                    
+                    this.$bindAsObject('todayRevs', FBApp.ref(this.firebasePathGetter.schedule).child(this.$moment().format('YYYY-MM-DD')), null, () => {
+                        console.warn("today and last",this.todayRevs,this.lastIndex )
+                        this.rescheduleData(this.revsGetter, this.todayRevs)
+                    })
+                    
                 }
                 
             },
             rescheduleData (newCount, lastInd) {
                     
-                let lastIndVal = lastInd[0]['.value']
-                let lastIndKey = lastInd[0]['.key']
+                let lastIndVal = lastInd['.value']
+                let lastIndKey = lastInd['.key']
                 
                 let reviewerIndex = Number(lastIndVal.split(',').pop())
                 let reviewers = newCount
@@ -142,7 +144,7 @@
                 
                 for (let i=1;i<=this.revScheduleDaysGetter;i++) {
                     
-                    let nextDay = this.$moment(this.nowDate).add(i,'days')
+                    let nextDay = this.$moment().add(i,'days')
                     let holiday = this.holidays.find(el => this.$moment(el, 'MMMM D').isSame(nextDay, 'day'))
 
                     if (nextDay.day() > 0 && nextDay.day()<6 && !holiday) { // check for weekend and holidays, holidays will be another FB instance soon
@@ -163,7 +165,7 @@
                 if (resultData) {
                     //  && !this.$moment(this.lastIndex[0]['.key']).isSameOrAfter(this.$moment(resultData[resultData.length - 1]))
                     console.warn('New schedule',resultData, this.lastIndex[0]['.key'])
-                    FBApp.ref(this.firebasePathGetter.schedule).update(resultData)
+                    // FBApp.ref(this.firebasePathGetter.schedule).update(resultData)
                 }
                     
             },
@@ -179,8 +181,8 @@
                     
                     this.$bindAsArray('lastIndex', FBApp.ref(this.firebasePathGetter.schedule).limitToLast(1), null, () => {
                         // Generating new instances on first PM login on Mondays(or on last found DB instance as of Today)
-                        if (this.$moment(this.lastIndex[0]['.key']).isSameOrBefore(this.nowDate,'day') || this.$moment(this.nowDate).day() === 1) {
-                            this.rescheduleData(this.revsGetter, this.lastIndex)
+                        if (this.$moment(this.lastIndex[0]['.key']).isSameOrBefore(this.$moment(),'day') || this.$moment().day() === 3) {
+                            this.rescheduleData(this.revsGetter, this.lastIndex[0])
                         }
                     })
                 

@@ -13,7 +13,7 @@
 
             <md-layout md-flex="55" :class="{ hidden: hiddenInputs.search }">
               <md-input-container md-inline>
-                <md-input v-model="search"></md-input>
+                <md-input v-model="search" @keyup.enter.native="findChanges(search)"></md-input>
                 <md-button class="md-icon-button" @click="findChanges(search)">
                   <md-icon>update</md-icon>
                   <md-tooltip md-delay="300" md-direction="bottom"> {{helperTexts.clicker}} </md-tooltip>
@@ -31,7 +31,7 @@
             <md-layout md-flex="25" :class="{ hidden: hiddenInputs.displayNum }">
               <md-input-container md-inline>
                 <label>Number of instances</label>
-                <md-input v-model="displayNum"></md-input>
+                <md-input v-model="displayNum" @keyup.enter.native="updateItemsNum(displayNum)"></md-input>
                 <md-button class="md-icon-button" @click="updateItemsNum(displayNum)">
                   <md-icon>update</md-icon>
                   <md-tooltip md-delay="300" md-direction="bottom"> {{helperTexts.clicker}} </md-tooltip>
@@ -67,7 +67,7 @@
       </md-sidenav>
 
       <keep-alive>
-        <router-view class="c-full-height"></router-view>
+        <router-view></router-view>
       </keep-alive>
   </div>
 </template>
@@ -121,10 +121,12 @@ export default {
       this[UPDATE_NUM](this.displayNum)
     },
     findChanges (ticket) {
-      this.$bindAsArray('allItems', FBApp.ref(this.firebasePathGetter.main), null, () => {
-          let changes = Object.values(this.allItems).filter((el)=> el.ticket.toLowerCase().includes(ticket.toLowerCase()))
-          this[GET_FBASE](changes)
-      })
+      if (ticket){
+        this.$bindAsArray('allItems', FBApp.ref(this.firebasePathGetter.main), null, () => {
+            let changes = Object.values(this.allItems).filter((el)=> el.ticket.toLowerCase().includes(ticket.toLowerCase()))
+            this[GET_FBASE](changes)
+        })
+      }
     },
     checkAccess (el) {
       return (el === 'PM' && !this.levelDEVORPM(this.activeUserGetter.role)) || (el === 'ENGINEERING' && !this.levelEngineer(this.activeUserGetter.role)) || (el === 'TEAMLEAD' && !this.levelTeamlead(this.activeUserGetter.role))
@@ -148,6 +150,13 @@ export default {
 </script>
 
 <style>
+.md-toolbar {
+  min-height: 55px;
+}
+
+.md-toolbar .md-toolbar-container {
+  height: 50px;
+}
 
 .review-welcome > * {
   width: 100%;
@@ -173,9 +182,6 @@ export default {
 }
 .c-full-width {
   width: 100%;
-}
-.c-full-height {
-  min-height: 100vh;
 }
 .c-main-section {
   margin: 0 auto;

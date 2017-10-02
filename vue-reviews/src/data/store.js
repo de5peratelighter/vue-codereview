@@ -11,7 +11,7 @@ import VueLodash from 'vue-lodash/dist/vue-lodash.min'
 Vue.use(VueLodash, lodash)
 
 
-import {GET_FBASE, LOGIN_ME, UPDATE_NUM, GET_REVIEWERS, GET_HOLIDAYS, GET_CAPACITY, SET_MONTH, SET_YEAR, GET_TODAYREVIEWERS, SET_FOCUSED_CELL, SET_IS_EDITING, SET_COPY_CACHE, SET_CURRENT_WEEK, GET_USERS, SET_PREFIXES} from './mutation-types'
+import {GET_FBASE, LOGIN_ME, UPDATE_NUM, GET_REVIEWERS, GET_HOLIDAYS, GET_CAPACITY, SET_MONTH, SET_YEAR, SET_FOCUSED_CELL, SET_IS_EDITING, SET_COPY_CACHE, SET_CURRENT_WEEK, GET_USERS, SET_PREFIXES} from './mutation-types'
 
 export default new Vuex.Store({
     state : {
@@ -38,12 +38,21 @@ export default new Vuex.Store({
             "username" : "user2"
           }, "2" : {
             ".key" : "1505006651791",
-            "comment" : "kk",
+            "comment" : "interesting case!",
             "content" : "/1656377",
             "reviewer" : "user1",
             "status" : "Looking",
             "ticket" : "/SUP-21035",
             "rc": "I'll take a look soon",
+            "username" : "user1"
+          }, "3" : {
+            ".key" : "1505006651712",
+            "comment" : "if your changeset is 'urgent' just use this word in any form",
+            "content" : "/1656376",
+            "reviewer" : "user1",
+            "status" : "New",
+            "ticket" : "/SUP-21039",
+            "rc": "wow!",
             "username" : "user1"
           },
         },
@@ -63,9 +72,10 @@ export default new Vuex.Store({
           role: "", // not best practice but very convenient, won't require additional if-elses on user-login
           alias: "", // if user isn't in read-only firebase boject "users" - login response always returns 'undefined'
           team: "",
-          token: 1111111
+          token: 1111111,
+          notes: ""
         },
-        displayNum : 5,
+        displayNum : 6,
         searchTerm : 'SUP',
         users: [],
         firePath : {
