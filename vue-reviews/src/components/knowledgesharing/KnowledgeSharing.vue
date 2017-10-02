@@ -129,7 +129,6 @@
       }
     },
     activated() {
-      console.log(this.activeUserGetter.isAnonymous);
       if (!this.activeUserGetter.isAnonymous) {
         this.readData();
       }
