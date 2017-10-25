@@ -1,19 +1,27 @@
 <template>
-  <div>
-    <md-layout md-gutter>
+  <div v-shortkey="['shift', 'f']" @shortkey="renderControlInputsPopup($route)">
+    <md-layout md-gutter >
       <ul class="c-main-section">
         
-        <md-layout md-align="center">
-            <h4>
-              <template v-if="activeUserGetter.isAnonymous">
-                {{ initialMessage }}
-              </template>
-              <template v-else-if="!levelEngineer(activeUserGetter.role)">
-                {{ noaccessMessage }}
-              </template>
-            </h4>
+        <md-layout>
+            <md-layout md-align="center" md-flex="95">
+              <h4>
+                <template v-if="activeUserGetter.isAnonymous">
+                  {{ initialMessage }}
+                </template>
+                <template v-else-if="!levelEngineer(activeUserGetter.role)">
+                  {{ noaccessMessage }}
+                </template>
+              </h4>
+            </md-layout>
+            <md-layout md-align="end" md-vertical-align="center" v-if="searchActive">
+              <md-button class="md-icon-button md-warn" @click="returnToItems">
+                <md-icon>history</md-icon>
+              </md-button>
+              <md-tooltip md-delay="300" md-direction="left">Revert search</md-tooltip> 
+            </md-layout>
         </md-layout>
-
+        
         <li  v-for="(item, key) in items" :key="key">
 
           <md-card :class="[item.status, 'instance']">
@@ -115,6 +123,20 @@
       <new-instance :inputs="codeReviewInputs" :requiredword="newInstanceRequiredWord" :path="firebasePathGetter.main" relcomponent="codereview"> </new-instance>
     </md-layout>
     
+    
+    <md-dialog ref="controlInputsPopup">
+      
+      <md-dialog-content>
+        <control-inputs :is-column="controlInputsVals.isColumn" :hidden-bydefault="controlInputsVals.hiddenBydefault"/>
+      </md-dialog-content>
+
+      <md-dialog-actions>
+        <md-button class="md-primary" @click="$refs.controlInputsPopup.close()">Back</md-button>
+      </md-dialog-actions>
+      
+    </md-dialog>
+    
+    
     <md-snackbar md-position="bottom center" ref="coreSnackbar" md-duration="5000">
         <strong>{{snackbarMessage}}</strong>
         <md-button class="md-accent" @click="$refs.coreSnackbar.close()">Close</md-button>
@@ -127,7 +149,7 @@
 
 import firebase from 'firebase'
 import { FBApp } from '@/data/firebase-config'
-import {GET_FBASE} from '@/data/mutation-types'
+import {GET_FBASE, UPDATE_NUM} from '@/data/mutation-types'
 import {mapActions, mapGetters } from 'vuex'
 import { levelMixin } from '@/mixins/restrictions'
 import { newInstanceMixin } from '@/mixins/inputs'
@@ -136,6 +158,7 @@ import { notificationMixin } from '@/mixins/notifications'
 
 const NewInstance = () => import('@/components/NewInstance.vue')
 const UpdateStatus = () => import('@/components/codereview/UpdateStatus.vue')
+const ControlInputs = () => import('@/components/codereview/ControlInputs.vue')
 
 export default {
   name: 'CodeReview',
@@ -144,7 +167,12 @@ export default {
       newInput : '',
       newInstanceRequiredWord: 'bazaarvoice',
       DEFAULT_DATA : this.$store.state.items,
-      prefixes : {}
+      prefixes : {},
+      backToItemsActive : false,
+      controlInputsVals : {
+        isColumn : true,
+        hiddenBydefault : false
+      }
     }
   },
   firebase: {},
@@ -153,14 +181,24 @@ export default {
     items () {
       return this.$store.state.items
     },
+    searchActive () {
+      return this.$store.state.search.active
+    },
     ...mapGetters(['activeUserGetter', 'displayNumGetter', 'firebasePathGetter', 'globalPrefixesGetter'])
   },
   methods : {
-    ...mapActions([GET_FBASE]),
+    ...mapActions([GET_FBASE, UPDATE_NUM]),
     getData () {
       this.$bindAsArray('itemsArray', FBApp.ref(this.firebasePathGetter.main).limitToLast(Number(this.displayNumGetter)), null, () => {
         this[GET_FBASE](this.itemsArray)
       })
+    },
+    returnToItems () {
+      if ( this.itemsArray.length) {
+        this[GET_FBASE](this.itemsArray)
+        this[UPDATE_NUM](6)
+        this.$store.commit('eventSearchActive', false)
+      }
     },
     prependPrefix (el, typer) {
       // console.warn(el, typer, this.globalPrefixesGetter)
@@ -182,7 +220,7 @@ export default {
     },
     onSelectChange (el) {
       if (el['.key'] && this.levelReviewer(this.activeUserGetter.role)) {
-        FBApp.ref(this.firebasePathGetter.main +"/" + el['.key']).update({status: el.status, reviewer : this.activeUserGetter.alias}).then(()=> {
+        FBApp.ref(this.firebasePathGetter.main +"/" + el['.key']).update({status: el.status, reviewer : this.activeUserGetter.alias, rtime : this.$moment().valueOf()}).then(()=> {
           this.$bindAsObject('itemOwner', FBApp.ref(this.firebasePathGetter.notifications + '/' + el.username), null, () => {
             if (this.itemOwner.token) { 
                 this.submitNotification(this.itemOwner, this.activeUserGetter, 'informOwner' , el.status) // from 'notificationMixin'
@@ -228,6 +266,12 @@ export default {
     },
     dummyDataMessage () {
       console.log('This is not real data')
+    },
+    renderControlInputsPopup (route) {
+      if (route.name == 'CodeReview') {
+        console.warn('Route', route)
+        this.$refs.controlInputsPopup.open()
+      }
     }
   },
   watch: {
@@ -239,22 +283,17 @@ export default {
           this[GET_FBASE](this.DEFAULT_DATA)
         }
       },
-      deep: true
+      deep: true,
+      immediate: true // triggers watcher immediately upon render/activation
     },
     displayNumGetter (newVal) {
       if (!this.activeUserGetter.isAnonymous) {this.getData () }
     }
   },
-  activated () {
-      if (!this.activeUserGetter.isAnonymous && this.activeUserGetter.role) {
-        this.getData()
-      } else {
-        this[GET_FBASE](this.DEFAULT_DATA)
-      }
-  },
   components : {
     NewInstance,
-    UpdateStatus
+    UpdateStatus,
+    ControlInputs
   }
 }
 </script>

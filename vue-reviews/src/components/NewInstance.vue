@@ -75,44 +75,49 @@
                     el.target.setAttribute('disabled', this.inputsInvalid)
                     
                 } else if (!user.isAnonymous && this.levelEngineer(user.role) && this.path) {
+                    let inputFirst = this.inputs[0].val
+                    let inputSecond = this.inputs[1].val
                     
                     // relcomponent indicates the component that is relevant for our concrete newInstance component
                     if (this.relcomponent === 'codereview') {
+                        let inputThird = this.inputs[2].val
                         let prefz = this.globalPrefixesGetter
                         let newData = {
                             username: user.alias,
                             si:  user.photoURL,
-                            content : prefz.changes.val ? this.inputs[0].val.replace(prefz.changes.val, '') : this.inputs[0].val,
-                            ticket : prefz.changes.val ? this.inputs[1].val.replace(prefz.tickets.val, '') : this.inputs[1].val,
+                            content : prefz.changes.val ? inputFirst.replace(prefz.changes.val, '') : inputFirst,
+                            ticket : prefz.changes.val ? inputSecond.replace(prefz.tickets.val, '') : inputSecond,
                             status: 'New',
                             reviewer: ''
                         }
-
-                        if (this.inputs[2].val) { newData.comment = this.inputs[2].val }
+                        if (inputThird) { newData.comment = inputThird }
                         
                         // add instance to Firebase
-                        FBApp.ref(this.path + '/' + this.$moment().valueOf()).set(newData).then(() => {
-                            // if app session isn't from today
-                            if (!(this.$moment(this.todayReviewersArray['.key'], 'YYYY-MM-DD').isSame(this.$moment(),'day'))) {
-                                this.getTodayReviewers().then(() => {      // then get Today reviewers 
-                                    this.findReviewerAndSendNotification() // AND triger notification to current reviewer
-                                }
-                                ) 
-                            } else {
-                                this.findReviewerAndSendNotification() // else simply trigger notification to current reviewer
-                            }
-                            
-                        })
+                        this.pushCrInstanceToFirebase(newData)
                         
                     } else if (this.relcomponent === 'mainconfig' && this.defaultRoleOption && this.defaultTeamOption) {
-                        let token = this.inputs[0].val ? this.inputs[0].val : 'WrongToken'
-                        let alias = this.inputs[1].val ? this.inputs[1].val : 'WrongAlias'
+                        let token = inputFirst ? inputFirst : 'WrongToken'
+                        let alias = inputSecond ? inputSecond : 'WrongAlias'
                         FBApp.ref(this.path +"/" + token).set({
-                            alias: alias, role : this.defaultRoleOption, team : this.defaultTeamOption, tester : this.defaulttestingOption, notes : this.defaultSpecialNote
+                            alias: alias, role : this.defaultRoleOption, 
+                            team : this.defaultTeamOption, tester : this.defaulttestingOption, 
+                            notes : this.defaultSpecialNote
                         })
                     }
                     
                 } this.clearData() // clear the inputs
+            },
+            pushCrInstanceToFirebase (data) {
+                FBApp.ref(this.path + '/' + this.$moment().valueOf()).set(data).then(() => {
+                    // if app session isn't from today
+                    if (!(this.$moment(this.todayReviewersArray['.key'], 'YYYY-MM-DD').isSame(this.$moment(),'day'))) {
+                        this.getTodayReviewers().then(() => {      // then get Today reviewers 
+                            this.findReviewerAndSendNotification() // AND triger notification to current reviewer
+                        }) 
+                    } else {
+                        this.findReviewerAndSendNotification() // else simply trigger notification to current reviewer
+                    }
+                })
             },
             clearData (el) {
                 this.inputs.map(el=> el.val = "")
@@ -125,6 +130,7 @@
                         this.submitNotification(this.currentReviewerToken, this.activeUserGetter, "informReviewer") // from 'notificationMixin'
                     }
                 })
+                console.log('hey there')
             },
             getTodayReviewers () {
                 return new Promise((resolve,reject) => { // making it a promise due to THEN statements for lazy users (whenever session is not reloaded nextday)

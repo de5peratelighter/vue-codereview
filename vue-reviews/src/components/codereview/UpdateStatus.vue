@@ -1,6 +1,9 @@
 <template>
   <md-input-container class="status-input">
-    <label for="status" style="color:inherit">{{ item.reviewer ? item.reviewer : 'Codereviewer will set the status' }}</label>
+    <label for="status" style="color:inherit">
+      {{ item.reviewer ? `${item.reviewer} 
+        ${ item.rtime ? 'at ' + $moment(item.rtime).format('h:mm A') : ''}` : 'Codereviewer will set the status' }}
+    </label>
     <md-select :disabled="cantChangeStatus(item.username)" name="status" v-model="item.status" class="width80" md-flex-offset="50">
       <md-option v-for="option in selectOptions" :key="option.id" :value="option.name" @selected="onStatusChange(item)">{{option.name}}</md-option>
     </md-select>
@@ -32,7 +35,8 @@
         methods : {
             onStatusChange (el) {
               this.$emit('statusUpdate', el)
-            }, 
+            },
+            
             onRemoveInstance (el) {
               this.$emit('removeInstance', el)
             },

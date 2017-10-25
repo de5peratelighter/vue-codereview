@@ -165,7 +165,7 @@
                 if (resultData) {
                     //  && !this.$moment(this.lastIndex[0]['.key']).isSameOrAfter(this.$moment(resultData[resultData.length - 1]))
                     console.warn('New schedule',resultData, this.lastIndex[0]['.key'])
-                    // FBApp.ref(this.firebasePathGetter.schedule).update(resultData)
+                    FBApp.ref(this.firebasePathGetter.schedule).update(resultData)
                 }
                     
             },
@@ -176,27 +176,24 @@
                 this.hiddenInputs[el] = !this.hiddenInputs[el]
             },
             updateUiValues (el) {
-                
-                if (!el.isAnonymous) {
-                    
+                if (!el) {
                     this.$bindAsArray('lastIndex', FBApp.ref(this.firebasePathGetter.schedule).limitToLast(1), null, () => {
                         // Generating new instances on first PM login on Mondays(or on last found DB instance as of Today)
-                        if (this.$moment(this.lastIndex[0]['.key']).isSameOrBefore(this.$moment(),'day') || this.$moment().day() === 3) {
+                        if (this.$moment(this.lastIndex[0]['.key']).isSameOrBefore(this.$moment(),'day') || this.$moment().day() === 1) {
                             this.rescheduleData(this.revsGetter, this.lastIndex[0])
                         }
                     })
-                
                 }
                 
             }
         },
         watch : {
-            activeUserGetter (newCount, oldCount) {
-                this.updateUiValues(newCount.isAnonymous)
+            activeUserGetter : {
+                handler(newVal) {
+                    this.updateUiValues(newVal.isAnonymous)
+                },
+                immediate: true // triggers watcher immediately upon render/activation
             }
-        },
-        mounted () {
-            this.updateUiValues(this.activeUserGetter.isAnonymous)
         }
     }
 </script>

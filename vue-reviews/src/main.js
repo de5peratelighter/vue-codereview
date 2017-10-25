@@ -26,6 +26,9 @@ import VueLodash from 'vue-lodash/dist/vue-lodash.min'
 
 // Local storage
 import VueLocalStorage from 'vue-ls'
+
+// Shortkey bindings
+import VueShortkey from 'vue-shortkey'
  
 Vue.use(Vuex)
 Vue.use(VueFire)
@@ -33,6 +36,7 @@ Vue.use(VueMaterial)
 Vue.use(VueClipboard)
 Vue.use(VueLodash, lodash)
 Vue.use(VueLocalStorage)
+Vue.use(VueShortkey)
 
 Vue.material.registerTheme('default', {
   primary: 'blue',

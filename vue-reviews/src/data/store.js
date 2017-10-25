@@ -76,7 +76,10 @@ export default new Vuex.Store({
           notes: ""
         },
         displayNum : 6,
-        searchTerm : 'SUP',
+        search : {
+          term : 'SUP',
+          active : false
+        },
         users: [],
         firePath : {
           main : 'wow/nice',
@@ -244,7 +247,7 @@ export default new Vuex.Store({
         },
         currentWeekGetter: (state) => {
           return state.currentWeek;
-        },
+        }
     },
     mutations : {
       [SET_PREFIXES] (state, payload) {
@@ -292,6 +295,9 @@ export default new Vuex.Store({
       },
       eventFormActive(state, payload) {
         state.eventFormActive = payload
+      },
+      eventSearchActive(state, payload) {
+        state.search.active = payload
       }
     },
     actions : {

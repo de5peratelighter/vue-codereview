@@ -25,8 +25,8 @@ export const toolbarLabelMixin = {
     data () {
         return {
             helperTexts : {
-                numbers : "Number of instances.",
-                finder : "Search for a ticket",
+                numbers : "Number of items (SHIFT+F)",
+                finder : "Search for a ticket (SHIFT+F)",
                 clicker : "Click to update"
             }
         }
