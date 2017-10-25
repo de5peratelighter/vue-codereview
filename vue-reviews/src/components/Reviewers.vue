@@ -63,11 +63,12 @@ export default {
                     
                 })
                 this.$bindAsObject('schedule', FBApp.ref(this.firebasePathGetter.schedule), null, () => {  this.scheduleReady = true })
-            } else { 
+            } else {
                 this.scheduleReady = false;
                 this[GET_HOLIDAYS](String())
                 this[GET_REVIEWERS](String())
                 FBApp.ref(this.firebasePathGetter.reviewers).ref.off('child_changed')
+                this.$router.push({ path: '/' })
             }
         }
     },
@@ -136,12 +137,12 @@ export default {
         ReviewersList
     },
     watch : {
-        activeUserGetter (newVal) {
-            this.receiveScheduleData(newVal)
+        activeUserGetter : {
+            handler(newVal) {
+                this.receiveScheduleData(this.activeUserGetter)
+            },
+            immediate: true // triggers watcher immediately upon render/activation
         }
-    },
-    activated () {
-        this.receiveScheduleData(this.activeUserGetter)
     }
 }
 </script>

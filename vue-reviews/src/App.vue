@@ -6,49 +6,9 @@
           <md-button class="md-icon-button" @click="$refs.sidenav.toggle()">
             <md-icon >menu</md-icon>
           </md-button>
-
           <span style="flex: 1;"></span>
-
-          <md-layout md-align="end" v-if="mainPath && levelEngineer(activeUserGetter.role)">
-
-            <md-layout md-flex="55" :class="{ hidden: hiddenInputs.search }">
-              <md-input-container md-inline>
-                <md-input v-model="search" @keyup.enter.native="findChanges(search)"></md-input>
-                <md-button class="md-icon-button" @click="findChanges(search)">
-                  <md-icon>update</md-icon>
-                  <md-tooltip md-delay="300" md-direction="bottom"> {{helperTexts.clicker}} </md-tooltip>
-                </md-button>
-              </md-input-container>
-            </md-layout>
-
-            <md-layout md-flex="10">
-              <md-button class="md-icon-button"  @click="showElement('search')">
-                <md-tooltip md-delay="300" md-direction="bottom"> {{helperTexts.finder}} </md-tooltip>
-                <md-icon>search</md-icon>
-              </md-button>
-            </md-layout>
-
-            <md-layout md-flex="25" :class="{ hidden: hiddenInputs.displayNum }">
-              <md-input-container md-inline>
-                <label>Number of instances</label>
-                <md-input v-model="displayNum" @keyup.enter.native="updateItemsNum(displayNum)"></md-input>
-                <md-button class="md-icon-button" @click="updateItemsNum(displayNum)">
-                  <md-icon>update</md-icon>
-                  <md-tooltip md-delay="300" md-direction="bottom"> {{helperTexts.clicker}} </md-tooltip>
-                </md-button>
-                
-              </md-input-container>
-            </md-layout>
-
-            <md-layout md-flex="10">
-              <md-button class="md-icon-button" @click="showElement('displayNum')">
-                <md-tooltip md-delay="300" md-direction="bottom"> {{helperTexts.numbers}} </md-tooltip>
-                <md-icon>filter_list</md-icon>
-              </md-button>
-            </md-layout>
-
-          </md-layout>
-
+          <control-inputs v-if="codereviewRouteActive && levelEngineer(activeUserGetter.role)" 
+            :is-column="controlInputsVals.isColumn" :hidden-bydefault="controlInputsVals.hiddenBydefault"/>
         </div>
       </md-toolbar>
 
@@ -79,9 +39,10 @@ import firebase from 'firebase'
 import { FBApp, messaging } from '@/data/firebase-config'
 import {UPDATE_NUM, GET_FBASE, SET_PREFIXES} from './data/mutation-types'
 import { levelMixin } from '@/mixins/restrictions'
-import { toolbarLabelMixin } from '@/mixins/labels'
 import {mapActions, mapGetters} from 'vuex'
 import MainNav from './components/MainNav.vue'
+
+const ControlInputs = () => import('./components/codereview/ControlInputs.vue')
 
 export default {
   name: 'app',
@@ -96,41 +57,25 @@ export default {
         // { title: 'SuperDoc', icon: 'book', name: 'SuperDoc', access : "ALL" },
         { title: 'Config', icon: 'settings', name: 'MainConfig', access : "PM" },
       ],
-      hiddenInputs : {
-        search : true,
-        displayNum : true
-      },
-      displayNum : this.$store.state.displayNum,
-      search: this.$store.state.searchTerm
+      controlInputsVals : {
+        isColumn : false,
+        hiddenBydefault : true
+      }
     }
   },
   firebase : {},
-  mixins: [levelMixin, toolbarLabelMixin],
+  mixins: [levelMixin],
   computed : {
     ...mapGetters(['activeUserGetter', 'firebasePathGetter']),
-    mainPath () {
-    	return this.$route.path.indexOf('/main') == 0
+    codereviewRouteActive () {
+    	return this.$route.name == "CodeReview"
     }
   },
   methods: {
-    ...mapActions([UPDATE_NUM,GET_FBASE,SET_PREFIXES]),
-    showElement (el) {
-      this.hiddenInputs[el] = !this.hiddenInputs[el]
-    },
-    updateItemsNum (el) {
-      this[UPDATE_NUM](this.displayNum)
-    },
-    findChanges (ticket) {
-      if (ticket){
-        this.$bindAsArray('allItems', FBApp.ref(this.firebasePathGetter.main), null, () => {
-            let changes = Object.values(this.allItems).filter((el)=> el.ticket.toLowerCase().includes(ticket.toLowerCase()))
-            this[GET_FBASE](changes)
-        })
-      }
-    },
+    ...mapActions([SET_PREFIXES]),
     checkAccess (el) {
       return (el === 'PM' && !this.levelDEVORPM(this.activeUserGetter.role)) || (el === 'ENGINEERING' && !this.levelEngineer(this.activeUserGetter.role)) || (el === 'TEAMLEAD' && !this.levelTeamlead(this.activeUserGetter.role))
-    } 
+    }
   },
   created () {
     this.$bindAsObject('prefz', FBApp.ref(this.firebasePathGetter.prefixes), null, () => {
@@ -144,20 +89,13 @@ export default {
     })
   },
   components : {
-    MainNav
+    MainNav,
+    ControlInputs
   }
 }
 </script>
 
 <style>
-.md-toolbar {
-  min-height: 55px;
-}
-
-.md-toolbar .md-toolbar-container {
-  height: 50px;
-}
-
 .review-welcome > * {
   width: 100%;
   margin: 5px 8px;
