@@ -210,6 +210,9 @@ input:focus {
   border-right: 1px solid #8397a3;
   border-bottom: 1px solid #8397a3;
 }
+  .capacity-cell:first-child {
+    border-left: 1px solid #8397a3;
+  }
   .capacity-cell span {
     font-size: 12px;
     font-family: Roboto, "Noto Sans", Noto, sans-serif;

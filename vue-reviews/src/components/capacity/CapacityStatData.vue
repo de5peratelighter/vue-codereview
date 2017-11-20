@@ -32,6 +32,9 @@ export default {
     border-right: 1px solid #8397a3;
     border-bottom: 1px solid #8397a3;
   }
+    .capacity-cell:first-child {
+      border-left: 1px solid #8397a3;
+    }
     .capacity-cell span {
       text-align: center;
       flex: 0 0 100%;

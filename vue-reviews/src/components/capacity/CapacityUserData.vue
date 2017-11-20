@@ -1,5 +1,5 @@
 <template>
-  <md-layout class="capacity-user">
+  <md-layout class="capacity-user" :class="{'focused': focusedUserGetter === user}">
     <md-layout md-vertical-align="center" class="capacity-cell" :class="{'capacity-highlighted': lead}">
       <span>{{ user }}</span>
     </md-layout>
@@ -13,6 +13,8 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
+
 export default {
   name: 'CapacityUserData',
   props: ['user', 'assignedTeam', 'testing', 'lead'],
@@ -27,6 +29,10 @@ export default {
           return 'TSE Testing'
       }
     }
+  },
+  
+  computed: {
+    ...mapGetters(['focusedUserGetter']),
   }
 }
 </script>
@@ -39,6 +45,9 @@ export default {
   flex-wrap: nowrap;
   background-color: #edf2f4;
 }
+  .capacity-user.focused {
+    background-color: transparent;
+  }
   .capacity-cell {
     border-right: 1px solid #8397a3;
     border-bottom: 1px solid #8397a3;

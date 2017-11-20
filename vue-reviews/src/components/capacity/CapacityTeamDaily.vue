@@ -59,6 +59,13 @@ export default {
     background-color: #d6cbe1;
   }
   .capacity-day {
-    flex: 0 0 20%
+    flex: 0 0 20%;
+    padding: 0 2px;
   }
+    .capacity-day:first-child {
+      padding-left: 4px;
+    }
+    .capacity-day:last-child {
+      padding-right: 0;
+    }
 </style>

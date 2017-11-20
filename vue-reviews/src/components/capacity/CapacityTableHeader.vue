@@ -44,7 +44,14 @@ export default {
   }
     .capacity-day {
       flex: 0 0 20%;
+      padding: 0 2px;
     }
+      .capacity-day:first-child {
+        padding-left: 4px;
+      }
+      .capacity-day:last-child {
+        padding-right: 0;
+      }
     .capacity-day-name {
       flex: 0 0 100%;
       flex-wrap: nowrap;
@@ -53,6 +60,9 @@ export default {
       border-right: 1px solid #8397a3;
       border-bottom: 1px solid #8397a3;
     }
+      .capacity-cell:first-child {
+        border-left: 1px solid #8397a3;
+      }
       .capacity-cell span {
         text-align: center;
         flex: 0 0 100%;

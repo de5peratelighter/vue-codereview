@@ -131,6 +131,9 @@ export default {
 </script>
 
 <style>
+.capacity-view {
+  padding: 0 10px;
+}
   .capacity-header-container {
     display: flex;
     flex: 0 0 100%;
