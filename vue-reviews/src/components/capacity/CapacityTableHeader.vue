@@ -7,6 +7,10 @@
         <capacity-stat-data requested="Requested" received="Received" tickets="Assigned"></capacity-stat-data>
       </md-layout>
     </md-layout>
+    <md-layout class="capacity-day total">
+      <md-layout md-align="center" class="capacity-day-name capacity-cell">Total</md-layout>
+      <capacity-stat-data requested="Requested" received="Received" tickets="Assigned"></capacity-stat-data>
+    </md-layout>
   </md-layout>
 </template>
 
@@ -40,16 +44,19 @@ export default {
   background-color: #edf2f4;
 }
   .capacity-week {
+    flex: 0 0 66.66%;
     flex-wrap: nowrap;
   }
     .capacity-day {
-      flex: 0 0 20%;
+      flex: 0 0 19.99%;
       padding: 0 2px;
     }
       .capacity-day:first-child {
         padding-left: 4px;
       }
-      .capacity-day:last-child {
+      .capacity-day.total {
+        flex: 0 0 13.34%;
+        font-weight: 600;
         padding-right: 0;
       }
     .capacity-day-name {

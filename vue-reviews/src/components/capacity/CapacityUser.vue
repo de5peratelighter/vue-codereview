@@ -10,6 +10,9 @@
         </md-layout>
       </md-layout>
     </md-layout>
+    <md-layout class="capacity-day total">
+      <capacity-stat-data :requested="getTotalByType(requestedCapacity)" :received="getTotalByType(receivedCapacity)" :tickets="getTotalByType(ticketsCapacity)"></capacity-stat-data>
+    </md-layout>
   </md-layout>
 </template>
 
@@ -19,6 +22,7 @@ import { mapGetters } from 'vuex';
 import { FBApp } from '@/data/firebase-config';
 
 import CapacityItem from './CapacityItem';
+import CapacityStatData from './CapacityStatData';
 import CapacityUserData from './CapacityUserData';
 import { capacityRecordMixin } from './mixins/capacityRecords';
 
@@ -67,7 +71,17 @@ export default {
       this.receivedCapacity = capacityData[1].split(',');
       this.ticketsCapacity = capacityData[2].split(',');
     },
-    
+    getTotalByType(type) {
+      if(type === []){
+        return 0;
+      }
+      return type.reduce((prevValue, curValue) => {
+          if(!isNaN(curValue)) {
+            return Number(prevValue) + Number(curValue);
+          }
+          return prevValue;
+        }, 0);
+    },
     createNewUserRecord() {
       const user = this.userInfoGetter(this.user);
       if(this.skipUser(user)) {
@@ -91,6 +105,7 @@ export default {
   },
   components: {
     CapacityItem,
+    CapacityStatData,
     CapacityUserData
   },
 }
@@ -109,11 +124,16 @@ export default {
    background-color: #9dc2e5;
 }
   .capacity-week {
+    flex: 0 0 66.66%;
     flex-wrap: nowrap;
   }
     .capacity-day {
-      flex: 0 0 20%;
+      flex: 0 0 19.99%;
     }
+      .capacity-day.total {
+        padding-right: 0;
+        background-color: #d6cbe1;
+      }
       .capacity-day-name {
         flex: 0 0 100%;
         flex-wrap: nowrap;

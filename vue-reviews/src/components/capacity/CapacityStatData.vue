@@ -38,5 +38,6 @@ export default {
     .capacity-cell span {
       text-align: center;
       flex: 0 0 100%;
+      word-break: break-all;
     }
 </style>
