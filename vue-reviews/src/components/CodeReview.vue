@@ -48,7 +48,11 @@
               </md-layout>
               
               <md-layout>
-                <md-button :href="prependPrefix(item.content, 'changeset')" target="_blank">
+                <md-button v-if="fromDBactive" :href="prependPrefix(item.content, 'changeset')" target="_blank">
+                  {{ truncContent(item.content, 'changeset') }}
+                  <md-tooltip md-delay="300" md-direction="right"> {{helperTexts.cset}} </md-tooltip>
+                </md-button>
+                <md-button v-else :href="item.content" disabled target="_blank">
                   {{ truncContent(item.content, 'changeset') }}
                   <md-tooltip md-delay="300" md-direction="right"> {{helperTexts.cset}} </md-tooltip>
                 </md-button>
@@ -59,7 +63,11 @@
               </md-layout>
               
               <md-layout>
-                <md-button :href="prependPrefix(item.ticket, 'ticket')" target="_blank">
+                <md-button v-if="fromDBactive" :href="prependPrefix(item.ticket, 'ticket')" target="_blank">
+                  {{ truncContent(item.ticket, 'ticket') }}
+                  <md-tooltip md-delay="300" md-direction="right"> {{helperTexts.ticket}} </md-tooltip>
+                </md-button>
+                <md-button v-else :href="item.ticket" target="_blank" disabled>
                   {{ truncContent(item.ticket, 'ticket') }}
                   <md-tooltip md-delay="300" md-direction="right"> {{helperTexts.ticket}} </md-tooltip>
                 </md-button>
@@ -172,7 +180,8 @@ export default {
       controlInputsVals : {
         isColumn : true,
         hiddenBydefault : false
-      }
+      },
+      fromDBactive: false
     }
   },
   firebase: {},
@@ -269,7 +278,6 @@ export default {
     },
     renderControlInputsPopup (route) {
       if (route.name == 'CodeReview') {
-        console.warn('Route', route)
         this.$refs.controlInputsPopup.open()
       }
     }
@@ -279,8 +287,10 @@ export default {
       handler(newVal){
         if (!newVal.isAnonymous && newVal.role) {
           this.getData()
+          this.fromDBactive = true
         } else {
           this[GET_FBASE](this.DEFAULT_DATA)
+          this.fromDBactive = false
         }
       },
       deep: true,
