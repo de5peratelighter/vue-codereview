@@ -130,7 +130,6 @@
                         this.submitNotification(this.currentReviewerToken, this.activeUserGetter, "informReviewer") // from 'notificationMixin'
                     }
                 })
-                console.log('hey there')
             },
             getTodayReviewers () {
                 return new Promise((resolve,reject) => { // making it a promise due to THEN statements for lazy users (whenever session is not reloaded nextday)
