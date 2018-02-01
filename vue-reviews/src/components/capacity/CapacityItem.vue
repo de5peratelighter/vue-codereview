@@ -10,7 +10,7 @@
 <script>
 
 import firebase from 'firebase';
-import { mapActions, mapGetters } from 'vuex';
+import { mapActions, mapGetters, mapState } from 'vuex';
 
 import { FBApp } from '@/data/firebase-config';
 import { SET_FOCUSED_CELL, SET_IS_EDITING, SET_COPY_CACHE } from '@/data/mutation-types';
@@ -31,7 +31,10 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['firebasePathGetter', 'capacityByUserGetter', 'activeUserGetter', 'editableItemClassGetter', 'copyCacheGetter', 'activeUserGetter']),
+    ...mapGetters(['firebasePathGetter', 'capacityByUserGetter', 'activeUserGetter', 'editableItemClassGetter', 'copyCacheGetter', 'activeUserGetter', 'currentWeekGetter']),
+    ...mapState({
+      currentYear: (state) => state.currentYear
+    }),
     isCopied() {
       if(this.copyCacheGetter.el !== null) {
       return this.copyCacheGetter.el === this.$refs.focusedCell
@@ -109,7 +112,7 @@ export default {
         return;
       }
       updatedData[this.user] = this.getUpdatedString(value);
-      FBApp.ref(this.firebasePathGetter.capacity +'/' +  this.$store.state.currentWeek ).update(updatedData);
+      FBApp.ref(this.firebasePathGetter.capacity + '/' + this.currentYear + '/' + this.currentWeekGetter ).update(updatedData);
     },
     unsetFocusedUser(){
       this.focused = false;
