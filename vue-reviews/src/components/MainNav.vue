@@ -18,7 +18,7 @@
               <md-button class="md-raised md-accent" @click="logIn">
                 
                 <template v-if="activeUserGetter.isAnonymous">
-                  Log In
+                  G+ Log In
                   <md-tooltip md-delay="300" md-direction="bottom">Log in into the app</md-tooltip>
                 </template>
               
@@ -47,7 +47,7 @@ import firebase from 'firebase'
 import fauth from'firebase/auth'
 import { FBApp } from '@/data/firebase-config'
 import { levelMixin } from '@/mixins/restrictions'
-import {LOGIN_ME} from '@/data/mutation-types'
+import {LOGIN_ME,SET_CURRENT_ONDUTY, SET_CURRENT_PARSER} from '@/data/mutation-types'
 import {mapActions, mapGetters} from 'vuex'
 const NotificationApp = () => import('@/components/NotificationApp.vue')
 
@@ -66,49 +66,12 @@ export default {
     ...mapGetters(['activeUserGetter', 'firebasePathGetter'])
   },
   methods : {
-    ...mapActions([LOGIN_ME]),
+    ...mapActions([LOGIN_ME, SET_CURRENT_ONDUTY,SET_CURRENT_PARSER]),
     logIn () {
       if (this.activeUserGetter.isAnonymous) {
         firebase.auth().signInWithPopup(provider).then((result) => {
           let user = result.user
-          this.$bindAsObject('rules', FBApp.ref(this.firebasePathGetter.users + '/' + user.uid), null, () => {
-              // initial login, always saves data, triggered even if user isn't activated
-              
-              let usr = this.setUserData(user)
-              
-              this[LOGIN_ME](usr)
-              
-              this.$ls.set('displayName', user.displayName)
-              this.$ls.set('photoURL', user.photoURL)
-              this.$ls.set('isAnonymous', user.isAnonymous)
-              this.$ls.set('token', user.uid)
-              this.$ls.set('role', this.rules.role)
-              this.$ls.set('alias', this.rules.alias)
-              this.$ls.set('team', this.rules.team)
-              this.$ls.set('notes', this.rules.notes)
-              
-              // listener for activeuser in DB, basically rerenders the entire app under if circumstances/role has changed
-              FBApp.ref(this.firebasePathGetter.users +'/' + user.uid).on('child_changed', (el) => {
-                usr[el.key] = el.val()
-                this[LOGIN_ME](usr)
-              })
-              
-              // listener for non-activated users, upon activating the account within DB - rerenders under new circumstances/role
-              this._.isNull(this.rules['.val'])
-              if (!this.activeUserGetter.role) {
-                FBApp.ref(this.firebasePathGetter.users).on("child_added", (el) => {
-                  if (this.activeUserGetter.token == el.key) {
-                    usr.role = el.val().role
-                    usr.alias = el.val().alias 
-                    usr.team = el.val().team
-                    usr.notes = el.val().notes
-                    this[LOGIN_ME](usr)
-                  }
-                })
-              }
-              
-          })
-          
+          this.getMyData(user)
         }).catch(function(error) {
           console.warn(error)
         });
@@ -124,6 +87,39 @@ export default {
       }
       
     },
+    getMyData (user) {
+      this.$bindAsObject('rules', FBApp.ref(this.firebasePathGetter.users + '/' + user.uid), null, () => {
+      // initial login, always saves data, triggered even if user isn't activated
+      
+        let usr = this.setUserData(user)
+        
+        this[LOGIN_ME](usr)
+
+        this.getTodayOnduty()
+        this.getTodayParser()
+        
+        // listener for activeuser in DB, basically rerenders the entire app under if circumstances/role has changed
+        FBApp.ref(this.firebasePathGetter.users +'/' + user.uid).on('child_changed', (el) => {
+          usr[el.key] = el.val()
+          this[LOGIN_ME](usr)
+        })
+        
+        // listener for non-activated users, upon activating the account within DB - rerenders under new circumstances/role
+        this._.isNull(this.rules['.val'])
+        if (!this.activeUserGetter.role) {
+          FBApp.ref(this.firebasePathGetter.users).on("child_added", (el) => {
+            if (this.activeUserGetter.token == el.key) {
+              // usr.role = el.val().role
+              // usr.alias = el.val().alias 
+              // usr.team = el.val().team
+              // usr.notes = el.val().notes
+              this[LOGIN_ME](usr)
+            }
+          })
+        }
+      
+      })
+    },
     setUserData (user) {
       return ({
         displayName: user.displayName, 
@@ -135,22 +131,60 @@ export default {
         team : this.rules.team,
         notes: this.rules.notes
       })
+    },
+    getTodayOnduty () {
+        return new Promise((resolve,reject) => { // making it a promise due to THEN statements for lazy users (whenever session is not reloaded nextday)
+          this.$bindAsObject('todayOnduty', FBApp.ref(this.firebasePathGetter.onDuty + '/' + this.$moment().get('year')).child(this.$moment().isoWeek()), null, () => {
+                if (this.todayOnduty['.value']) {
+                    this[SET_CURRENT_ONDUTY](this.todayOnduty['.value'])
+                    resolve()
+                }
+
+                FBApp.ref(this.firebasePathGetter.onDuty + '/' + this.$moment().get('year')).child(this.$moment().isoWeek()).on('value', (el) => {
+                    if (this.todayOnduty['.value']) {
+                        this[SET_CURRENT_ONDUTY](el)
+                    }
+                })
+
+            })  
+        })
+    },
+    getTodayParser () {
+        return new Promise((resolve,reject) => { // making it a promise due to THEN statements for lazy users (whenever session is not reloaded nextday)
+          this.$bindAsObject('todayParsing', FBApp.ref(this.firebasePathGetter.parsing + '/' + this.$moment().get('year')).child(this.$moment().isoWeek()), null, () => {
+                if (this.todayParsing['.value']) {
+                    this[SET_CURRENT_PARSER](this.todayParsing['.value'])
+                    resolve()
+                }
+                
+                FBApp.ref(this.firebasePathGetter.parsing + '/' + this.$moment().get('year')).child(this.$moment().isoWeek()).on('value', (el) => {
+                    if (this.todayParsing['.value']) {
+                        this[SET_CURRENT_PARSER](el)
+                    }
+                })
+
+            })  
+        })
+    },
+    checkSession () {
+        let data = {}
+        for (var a in localStorage) {
+          // grab all main data from firebase instance
+          if (a.includes('firebase:authUser')) {
+            let item = JSON.parse(localStorage[a])
+            data.uid = item.uid; data.photoURL = item.photoURL; data.isAnonymous = item.isAnonymous;
+            data.displayName = item.displayName; 
+          }
+
+        }
+
+        if (data.uid) {
+          this.getMyData(data)
+        }
     }
   },
   created () {
-    let user = {
-      displayName : this.$ls.get('displayName'),
-      photoURL : this.$ls.get('photoURL'),
-      isAnonymous : this.$ls.get('isAnonymous'),
-      token : this.$ls.get('token'),
-      role : this.$ls.get('role'),
-      alias : this.$ls.get('alias'),
-      team : this.$ls.get('team'),
-      notes : this.$ls.get('notes')
-    }
-    if (user.displayName) {
-      this[LOGIN_ME](user)
-    }
+    this.checkSession()
   },
   components : {
     NotificationApp

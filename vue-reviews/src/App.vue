@@ -6,7 +6,14 @@
           <md-button class="md-icon-button" @click="$refs.sidenav.toggle()">
             <md-icon >menu</md-icon>
           </md-button>
-          <span style="flex: 1;"></span>
+          <md-layout>
+            <md-layout v-if="currentOnDutyGetter" md-align="center">
+              <strong>On-duty engineer: {{currentOnDutyGetter}}</strong>
+            </md-layout>
+            <md-layout v-if="currentParserGetter" md-align="center">
+              <strong>Queue parser: {{currentParserGetter}}</strong>
+            </md-layout>
+          </md-layout>
           <control-inputs v-if="codereviewRouteActive && levelEngineer(activeUserGetter.role)" 
             :is-column="controlInputsVals.isColumn" :hidden-bydefault="controlInputsVals.hiddenBydefault"/>
         </div>
@@ -66,7 +73,7 @@ export default {
   firebase : {},
   mixins: [levelMixin],
   computed : {
-    ...mapGetters(['activeUserGetter', 'firebasePathGetter']),
+    ...mapGetters(['activeUserGetter', 'firebasePathGetter','currentOnDutyGetter','currentParserGetter']),
     codereviewRouteActive () {
     	return this.$route.name == "CodeReview"
     }
