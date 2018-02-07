@@ -15,7 +15,7 @@
                     <div id="calendar">
                         <div v-for="(week,ind) in weeks.weeks" class="calendar-week" :key='ind'>
                             <!-- {{nicer(weeks.nums[ind])}} -->
-                             <md-layout md-align="center" v-if="currentOnDutyGetter && currentParserGetter">
+                             <md-layout md-align="center" v-if="currentOnDutyGetter && currentParserGetter && levelTeamlead(activeUserGetter.role)">
                                 <md-layout md-flex="30" class="onduty-engineer-by-week engineer-week">OnDuty: {{ onDuties[`${String(weeks.nums[ind])}`] }}</md-layout>
                                 <md-layout md-flex="30" class="parsing-engineer-by-week engineer-week">Parser: {{ parsingGuys[`${String(weeks.nums[ind])}`] }}</md-layout>
                              </md-layout>

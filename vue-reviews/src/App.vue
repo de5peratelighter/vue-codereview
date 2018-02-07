@@ -6,7 +6,7 @@
           <md-button class="md-icon-button" @click="$refs.sidenav.toggle()">
             <md-icon >menu</md-icon>
           </md-button>
-          <md-layout>
+          <md-layout v-if="levelTeamlead(activeUserGetter.role)">
             <md-layout v-if="currentOnDutyGetter" md-align="center">
               <strong>On-duty engineer: {{currentOnDutyGetter}}</strong>
             </md-layout>
