@@ -31,23 +31,50 @@
         <div>
             
             <div class="md-headline">
-                <md-button @click="showElement('ondutyInput')">
+                <md-button @click="showElement('ondutyNAInput')">
                     <md-icon>supervisor_account</md-icon>
-                    OnDuty
+                    OnDuty NA
                 </md-button>
             </div>
             
-            <md-list :class="{ hidden: hiddenInputs.ondutyInput }">
-                <md-list-item v-for="(el,i) in onDuties" :key="i">
+            <md-list :class="{ hidden: hiddenInputs.ondutyNAInput }">
+                <md-list-item v-for="(el,i) in onDutiesNA" :key="i">
                     <span>{{i}}. {{el}}</span> 
-                    <md-button @click="updateListInDB(i, 'remove', 'onDuty')" class="md-icon-button md-list-action"> 
+                    <md-button @click="updateListInDB(i, 'remove', 'duty/NA')" class="md-icon-button md-list-action"> 
                        <md-icon>delete</md-icon>
                     </md-button>
                 </md-list-item>
                 <md-input-container>
-                    <label for="reviewers__list__addnew">{{newOndutyMessage}}</label>
-                    <md-input id="reviewers__list__addnew" v-model="newOndutyInput"></md-input>
-                    <md-button @click="updateListInDB(newOndutyInput, 'add', 'onDuty')" class="md-icon-button"> 
+                    <label for="reviewers__list__addnew">{{newOndutyNAMessage}}</label>
+                    <md-input id="reviewers__list__addnew" v-model="newOndutyNAInput"></md-input>
+                    <md-button @click="updateListInDB(newOndutyNAInput, 'add', 'duty/NA')" class="md-icon-button"> 
+                       Add
+                    </md-button>
+                </md-input-container>
+            </md-list>
+            
+        </div>
+
+        <div>
+            
+            <div class="md-headline">
+                <md-button @click="showElement('ondutyEMEAInput')">
+                    <md-icon>supervisor_account</md-icon>
+                    OnDuty EMEA
+                </md-button>
+            </div>
+            
+            <md-list :class="{ hidden: hiddenInputs.ondutyEMEAInput }">
+                <md-list-item v-for="(el,i) in onDutiesEMEA" :key="i">
+                    <span>{{i}}. {{el}}</span> 
+                    <md-button @click="updateListInDB(i, 'remove', 'duty/EMEA')" class="md-icon-button md-list-action"> 
+                       <md-icon>delete</md-icon>
+                    </md-button>
+                </md-list-item>
+                <md-input-container>
+                    <label for="reviewers__list__addnew">{{newOndutyEMEAMessage}}</label>
+                    <md-input id="reviewers__list__addnew" v-model="newOndutyEMEAInput"></md-input>
+                    <md-button @click="updateListInDB(newOndutyEMEAInput, 'add', 'duty/EMEA')" class="md-icon-button"> 
                        Add
                     </md-button>
                 </md-input-container>
@@ -144,16 +171,19 @@
             weeksToRescheduleNum: 4,
             newReviewerMessage : 'Add reviewer',
             newHolidayMessage :'New Holiday',
-            newOndutyMessage: 'New on-duty guy',
+            newOndutyNAMessage: 'New on-duty NA',
+            newOndutyEMEAMessage: 'New on-duty EMEA',
             newParsingMessage: 'New parsing guy',
             newReviewerInput : '',
-            newOndutyInput: '',
+            newOndutyNAInput: '',
+            newOndutyEMEAInput: '',
             newParsingInput: '',
             newHolidayInput : '',
             hiddenInputs : {
                 reviewersInput : true,
                 holidaysInput : true,
-                ondutyInput:  true,
+                ondutyNAInput:  true,
+                ondutyEMEAInput:  true,
                 parsingInput: true
             },
             updateAllStarted : false,
@@ -174,7 +204,7 @@
            }
         },
        computed : {
-            ...mapGetters(['activeUserGetter','firebasePathGetter', 'holidaysGetter', 'revsGetter', 'onDutyGetter', 'revPerDayGetter', 'revScheduleDaysGetter', 'parsingTeamGetter','currentOnDutyGetter','currentParserGetter']),
+            ...mapGetters(['activeUserGetter','firebasePathGetter', 'holidaysGetter', 'revsGetter', 'onDutyGetterNA', 'onDutyGetterEMEA', 'revPerDayGetter', 'revScheduleDaysGetter', 'parsingTeamGetter','currentOnDutyGetter','currentParserGetter']),
             holidays () {
                 if (this.$store.state.holidays) {
                     return this.$store.state.holidays.split(',')
@@ -183,8 +213,11 @@
             revs () {
                 return this.revsGetter
             },
-            onDuties () {
-                return this.onDutyGetter
+            onDutiesNA () {
+                return this.onDutyGetterNA
+            },
+            onDutiesEMEA () {
+                return this.onDutyGetterEMEA
             },
             parsingGuys () {
                 return this.parsingTeamGetter
@@ -196,7 +229,7 @@
                 return this.$store.state.currentYear
             },
             readyToUpdateAll () {
-                return !!this.currentOnDutyGetter && !!this.currentParserGetter
+                return !!this.currentOnDutyGetter['NA'] && !!this.currentOnDutyGetter['EMEA']&& !!this.currentParserGetter
             }
         },
         firebase: {},
@@ -204,20 +237,23 @@
             ...mapActions([GET_REVIEWERS,GET_HOLIDAYS]),
             rescheduleAll () {
                 this.updateAllStarted = true
-                this.rescheduleMinor("onDuty",this.onDuties, this.currentOnDutyGetter)
+                this.rescheduleMinor("onDuty",this.onDutiesNA, this.currentOnDutyGetter['NA'],'NA')
+                this.rescheduleMinor("onDuty",this.onDutiesEMEA, this.currentOnDutyGetter['EMEA'],'EMEA')
                 this.rescheduleMinor("parsing",this.parsingGuys, this.currentParserGetter)
             },
             updateListInDB (el, action, path) {
                 let dater = this.$moment(el, 'MMMM D')
-                let lister = path === 'all' ? Object.values(this.revs) : path === 'holidays' ? Object.values(this.holies) : path === 'onDuty' ? Object.values(this.onDuties) : path === 'parsing' ? Object.values(this.parsingGuys) : []
+                let lister = path === 'all' ? Object.values(this.revs) : path === 'holidays' ? Object.values(this.holies) : path === 'duty/NA' ? Object.values(this.onDutiesNA) : path === 'duty/EMEA' ? Object.values(this.onDutiesEMEA) : path === 'parsing' ? Object.values(this.parsingGuys) : []
                 let allowUpdating =  false
                 if (action === "remove" && lister) {
                     lister.splice(el,1)
-                    allowUpdating = path === 'holidays' || path === 'all' || path === 'onDuty' || path === 'parsing'
+                    allowUpdating = path === 'holidays' || path === 'all' || path === 'duty/NA' || path === 'duty/EMEA' || path === 'parsing'
                     if (allowUpdating) {
                         FBApp.ref(this.firebasePathGetter.reviewers+'/' + path).set(lister.join(',')).then(()=> {
-                            if (path === 'holidays') { this[GET_HOLIDAYS](lister.join(',')) } else if (path === 'all') { this[GET_REVIEWERS](lister.join(',')) } else if (path === 'onDuty') {
-                                this.rescheduleMinor(path, this.onDuties, this.currentOnDutyGetter)
+                            if (path === 'holidays') { this[GET_HOLIDAYS](lister.join(',')) } else if (path === 'all') { this[GET_REVIEWERS](lister.join(',')) } else if (path === 'duty/NA') {
+                            this.rescheduleMinor('onDuty', this.onDutiesNA, this.currentOnDutyGetter['NA'],'NA')
+                            } else if (path === 'duty/EMEA') {
+                            this.rescheduleMinor('onDuty', this.onDutiesEMEA, this.currentOnDutyGetter['EMEA'],'EMEA')
                             } else if (path === 'parsing') {
                                 this.rescheduleMinor(path,this.parsingGuys, this.currentParserGetter)
                             }
@@ -225,11 +261,13 @@
                     }
                 } else if (action === "add" && lister) {
                     lister = lister + "," + el
-                    allowUpdating = path === 'holidays' ? (this.validateDate(dater) && this.holidaysGetter && el) : path === 'all' ? el : path === 'onDuty' ? el : path === 'parsing' ? el : false
+                    allowUpdating = path === 'holidays' ? (this.validateDate(dater) && this.holidaysGetter && el) : path === 'all' ? el : path === 'duty/NA' ? el : path === 'duty/EMEA' ? el : path === 'parsing' ? el : false
                     if (allowUpdating) {
                         FBApp.ref(this.firebasePathGetter.reviewers+'/' + path).set(lister).then(()=> {
-                            if (path === 'holidays') { this[GET_HOLIDAYS](lister) } else if (path === 'all') { this[GET_REVIEWERS](lister) } else if (path === 'onDuty') {
-                                this.rescheduleMinor(path, this.onDuties, this.currentOnDutyGetter)
+                            if (path === 'holidays') { this[GET_HOLIDAYS](lister) } else if (path === 'all') { this[GET_REVIEWERS](lister) } else if (path === 'duty/NA') {
+                            this.rescheduleMinor('onDuty', this.onDutiesNA, this.currentOnDutyGetter['NA'],'NA')
+                            } else if (path === 'duty/EMEA') {
+                            this.rescheduleMinor('onDuty', this.onDutiesEMEA, this.currentOnDutyGetter['EMEA'],'EMEA')
                             } else if (path === 'parsing') {
                                 this.rescheduleMinor(path,this.parsingGuys, this.currentParserGetter)
                             }
@@ -250,7 +288,7 @@
                 }
                 
             },
-            rescheduleMinor (path,ar,current) {
+            rescheduleMinor (path,ar,current,region) {
                 let currentWeek = this.$moment().isoWeek()
 
                 let currentEngineerIndex = 0
@@ -272,8 +310,7 @@
                     finalData[++currentWeek] = ar[currentEngineerIndex]
                 }
                 if (Object.keys(finalData).length) {
-                // console.error(path, finalData, this.firebasePathGetter[path]+'/'+this.$moment().get('year'))
-                    FBApp.ref(this.firebasePathGetter[path]+'/'+this.$moment().get('year')).update(finalData).then(() => {this.updateAllList[path].status = 1})
+                    FBApp.ref(`${this.firebasePathGetter[path]}/${this.$moment().get('year')}${region ? ('/' + region) : ''}`).update(finalData).then(() => {this.updateAllList[path].status = 1})
                     .catch((er)=> {console.error(er); this.updateAllList[path].status = 2})
                 } else {
                     this.updateAllList[path].status = 2

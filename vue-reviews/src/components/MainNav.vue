@@ -95,7 +95,8 @@ export default {
         
         this[LOGIN_ME](usr)
 
-        this.getTodayOnduty()
+        this.getTodayOnduty('NA')
+        this.getTodayOnduty('EMEA')
         this.getTodayParser()
         
         // listener for activeuser in DB, basically rerenders the entire app under if circumstances/role has changed
@@ -132,17 +133,17 @@ export default {
         notes: this.rules.notes
       })
     },
-    getTodayOnduty () {
+    getTodayOnduty (region) {
         return new Promise((resolve,reject) => { // making it a promise due to THEN statements for lazy users (whenever session is not reloaded nextday)
-          this.$bindAsObject('todayOnduty', FBApp.ref(this.firebasePathGetter.onDuty + '/' + this.$moment().get('year')).child(this.$moment().isoWeek()), null, () => {
+          this.$bindAsObject('todayOnduty', FBApp.ref(this.firebasePathGetter.onDuty + '/' + this.$moment().get('year')+ '/' + region).child(this.$moment().isoWeek()), null, () => {
                 if (this.todayOnduty['.value']) {
-                    this[SET_CURRENT_ONDUTY](this.todayOnduty['.value'])
+                    this[SET_CURRENT_ONDUTY]({ 'region': region, 'v' :this.todayOnduty['.value']})
                     resolve()
                 }
 
                 FBApp.ref(this.firebasePathGetter.onDuty + '/' + this.$moment().get('year')).child(this.$moment().isoWeek()).on('value', (el) => {
                     if (this.todayOnduty['.value']) {
-                        this[SET_CURRENT_ONDUTY](el)
+                        this[SET_CURRENT_ONDUTY]({'region': region, 'v' : el})
                     }
                 })
 

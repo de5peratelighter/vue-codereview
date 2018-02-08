@@ -66,7 +66,6 @@ export default new Vuex.Store({
         holidays : "", // List of holidays, filled upon login
         reviewersPerDay : 3, // Number of reviewers per day
         reviewersScheduleAhead : 21, // Number of days to reschedule
-        onDuties: "",
         parsingTeam: "",
         activeUser : {
           displayName: 'Guest',
@@ -105,7 +104,14 @@ export default new Vuex.Store({
         currentYear : Number(moment().format('YYYY')),
         currentMonth : Number(moment().format('M')),
         currentWeek : Number(moment().isoWeek()),
-        currentOnDuty: '',
+        currentOnDuty: {
+          'NA' : '',
+          'EMEA' : ''
+        },
+        onDuties: {
+          'NA' : '',
+          'EMEA': ''
+        },
         currentParser: '',
         eventFormActive : false,
         activeReviewers : [],
@@ -132,9 +138,18 @@ export default new Vuex.Store({
           state.revs ? state.revs.split(',').forEach((el, i)=> { obj[i] = el}) : obj = state.revs
           return obj
         },
-        onDutyGetter : (state) => {
+        onDutyGetterNA : (state) => {
           let obj = {}
-          state.onDuties ? state.onDuties.split(',').forEach((el, i)=> { obj[i] = el}) : obj = state.onDuties
+
+          state.onDuties['NA'] ? state.onDuties['NA'].split(',').forEach((el, i)=> { obj[i] = el}) : obj = {}
+
+          return obj
+        },
+        onDutyGetterEMEA : (state) => {
+          let obj = {}
+
+          state.onDuties['EMEA'] ? state.onDuties['EMEA'].split(',').forEach((el, i)=> { obj[i] = el}) : obj = {}
+
           return obj
         },
         parsingTeamGetter : (state) => {
@@ -316,7 +331,7 @@ export default new Vuex.Store({
         state.holidays = payload
       },
       [SET_CURRENT_ONDUTY] (state, payload) {
-        state.currentOnDuty = payload
+        state.currentOnDuty[payload.region] = payload.v
       },
       [SET_CURRENT_PARSER] (state, payload) {
         state.currentParser = payload
@@ -366,7 +381,7 @@ export default new Vuex.Store({
         store.commit(GET_PARSINGUYS, payload)
       },
       [SET_CURRENT_ONDUTY] (store, payload) {
-        if (payload && typeof payload === 'string') {
+        if (payload && typeof payload.v === 'string') {
           store.commit(SET_CURRENT_ONDUTY, payload) 
         }
       },

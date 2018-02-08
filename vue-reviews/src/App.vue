@@ -6,9 +6,12 @@
           <md-button class="md-icon-button" @click="$refs.sidenav.toggle()">
             <md-icon >menu</md-icon>
           </md-button>
-          <md-layout v-if="levelTeamlead(activeUserGetter.role)">
-            <md-layout v-if="currentOnDutyGetter" md-align="center">
-              <strong>On-duty engineer: {{currentOnDutyGetter}}</strong>
+          <md-layout v-if="levelEngineer(activeUserGetter.role)">
+            <md-layout v-if="currentOnDutyGetter['NA']" md-align="center">
+              <strong>On-duty NA: {{currentOnDutyGetter['NA']}}</strong>
+            </md-layout>
+            <md-layout v-if="currentOnDutyGetter['EMEA']" md-align="center">
+              <strong>On-duty EMEA: {{currentOnDutyGetter['EMEA']}}</strong>
             </md-layout>
             <md-layout v-if="currentParserGetter" md-align="center">
               <strong>Queue parser: {{currentParserGetter}}</strong>

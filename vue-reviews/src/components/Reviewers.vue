@@ -15,8 +15,9 @@
                     <div id="calendar">
                         <div v-for="(week,ind) in weeks.weeks" class="calendar-week" :key='ind'>
                             <!-- {{nicer(weeks.nums[ind])}} -->
-                             <md-layout md-align="center" v-if="currentOnDutyGetter && currentParserGetter && levelTeamlead(activeUserGetter.role)">
-                                <md-layout md-flex="30" class="onduty-engineer-by-week engineer-week">OnDuty: {{ onDuties[`${String(weeks.nums[ind])}`] }}</md-layout>
+                             <md-layout md-align="center" v-if="onDutiesReady && currentParserGetter && levelEngineer(activeUserGetter.role)">
+                                <md-layout md-flex="30" class="onduty-engineer-by-week engineer-week">OnDuty NA: {{ onDuties['NA'][`${String(weeks.nums[ind])}`] }}</md-layout>
+                                <md-layout md-flex="30" class="onduty-engineer-by-week engineer-week">OnDuty EMEA: {{ onDuties['EMEA'][`${String(weeks.nums[ind])}`] }}</md-layout>
                                 <md-layout md-flex="30" class="parsing-engineer-by-week engineer-week">Parser: {{ parsingGuys[`${String(weeks.nums[ind])}`] }}</md-layout>
                              </md-layout>
                              <div class="inner-week">
@@ -46,6 +47,7 @@ export default {
     data () {
         return {
             scheduleReady : false,
+            onDutiesReady: false,
             welcomeMessage : "Reviewer schedule(by days/month)",
             daysArray : ['MON','TUE','WED','THU','FRI','SAT','SUN']
         }
@@ -59,7 +61,7 @@ export default {
                 this.$bindAsObject('reviewers', FBApp.ref(this.firebasePathGetter.reviewers),null, () => {
                     this[GET_REVIEWERS](this.reviewers['all'])
                     this[GET_HOLIDAYS](this.reviewers['holidays'])
-                    this[GET_ONDUTY](this.reviewers['onDuty'])
+                    this[GET_ONDUTY](this.reviewers['duty'])
                     this[GET_PARSINGUYS](this.reviewers['parsing'])
 
                     FBApp.ref(this.firebasePathGetter.reviewers).on('child_changed', (dataSnapshot) => {
@@ -67,7 +69,7 @@ export default {
                             this[GET_REVIEWERS](dataSnapshot.val())
                         } else if (dataSnapshot.key === 'holidays') {
                             this[GET_HOLIDAYS](dataSnapshot.val())
-                        } else if (dataSnapshot.key === 'onDuty') {
+                        } else if (dataSnapshot.key === 'duty') {
                             this[GET_ONDUTY](dataSnapshot.val())
                         } else if (dataSnapshot.key === 'parsing') {
                             this[GET_PARSINGUYS](dataSnapshot.val())
@@ -76,7 +78,7 @@ export default {
                     
                 })
                 this.$bindAsObject('schedule', FBApp.ref(this.firebasePathGetter.schedule), null, () => {  this.scheduleReady = true })
-                this.$bindAsObject('onDuties', FBApp.ref(this.firebasePathGetter.onDuty + '/' + this.$moment().get('year')), null, () => {})
+                this.$bindAsObject('onDuties', FBApp.ref(this.firebasePathGetter.onDuty + '/' + this.$moment().get('year')), null, () => {this.onDutiesReady = true})
                 this.$bindAsObject('parsingGuys', FBApp.ref(this.firebasePathGetter.parsing + '/' + this.$moment().get('year')), null, () => {})
             } else {
                 this.scheduleReady = false;
