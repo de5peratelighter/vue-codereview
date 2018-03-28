@@ -108,6 +108,13 @@ body {
     #calendar {
       background-color: white;
       .calendar-week {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        .inner-week  {
+          display: flex;
+          flex-direction: row;
+        }
         @include calendar-row;
         .day {
           overflow: hidden;
@@ -118,6 +125,7 @@ body {
           cursor: default;
           border-left: $calendar-border;
           border-top: $calendar-border;
+          border-bottom: $calendar-border;
 
           &:last-child {
             border-right: $calendar-border;

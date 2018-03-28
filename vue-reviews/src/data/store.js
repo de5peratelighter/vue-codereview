@@ -11,7 +11,7 @@ import VueLodash from 'vue-lodash/dist/vue-lodash.min'
 Vue.use(VueLodash, lodash)
 
 
-import {GET_FBASE, LOGIN_ME, UPDATE_NUM, GET_REVIEWERS, GET_HOLIDAYS, GET_CAPACITY, SET_MONTH, SET_YEAR, SET_FOCUSED_CELL, SET_IS_EDITING, SET_COPY_CACHE, SET_CURRENT_WEEK, GET_USERS, SET_PREFIXES} from './mutation-types'
+import {GET_FBASE, LOGIN_ME, UPDATE_NUM, GET_REVIEWERS, GET_HOLIDAYS, GET_CAPACITY, SET_MONTH, SET_YEAR, SET_FOCUSED_CELL, SET_IS_EDITING, SET_COPY_CACHE, SET_CURRENT_WEEK, GET_USERS, SET_PREFIXES,GET_ONDUTY, GET_PARSINGUYS, SET_CURRENT_ONDUTY, SET_CURRENT_PARSER} from './mutation-types'
 
 export default new Vuex.Store({
     state : {
@@ -66,6 +66,8 @@ export default new Vuex.Store({
         holidays : "", // List of holidays, filled upon login
         reviewersPerDay : 3, // Number of reviewers per day
         reviewersScheduleAhead : 21, // Number of days to reschedule
+        onDuties: "",
+        parsingTeam: "",
         activeUser : {
           displayName: 'Guest',
           isAnonymous : true,
@@ -86,6 +88,8 @@ export default new Vuex.Store({
           resources : 'wow/resources',
           reviewers : 'wow/resources/reviewers',
           schedule : 'wow/resources/schedule',
+          onDuty : 'wow/resources/onDutyByYear',
+          parsing: 'wow/resources/parsingByYear',
           users : 'wow/users',
           capacity: 'wow/resources/capacityByWeek',
           notifications : 'wow/notifications',
@@ -101,6 +105,8 @@ export default new Vuex.Store({
         currentYear : Number(moment().format('YYYY')),
         currentMonth : Number(moment().format('M')),
         currentWeek : Number(moment().isoWeek()),
+        currentOnDuty: '',
+        currentParser: '',
         eventFormActive : false,
         activeReviewers : [],
         workingHours : ['10,11,12' , '13,14,15' , '16,17']
@@ -126,10 +132,26 @@ export default new Vuex.Store({
           state.revs ? state.revs.split(',').forEach((el, i)=> { obj[i] = el}) : obj = state.revs
           return obj
         },
+        onDutyGetter : (state) => {
+          let obj = {}
+          state.onDuties ? state.onDuties.split(',').forEach((el, i)=> { obj[i] = el}) : obj = state.onDuties
+          return obj
+        },
+        parsingTeamGetter : (state) => {
+          let obj = {}
+          state.parsingTeam ? state.parsingTeam.split(',').forEach((el, i)=> { obj[i] = el}) : obj = state.parsingTeam
+          return obj
+        },
         holidaysGetter : (state) => {
           let obj = {} // an object, if data is received from Firebase - restructure it into object (kept in Firebase as a single String)
           state.holidays ? state.holidays.split(',').forEach((el, i)=> { obj[i] = el}) : obj = state.holidays
           return obj
+        },
+        currentOnDutyGetter : (state) => {
+          return state.currentOnDuty
+        },
+        currentParserGetter : (state) => {
+          return state.currentParser
         },
         revPerDayGetter : (state) => {
           return state.reviewersPerDay
@@ -281,11 +303,23 @@ export default new Vuex.Store({
       [GET_REVIEWERS] (state, payload) {
         state.revs = payload
       },
+      [GET_ONDUTY] (state, payload) {
+        state.onDuties = payload
+      },
+      [GET_PARSINGUYS] (state,payload) {
+        state.parsingTeam = payload
+      },
       [SET_FOCUSED_CELL] (state, payload) {
         state.focusedCell = payload
       },
       [GET_HOLIDAYS] (state, payload) {
         state.holidays = payload
+      },
+      [SET_CURRENT_ONDUTY] (state, payload) {
+        state.currentOnDuty = payload
+      },
+      [SET_CURRENT_PARSER] (state, payload) {
+        state.currentParser = payload
       },
       [SET_MONTH] (state, payload) {
         state.currentMonth = payload
@@ -324,6 +358,22 @@ export default new Vuex.Store({
       },
       [GET_REVIEWERS] (store, payload) {
         store.commit(GET_REVIEWERS, payload)
+      },
+      [GET_ONDUTY] (store, payload) {
+        store.commit(GET_ONDUTY, payload)
+      },
+      [GET_PARSINGUYS] (store, payload) {
+        store.commit(GET_PARSINGUYS, payload)
+      },
+      [SET_CURRENT_ONDUTY] (store, payload) {
+        if (payload && typeof payload === 'string') {
+          store.commit(SET_CURRENT_ONDUTY, payload) 
+        }
+      },
+      [SET_CURRENT_PARSER] (store, payload) {
+        if (payload && typeof payload === 'string') {
+          store.commit(SET_CURRENT_PARSER, payload) 
+        }
       },
       [LOGIN_ME] (store, payload) {
         store.commit(LOGIN_ME, payload)
