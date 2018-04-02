@@ -1,5 +1,6 @@
 {
   "projects": {
-    "default": "codereview-vue"
+    "default": "codereview-vue",
+    "staging": "dev-codereview-vue"
   }
 }

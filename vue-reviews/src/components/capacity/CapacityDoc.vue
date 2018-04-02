@@ -16,11 +16,11 @@
 <script>
 
 import firebase from 'firebase';
-import { mapActions, mapGetters } from 'vuex';
+import { mapActions, mapGetters, mapState } from 'vuex';
 
 import CapacityTable from './CapacityTable';
 import { FBApp } from '@/data/firebase-config';
-import { GET_CAPACITY, SET_CURRENT_WEEK, SET_COPY_CACHE, GET_USERS } from '@/data/mutation-types';
+import { GET_CAPACITY, SET_CURRENT_WEEK, SET_YEAR, SET_COPY_CACHE, GET_USERS } from '@/data/mutation-types';
 import { levelMixin } from '@/mixins/restrictions';
 import { capacityRecordMixin } from './mixins/capacityRecords';
 
@@ -34,15 +34,26 @@ export default {
   mixins: [levelMixin, capacityRecordMixin],
   computed: {
     ...mapGetters(['firebasePathGetter', 'activeUserGetter', 'currentWeekGetter']),
+    ...mapState({
+      currentYear: (state) => state.currentYear
+    }),
     capacity () {
       return this.$store.state.capacity;
     }
   },
   firebase: {},
   methods: {
-    ...mapActions([GET_CAPACITY, SET_CURRENT_WEEK, SET_COPY_CACHE, GET_USERS]),
+    ...mapActions([GET_CAPACITY, SET_CURRENT_WEEK, SET_YEAR, SET_COPY_CACHE, GET_USERS]),
     setWeek(value) {
-      this[SET_CURRENT_WEEK](this.currentWeekGetter + value);
+      if(this.currentWeekGetter === 1 && value === -1) {
+        this[SET_YEAR](this.currentYear - 1)
+        this[SET_CURRENT_WEEK](52)
+      } else if (this.currentWeekGetter === 52 && value === 1) {
+        this[SET_YEAR](this.currentYear + 1)
+        this[SET_CURRENT_WEEK](1)
+      }else {
+        this[SET_CURRENT_WEEK](this.currentWeekGetter + value);
+      }
     },
     isDisabled(type) {
       switch (type) {
@@ -53,23 +64,22 @@ export default {
       }
     },
     getDate(day) {
-      const year = this.$moment().year();
       let week = this.currentWeekGetter;
       if(week < 10) {
         week = '0' + week
       }
-      return this.$moment(`${year}-W${week}-${day}`).format('Do, MMMM');
+      return this.$moment(`${this.currentYear}-W${week}-${day}`).format('Do, MMMM');
     },
     getCapacityData() {
       this[SET_COPY_CACHE]({
         el: null,
         data: ''
       });
-      this.$bindAsArray('capacityData', FBApp.ref(this.firebasePathGetter.capacity + '/' + this.currentWeekGetter), null, () => {
+      this.$bindAsArray('capacityData', FBApp.ref(this.firebasePathGetter.capacity + '/' + this.currentYear + '/' + this.currentWeekGetter), null, () => {
         if(this.capacityData.length > 0) {
           this[GET_CAPACITY](this.capacityData);
           this.noPrevData = false;
-        } else if(this.currentWeekGetter < this.$moment().isoWeek()){
+        } else if(this.currentYear < this.$moment().year() || this.currentYear === this.$moment().year() && this.currentWeekGetter < this.$moment().isoWeek()){
           this.noPrevData = true;
           this[GET_CAPACITY]([]);
         } else {
@@ -96,7 +106,7 @@ export default {
           }
           weekData[users[user]['alias']] = userString;
         }
-        FBApp.ref(this.firebasePathGetter.capacity +"/" + this.currentWeekGetter).set(weekData)
+        FBApp.ref(this.firebasePathGetter.capacity +"/" + this.currentYear + '/' + this.currentWeekGetter).set(weekData)
           .then(() => {
             this.getCapacityData();
           })
