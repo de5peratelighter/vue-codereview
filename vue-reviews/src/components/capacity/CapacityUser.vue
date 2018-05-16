@@ -18,7 +18,7 @@
 
 <script>
 
-import { mapGetters } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 import { FBApp } from '@/data/firebase-config';
 
 import CapacityItem from './CapacityItem';
@@ -40,6 +40,9 @@ export default {
   },
   computed: {
     ...mapGetters(['capacityByUserGetter', 'focusedUserGetter', 'userInfoGetter', 'firebasePathGetter', 'currentWeekGetter']),
+    ...mapState({
+      currentYear: (state) => state.currentYear
+    }),
     usersCapacity() {
       if(this.$store.state.capacity.length === 0) {
         return null;
@@ -91,7 +94,7 @@ export default {
         const userString = this.createUserString(user);
         const newUserData = {};
         newUserData[this.user] = userString;
-        return FBApp.ref(this.firebasePathGetter.capacity +"/" + this.currentWeekGetter).update(newUserData);
+        return FBApp.ref(this.firebasePathGetter.capacity + '/' + this.currentYear + '/' + this.currentWeekGetter).update(newUserData);
       }
     }
   },
