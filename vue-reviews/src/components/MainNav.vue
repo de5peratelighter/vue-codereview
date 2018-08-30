@@ -90,7 +90,6 @@ export default {
     getMyData (user) {
       this.$bindAsObject('rules', FBApp.ref(this.firebasePathGetter.users + '/' + user.uid), null, () => {
       // initial login, always saves data, triggered even if user isn't activated
-      
         let usr = this.setUserData(user)
         
         this[LOGIN_ME](usr)
@@ -172,6 +171,7 @@ export default {
         for (var a in localStorage) {
           // grab all main data from firebase instance
           if (a.includes('firebase:authUser')) {
+            
             let item = JSON.parse(localStorage[a])
             data.uid = item.uid; data.photoURL = item.photoURL; data.isAnonymous = item.isAnonymous;
             data.displayName = item.displayName; 

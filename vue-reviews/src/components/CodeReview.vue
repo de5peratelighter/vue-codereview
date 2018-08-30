@@ -173,7 +173,7 @@ export default {
   data () {
     return {
       newInput : '',
-      newInstanceRequiredWord: 'bazaarvoice',
+      newInstanceRequiredWord: 'test',
       DEFAULT_DATA : this.$store.state.items,
       prefixes : {},
       backToItemsActive : false,

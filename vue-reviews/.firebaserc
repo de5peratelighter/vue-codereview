@@ -1,6 +1,5 @@
 {
   "projects": {
-    "default": "codereview-vue",
-    "staging": "dev-codereview-vue"
+    "default": "test-vue-bob"
   }
 }
