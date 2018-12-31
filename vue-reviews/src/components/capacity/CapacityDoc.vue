@@ -75,6 +75,9 @@ export default {
         el: null,
         data: ''
       });
+      if (this.currentWeekGetter === 1 && this.$moment().startOf('isoWeek').format("D") > 7){
+        this[SET_YEAR](this.currentYear + 1);
+      }
       this.$bindAsArray('capacityData', FBApp.ref(this.firebasePathGetter.capacity + '/' + this.currentYear + '/' + this.currentWeekGetter), null, () => {
         if(this.capacityData.length > 0) {
           this[GET_CAPACITY](this.capacityData);
