@@ -80,7 +80,6 @@ export default {
           this[GET_CAPACITY](this.capacityData);
           this.noPrevData = false;
         } else if(this.currentYear < this.$moment().year() || this.currentYear === this.$moment().year() && this.currentWeekGetter < this.$moment().isoWeek()){
-          console.log('here')
           this.noPrevData = true;
           this[GET_CAPACITY]([]);
         } else {
