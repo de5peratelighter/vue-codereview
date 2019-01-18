@@ -302,12 +302,12 @@
                 }
 
                 for (let i = 0; i < this.weeksToRescheduleNum; i++) {
+                    finalData[currentWeek++] = ar[currentEngineerIndex]
                     if (currentEngineerIndex >= engineersCount - 1) {
                         currentEngineerIndex = 0;
                     } else {
                         currentEngineerIndex++;
                     }
-                    finalData[++currentWeek] = ar[currentEngineerIndex]
                 }
                 if (Object.keys(finalData).length) {
                     FBApp.ref(`${this.firebasePathGetter[path]}/${this.$moment().get('year')}${region ? ('/' + region) : ''}`).update(finalData).then(() => {this.updateAllList[path].status = 1})
